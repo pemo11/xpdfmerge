@@ -1,0 +1,5 @@
+pdfmergev1\StandardController.class
+pdfmergev1\XEFPdfMerge.class
+module-info.class
+pdfmergev1\PdfHelper.class
+pdfmergev1\XmlHelper.class
