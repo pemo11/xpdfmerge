@@ -1,4 +1,4 @@
-package pdfmergev1;
+package xpdfmergeV1;
 
 /**
  * Repräsentiert ein Akte-Element
@@ -13,6 +13,10 @@ public class Dokument {
 
     public Dokument(String Id) {
         this.id = Id;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getAnzeigename() {

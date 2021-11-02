@@ -9,7 +9,7 @@
     <groupId>ef.pdfmerge</groupId>
     <artifactId>pdfmergev1</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>pdfmergev1</name>
+    <name>xpdfmergeV1</name>
 
     <properties>
         <junit.version>5.7.1</junit.version>

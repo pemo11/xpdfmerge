@@ -1,4 +1,4 @@
-package pdfmergev1;
+package xpdfmergeV1;
 
 public class PdfInfo {
     private String filePath;

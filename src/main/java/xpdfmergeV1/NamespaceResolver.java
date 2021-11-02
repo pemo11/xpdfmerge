@@ -3,7 +3,7 @@
  * @author: pemo
  */
 
-package pdfmergev1;
+package xpdfmergeV1;
 
 import java.util.Iterator;
 

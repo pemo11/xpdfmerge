@@ -3,9 +3,8 @@
 ** Umgang mit einer Config-Datei
 `*/
 
-package pdfmergev1;
+package xpdfmergeV1;
 
-import java.util.*;
 import java.util.Properties;
 import java.io.FileInputStream;
 

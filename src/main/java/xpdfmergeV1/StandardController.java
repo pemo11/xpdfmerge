@@ -1,11 +1,6 @@
-package pdfmergev1;
+package xpdfmergeV1;
 
-import javafx.fxml.FXML;
-import javafx.scene.Scene;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import javafx.scene.control.Label;
-import javafx.scene.paint.Color;
 
 public class StandardController {
     private Stage currentStage;

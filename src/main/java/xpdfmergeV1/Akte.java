@@ -1,25 +1,16 @@
-package pdfmergev1;
+package xpdfmergeV1;
 
 /**
- * Repräsentiert ein Teilakte-Element
+ * Repräsentiert ein Akte-Element
  * @author Pemo
  */
-
-public class Teilakte {
+public class Akte {
     private String id;
     private String anzeigeName;
     private String aktenTyp;
-    private Integer nummerImUebergeordnetenContainer;
+    boolean hasTeilakten;
 
-    public Integer getNummerImUebergeordnetenContainer() {
-        return this.nummerImUebergeordnetenContainer;
-    }
-
-    public void setNummerImUebergeordnetenContainer(Integer nummer) {
-        this.nummerImUebergeordnetenContainer = nummer;
-    }
-
-    public Teilakte(String id) {
+    public Akte(String id) {
         this.id = id;
     }
 
@@ -41,6 +32,14 @@ public class Teilakte {
 
     public void setAktenTyp(String aktenTyp) {
         this.aktenTyp = aktenTyp;
+    }
+
+    public boolean getHasTeilakten() {
+        return hasTeilakten;
+    }
+
+    public void setHasTeilakten(boolean teilakte) {
+        hasTeilakten = teilakte;
     }
 
 }

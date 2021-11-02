@@ -11,6 +11,6 @@ module pdfmergev1 {
     requires java.xml;
     requires commons.logging;
 
-    opens pdfmergev1 to javafx.fxml;
-    exports pdfmergev1;
+    opens xpdfmergeV1 to javafx.fxml;
+    exports xpdfmergeV1;
 }

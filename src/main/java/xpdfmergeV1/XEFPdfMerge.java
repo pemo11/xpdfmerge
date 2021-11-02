@@ -1,4 +1,4 @@
-package pdfmergev1;
+package xpdfmergeV1;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -8,8 +8,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -29,7 +29,8 @@ import java.util.*;
 
 public class XEFPdfMerge extends Application {
     // TODO: Aus config-Datei auslesen
-    private String xJustizPfad = "D:\\EurekaFach\\BEAkten-Projekt2021\\baakte";
+    private String xJustizPfad = "C:\\";
+    private String osName = "Unbekannt";
     private static final Log logger = LogFactory.getLog(XEFPdfMerge.class);
     private XmlHelper xmlHelper = null;
     private String xmlPfad = "";
@@ -43,8 +44,18 @@ public class XEFPdfMerge extends Application {
         // User directory holen
         String userDir = System.getProperty("user.home");
 
-        // Funktioniert so nur unter Windows
-        pdfOutfile = userDir + "/documents/" + pdfOutfile;
+        // OS-Name holen
+        osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+
+        // Ausgabeverzeichnis OS-spezifisch festlegen
+        // Ist u.U. nicht erforderlich, da user.home bereits OS-spezifisch ist
+        if (osName.indexOf("win") >= 0 ) {
+            pdfOutfile = userDir + "/documents/" + pdfOutfile;
+        } else if (osName.indexOf("mac") >= 0) {
+            pdfOutfile = userDir + "/documents/" + pdfOutfile;
+        } else {
+            pdfOutfile = userDir + "/documents/" + pdfOutfile;
+        }
 
         // xJustiz-Pfad einlesen
         AppConfig config = new AppConfig();
@@ -84,8 +95,18 @@ public class XEFPdfMerge extends Application {
 
         VBox vbox2 = new VBox();
 
+
         Label lbl1 = new Label();
         lbl1.setText("Dokumente");
+
+        Label lbl2 = new Label();
+        lbl2.setText("Status");
+
+        Label lbl3 = new Label();
+        lbl3.setText("OK");
+        // Vordergrundfarbe muss per CSS gesetzt werden
+        lbl3.setStyle("-fx-text-fill:white;");
+        lbl3.setBackground(new Background(new BackgroundFill(Color.BLACK,null,null)));
 
         // hbox für TreeView anlegen
         // HBox hBox = new HBox();
@@ -99,10 +120,13 @@ public class XEFPdfMerge extends Application {
         // ???
         trvAkten.setPadding(new Insets(10, 20, 10, 20));
 
+        // TreeView soll in der vbox "wachsen"
+        vbox2.setVgrow(trvAkten, Priority.ALWAYS);
+
         // TreeView zur HBox hinzufügen
         // hBox.getChildren().add(trvDokumente);
 
-        vbox2.getChildren().addAll(lbl1, trvAkten);
+        vbox2.getChildren().addAll(lbl1, trvAkten, lbl2, lbl3);
 
         // Weitere hbox für TreeView und ImageView
         HBox hbox1 = new HBox();
@@ -145,10 +169,14 @@ public class XEFPdfMerge extends Application {
 
                 File selectedFile = fileChooser.showOpenDialog(stage);
                 if (selectedFile != null) {
+
                     // Klassenvariable wird ohne this angesprochen
                     xmlPfad = selectedFile.toString();
                     infoMessage = String.format("xmlPfad = %s", xmlPfad);
                     logger.info(infoMessage);
+
+                    // Basispfad festlegen
+                    basePfad = selectedFile.getParent();
 
                     String anzeigeName = "";
                     String dateiName = "";
@@ -159,6 +187,9 @@ public class XEFPdfMerge extends Application {
                     alert.setHeaderText("");
                     alert.setContentText(xmlPfad + " wurde ausgewertet.");
                     alert.showAndWait();
+
+                    // Pfad in "Statusbar" anzeigen
+                    lbl3.setText(xmlPfad + " wurde geladen.");
 
                     // Anlegen der Bookmarks in der Ausgabe-Pdf
                     pdfInfoHashtable = new Hashtable<>();
@@ -171,7 +202,7 @@ public class XEFPdfMerge extends Application {
                         // Ins TreeView übertragen
                         for(Akte akte: akten) {
                             String aktenId = akte.getId();
-                            TreeItem triAkte = new TreeItem(aktenId);
+                            TreeItem triAkte = new TreeItem("Akte=" + aktenId);
                             anzeigeName = akte.getAnzeigeName();
                             triAkte.getChildren().add(new TreeItem("Anzeigename=" + anzeigeName));
                             triAkte.getChildren().add(new TreeItem("Aktentyp=" + akte.getAktenTyp()));
@@ -180,33 +211,37 @@ public class XEFPdfMerge extends Application {
                             // Gibt es Teilakten?
                             if (teilakten.size() > 0) {
                                 for(Teilakte teilakte: teilakten) {
-                                    triAkte.getChildren().add(new TreeItem("Nummer im übg. Container=" + teilakte.getNummerImUebergeordnetenContainer()));
+                                    String teilakteId = teilakte.getId();
+                                    TreeItem triTeilakte = new TreeItem("Teilakte=" + teilakteId);
+                                    triTeilakte.getChildren().add(new TreeItem("Nummer im übg. Container=" + teilakte.getNummerImUebergeordnetenContainer()));
                                     // Alle Dokumente durchgehen
-                                    String teilaktenId = teilakte.getId();
-                                    List<Dokument> dokumente = xmlHelper.getDokumente(teilaktenId, Aktentyp.Teilakte);
+                                    List<Dokument> dokumente = xmlHelper.getDokumente(teilakteId, Aktentyp.Teilakte);
                                     for(Dokument dokument: dokumente) {
+                                        TreeItem triDokument = new TreeItem("Dokument=" + dokument.getId());
                                         dateiName = dokument.getDateiname();
-                                        triAkte.getChildren().add(new TreeItem("Pdf-Datei=" + dateiName));
+                                        triDokument.getChildren().add(new TreeItem("Pdf-Datei=" + dateiName));
                                         // TODO: Nur provisorisch, der basePfad muss anders festgelegt werden
                                         basePfad = xJustizPfad;
                                         String pdfPfad = basePfad + "/" + dateiName;
                                         Integer pageCount = pdfHelper.getPdfPageCount(pdfPfad);
-                                        triAkte.getChildren().add(new TreeItem("Anzahl Seiten=" + pageCount));
-                                        triRoot.getChildren().add(triAkte);
+                                        triDokument.getChildren().add(new TreeItem("Anzahl Seiten=" + pageCount));
+                                        triTeilakte.getChildren().add(triDokument);
                                     }
+                                    triAkte.getChildren().add(triTeilakte);
                                 }
                             } else {
                                 // Alle Dokumente der Akte durchgehen
                                 List<Dokument> dokumente = xmlHelper.getDokumente(aktenId, Aktentyp.Akte);
                                 for(Dokument dokument: dokumente) {
+                                    TreeItem triDokument = new TreeItem("Dokument=" + dokument.getId());
                                     dateiName = dokument.getDateiname();
-                                    triAkte.getChildren().add(new TreeItem("Pdf-Datei=" + dateiName));
+                                    triDokument.getChildren().add(new TreeItem("Pdf-Datei=" + dateiName));
                                     // TODO: Nur provisorisch, der basePfad muss anders festgelegt werden
                                     basePfad = xJustizPfad;
                                     String pdfPfad = basePfad + "/" + dateiName;
                                     Integer pageCount = pdfHelper.getPdfPageCount(pdfPfad);
-                                    triAkte.getChildren().add(new TreeItem("Anzahl Seiten=" + pageCount));
-                                    triRoot.getChildren().add(triAkte);
+                                    triDokument.getChildren().add(new TreeItem("Anzahl Seiten=" + pageCount));
+                                    triAkte.getChildren().add(triDokument);
                                 }
                             }
 
@@ -219,6 +254,9 @@ public class XEFPdfMerge extends Application {
                             // TODO: Hier fehlt noch was?
                             // Eintrag in pdfInfoHashtable, damit das Setzen von Bookmarks später möglich ist
                             pdfInfoHashtable.put(dateiName, pdfInfo);
+
+                            triRoot.getChildren().add(triAkte);
+
                         }
                         // Root-Element des TreeView hinzufügen
                         trvAkten.setRoot(triRoot);
@@ -257,9 +295,14 @@ public class XEFPdfMerge extends Application {
         pdfMerge.setOnAction(new EventHandler<ActionEvent>() {
             private Instant startZeit = Instant.now();
 
-
             @Override
             public void handle(ActionEvent actionEvent) {
+
+                lbl3.setText("Pdf-Merge wird gestartet.");
+                lbl3.requestFocus();
+                // Bringt leider nichts - Text wird erst am Ende angezeigt
+                // TODO: Auslagern des Merge in einen Task oder einfacher per Platform.runLater()
+                // https://riptutorial.com/javafx/example/7291/updating-the-ui-using-platform-runlater
 
                 // Pfade aller Pdf-Dateien aus der Xml-Datei ziehen
                 try {
@@ -353,6 +396,10 @@ public class XEFPdfMerge extends Application {
                 alert.setTitle("Pdf-Merge abgeschlossen");
                 alert.setHeaderText("Die Ausgabedatei heißt " + pdfOutfile);
                 alert.showAndWait();
+
+                // Status-Meldung ausgeben
+                lbl3.setText("Pdf-Merge wurde abgeschlossen.");
+
             }
         });
 
@@ -368,7 +415,7 @@ public class XEFPdfMerge extends Application {
              public void handle(ActionEvent actionEvent) {
                  Alert infoAlert = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.OK);
                  infoAlert.setTitle("Über das Programm");
-                 infoAlert.setHeaderText("Portabler XJustiz-Viewer 0.1");
+                 infoAlert.setHeaderText("Portabler XJustiz-Viewer 0.15");
                  infoAlert.setContentText("Alle Rechte vorbehalten usw.");
                  infoAlert.showAndWait();
              }
@@ -388,7 +435,7 @@ public class XEFPdfMerge extends Application {
             System.out.println("Shown Stage");
         });
 
-        stage.setTitle("EF-XJustiz-Viewer 0.1");
+        stage.setTitle("EF-XJustiz-Viewer 0.15");
         stage.setScene(scene);
         stage.show();
     }
