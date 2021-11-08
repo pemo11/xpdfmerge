@@ -77,6 +77,8 @@ public class XmlHelper {
                 tmpList.add((Element)nNode);
             }
         }
+        infoMessage = String.format("*** Abschluss von getElements mit %d Elementen.", tmpList.size());
+        this.logger.info(infoMessage);
         return tmpList;
     }
 
