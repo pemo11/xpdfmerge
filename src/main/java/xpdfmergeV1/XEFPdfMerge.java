@@ -396,7 +396,7 @@ public class XEFPdfMerge extends Application {
                 alert.showAndWait();
 
                 // Status-Meldung ausgeben
-                lbl3.setText("Pdf-Merge wurde abgeschlossen.");
+                lbl3.setText(String.format("Pdf-Merge nach %s wurde abgeschlossen.", pdfOutfile));
 
             }
         });

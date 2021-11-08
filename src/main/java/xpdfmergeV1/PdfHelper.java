@@ -37,7 +37,6 @@ import java.util.*;
 
 import org.apache.commons.logging.Log;
 
-
 /*
 * Stellt allgemeine Pdf-Funktionen zur Verfügung (auf der Basis von PdfBox)
  * @author Pemo
@@ -323,11 +322,17 @@ public class PdfHelper {
     public Hashtable<String, Integer> getPdfPageCount(List<String> pdfDateien) throws IOException {
         Hashtable<String, Integer> tmpTable = new Hashtable<>();
         for(String pdfDatei: pdfDateien) {
-            PDDocument pdfDoc = Loader.loadPDF(new File(pdfDatei));
-            Path filePath = Paths.get(pdfDatei);
-            String fileName = filePath.getFileName().toString();
-            Integer pageCount = pdfDoc.getNumberOfPages();
-            tmpTable.put(fileName, pageCount);
+            try {
+                PDDocument pdfDoc = Loader.loadPDF(new File(pdfDatei));
+                Path filePath = Paths.get(pdfDatei);
+                String fileName = filePath.getFileName().toString();
+                Integer pageCount = pdfDoc.getNumberOfPages();
+                tmpTable.put(fileName, pageCount);
+            } catch(Exception ex) {
+                infoMessage = String.format("!!! getPdfPageCount - Seitenzahl für %s kann nicht abgefragt werden (%s)",
+                  pdfDatei, ex.getMessage());
+                logger.error(infoMessage, ex);
+            }
         }
         return tmpTable;
     }
