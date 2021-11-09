@@ -35,6 +35,7 @@ import java.util.*;
 public class XEFPdfMerge extends Application {
     private String xJustizPfad;
     private String osName = "Unbekannt";
+    private String appVersion = "0.1";
     private static final Log logger = LogFactory.getLog(XEFPdfMerge.class);
     private XmlHelper xmlHelper = null;
     private String xmlPfad = "";
@@ -66,6 +67,12 @@ public class XEFPdfMerge extends Application {
         // xJustiz-Pfad aus Config-Datei einlesen
         AppConfig config = new AppConfig();
         xJustizPfad = config.getProperty("xJustizPfad");
+
+        // Versionsnummer  aus der Config-Datei holen
+        if (config.getProperty("version") != null) {
+            appVersion = config.getProperty("version");
+        }
+
 
         infoMessage = String.format("*** xJustizPfad=%s ***", xJustizPfad);
         logger.info(infoMessage);
@@ -419,7 +426,7 @@ public class XEFPdfMerge extends Application {
              public void handle(ActionEvent actionEvent) {
                  Alert infoAlert = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.OK);
                  infoAlert.setTitle("Über das Programm");
-                 infoAlert.setHeaderText("Portabler XJustiz-Viewer 0.15");
+                 infoAlert.setHeaderText(String.format("Portabler XJustiz-Viewer %s", appVersion));
                  infoAlert.setContentText("Alle Rechte vorbehalten usw.");
                  infoAlert.showAndWait();
              }
@@ -439,7 +446,7 @@ public class XEFPdfMerge extends Application {
             System.out.println("Shown Stage");
         });
 
-        stage.setTitle("EF-XJustiz-Viewer 0.15");
+        stage.setTitle(String.format("EF-XJustiz-Viewer %s", appVersion));
         stage.setScene(scene);
         stage.show();
     }
