@@ -233,8 +233,6 @@ public class XEFPdfMerge extends Application {
                                         TreeItem triDokument = new TreeItem("Dokument=" + dokument.getId());
                                         dateiName = dokument.getDateiname();
                                         triDokument.getChildren().add(new TreeItem("Pdf-Datei=" + dateiName));
-                                        // TODO: Nur provisorisch, der basePfad muss anders festgelegt werden
-                                        // basePfad = xJustizPfad;
                                         String pdfPfad = basePfad + "/" + dateiName;
                                         Integer pageCount = pdfHelper.getPdfPageCount(pdfPfad);
                                         triDokument.getChildren().add(new TreeItem("Anzahl Seiten=" + pageCount));
