@@ -108,7 +108,6 @@ public class XEFPdfMerge extends Application {
 
         VBox vbox2 = new VBox();
 
-
         Label lbl1 = new Label();
         lbl1.setText("Dokumente");
 
