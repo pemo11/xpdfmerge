@@ -1,3 +1,8 @@
+/**
+ * XJustiz-Pdf-Merge für Windows, MacOs und Linux
+ * Autor: Peter Monadjemi - pm@eureka-fach.de
+ * Letzte Änderung: 09/11/21
+ */
 package xpdfmergeV1;
 
 import javafx.application.Application;
@@ -28,8 +33,7 @@ import java.time.Instant;
 import java.util.*;
 
 public class XEFPdfMerge extends Application {
-    // TODO: Aus config-Datei auslesen
-    private String xJustizPfad = "C:\\";
+    private String xJustizPfad;
     private String osName = "Unbekannt";
     private static final Log logger = LogFactory.getLog(XEFPdfMerge.class);
     private XmlHelper xmlHelper = null;
@@ -43,6 +47,8 @@ public class XEFPdfMerge extends Application {
     public void start(Stage stage) throws IOException {
         // User directory holen
         String userDir = System.getProperty("user.home");
+        // Voreinstellung für Auswahlpfad für die Xml-Datei setzen
+        xJustizPfad = userDir;
 
         // OS-Name holen
         osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
@@ -57,7 +63,7 @@ public class XEFPdfMerge extends Application {
             pdfOutfile = userDir + "/documents/" + pdfOutfile;
         }
 
-        // xJustiz-Pfad einlesen
+        // xJustiz-Pfad aus Config-Datei einlesen
         AppConfig config = new AppConfig();
         xJustizPfad = config.getProperty("xJustizPfad");
 

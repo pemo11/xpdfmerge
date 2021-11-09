@@ -1,0 +1,10 @@
+===============================================================================
+Release-History
+===============================================================================
+
+bis 09/11/21 - Version 0.15 umfasst die Kernfunktionalität
+               Unter Windows und macOs getetestet
+               Es gibt aber noch einen Bug
+
+09/11/21     - try/catch in alle Methoden in XmlHelper eingefügt
+

@@ -44,17 +44,24 @@ public class XmlHelper {
     public XmlHelper(Log logger, String xmlPfad) throws IOException, ParserConfigurationException, SAXException {
         this.logger = logger;
         this.xmlPfad = xmlPfad;
-        // Xml-Datei öffnen
-        File xmlFile = new File(xmlPfad);
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        dbFactory.setNamespaceAware(true);
+        try {
+            // Xml-Datei öffnen
+            File xmlFile = new File(xmlPfad);
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            dbFactory.setNamespaceAware(true);
 
-        // DocumentBuilder für das Parsen der Xml-Datei anlegen
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        xDoc = dBuilder.parse(xmlFile);
-        // Kontrollmeldung
-        this.logger.info(String.format("*** XML-Datei %s wurde geparsed ***", xmlPfad));
-        this.logger.info("Namespace:" + xDoc.getDocumentElement().getPrefix());
+            // DocumentBuilder für das Parsen der Xml-Datei anlegen
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            xDoc = dBuilder.parse(xmlFile);
+            // Kontrollmeldung
+            infoMessage = String.format("*** XML-Datei %s wurde geparsed ***", xmlPfad);
+            this.logger.info(infoMessage);
+            infoMessage = String.format("*** XML-Namespace=%s", xDoc.getDocumentElement().getPrefix());
+            this.logger.info(infoMessage);
+        } catch (Exception ex) {
+            infoMessage = String.format("!!! XmlHelper-Konstruktor: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            this.logger.error(infoMessage, ex);
+        }
     }
 
     /**
@@ -66,20 +73,25 @@ public class XmlHelper {
     public List<Element> getElements(String tagName, String nsName) {
         infoMessage = String.format("*** Aufruf von getElements mit tagName=%s und nsName=%s", tagName, nsName);
         this.logger.info(infoMessage);
-        List<Element> tmpList = new ArrayList<Element>();
-        Element root = xDoc.getDocumentElement();
-        NodeList nlList = root.getElementsByTagNameNS(nsName, tagName);
-        // Alle nodes einzeln ansprechen
-        for(int i=0; i<nlList.getLength();i++) {
-            Node nNode = nlList.item(i);
-            // Ist das Element ein Node?
-            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                tmpList.add((Element)nNode);
+        List<Element> tmpListe = new ArrayList<Element>();
+        try {
+            Element root = xDoc.getDocumentElement();
+            NodeList nlList = root.getElementsByTagNameNS(nsName, tagName);
+            // Alle nodes einzeln ansprechen
+            for(int i=0; i<nlList.getLength();i++) {
+                Node nNode = nlList.item(i);
+                // Ist das Element ein Node?
+                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                    tmpListe.add((Element)nNode);
+                }
             }
+            infoMessage = String.format("*** getElements: Abschluss mit %d Elementen.", tmpListe.size());
+            this.logger.info(infoMessage);
+        } catch (Exception ex) {
+            infoMessage = String.format("!!! getElements: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            this.logger.error(infoMessage, ex);
         }
-        infoMessage = String.format("*** Abschluss von getElements mit %d Elementen.", tmpList.size());
-        this.logger.info(infoMessage);
-        return tmpList;
+        return tmpListe;
     }
 
     /**
@@ -89,14 +101,21 @@ public class XmlHelper {
     public List<String> getPdfNamen() {
         List<Element> tmpListe = getElements("datei", nsName);
         List<String> pdfListe = new ArrayList<String>();
-        // Ein Liste kann iteriert werden
-        for(Element el: tmpListe) {
-            String dateiname = el.getElementsByTagNameNS(nsName, "dateiname").item(0).getTextContent();
-            // Ist es eine Pdf-Datei?
-            if (dateiname.toLowerCase().endsWith(".pdf")) {
-                pdfListe.add(dateiname);
+        try {
+            // Ein Liste kann iteriert werden
+            for(Element el: tmpListe) {
+                String dateiname = el.getElementsByTagNameNS(nsName, "dateiname").item(0).getTextContent();
+                // Ist es eine Pdf-Datei?
+                if (dateiname.toLowerCase().endsWith(".pdf")) {
+                    pdfListe.add(dateiname);
+                }
             }
-        }
+            infoMessage = String.format("*** getPdfNamen: Abschluss mit %d Pdf-Dateinamen.", pdfListe.size());
+            this.logger.info(infoMessage);
+        } catch (Exception ex) {
+            infoMessage = String.format("!!! getPdfNamen: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            this.logger.error(infoMessage, ex);
+        } 
         return pdfListe;
     }
 
@@ -107,17 +126,24 @@ public class XmlHelper {
     public List<String> getPdfNamen2() {
         List<Element> elListe = getElements("datei", nsName);
         List<String> pdfListe = new ArrayList<String>();
-        // for-Loop statt Iterator
-        for(var i=0;i<elListe.size();i++) {
-            if (elListe.get(i).getNodeType() == Node.ELEMENT_NODE) {
-                //  Ist das Element ein Node? Dann dateiname-Element holen
-                String dateiname = ((Element)elListe.get(i)).getElementsByTagNameNS(nsName, "dateiname").item(0).getTextContent();
-                if (dateiname.toLowerCase().endsWith(".pdf")) {
-                    pdfListe.add(dateiname);
-                    infoMessage = String.format("*** Pdf-Datei: %s", dateiname);
-                    this.logger.info(infoMessage);
-                }                
+        try {
+            // for-Loop statt Iterator
+            for(var i=0;i<elListe.size();i++) {
+                if (elListe.get(i).getNodeType() == Node.ELEMENT_NODE) {
+                    //  Ist das Element ein Node? Dann dateiname-Element holen
+                    String dateiname = ((Element)elListe.get(i)).getElementsByTagNameNS(nsName, "dateiname").item(0).getTextContent();
+                    if (dateiname.toLowerCase().endsWith(".pdf")) {
+                        pdfListe.add(dateiname);
+                        infoMessage = String.format("*** getPdfNamen2: Pdf-Datei: %s", dateiname);
+                        this.logger.info(infoMessage);
+                    }                
+                }
             }
+            infoMessage = String.format("*** getPdfNamen2: Abschluss mit %d Pdf-Dateinamen.", pdfListe.size());
+            this.logger.info(infoMessage);
+        } catch (Exception ex) {
+            infoMessage = String.format("!!! getPdfNamen2: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            this.logger.error(infoMessage, ex);
         }
         return pdfListe;
     }
@@ -130,7 +156,8 @@ public class XmlHelper {
         // Alle akte-Elemente holen
         List<Element> tmpListe = getElements("akte", nsName);
         List<Akte> aktenListe = new ArrayList<Akte>();
-        for(Element el: tmpListe) {
+        try {
+            for(Element el: tmpListe) {
             String dateiname = el.getElementsByTagNameNS(nsName, "dateiname").item(0).getTextContent();
             String id = el.getElementsByTagNameNS(nsName, "id").item(0).getTextContent();
             String aktenTyp = el.getElementsByTagName("code").item(0).getTextContent();
@@ -141,6 +168,12 @@ public class XmlHelper {
             neuAkte.setAnzeigeName(anzeigenName);
             aktenListe.add(neuAkte);
         }
+        infoMessage = String.format("*** getAkten: Abschluss mit %d Akten.", aktenListe.size());
+        this.logger.info(infoMessage);
+        } catch (Exception ex) {
+            infoMessage = String.format("!!! getAkten: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            this.logger.error(infoMessage, ex);
+        }
         return aktenListe;
     }
 
@@ -150,21 +183,26 @@ public class XmlHelper {
      * @return - das akte-Element oder null
      */
     private Element getAkteById(String Id) {
-        // Das Akte-Element mit der Id per XPath lokalisieren
-        XPath xPathId = XPathFactory.newInstance().newXPath();
-        // Namespaceresolver verwenden
-        xPathId.setNamespaceContext(new NamespaceResolver(xDoc));
         Element elAkte = null;
-        // XPath-Ausdruck, der das erste akte-Element zum id-Element holt
-        String xPathExpr = "//ns0:akte/ns0:identifikation/ns0:id[contains(.,'" + Id + "')]/ancestor::ns0:akte[1]";
         try {
-            NodeList nlAkte = (NodeList)xPathId.evaluate(xPathExpr, xDoc, XPathConstants.NODESET);
-            Node nAkte = nlAkte.item(0);
-            elAkte = (Element)nAkte;
-        } catch(XPathExpressionException ex) {
-            infoMessage = "!!! getAkteById - XPath-Fehler (" + ex.getMessage() + ")";
-            logger.error(infoMessage);
-            ex.printStackTrace();
+            // Das Akte-Element mit der Id per XPath lokalisieren
+            XPath xPathId = XPathFactory.newInstance().newXPath();
+            // Namespaceresolver verwenden
+            xPathId.setNamespaceContext(new NamespaceResolver(xDoc));
+            // XPath-Ausdruck, der das erste akte-Element zum id-Element holt
+            String xPathExpr = "//ns0:akte/ns0:identifikation/ns0:id[contains(.,'" + Id + "')]/ancestor::ns0:akte[1]";
+            try {
+                NodeList nlAkte = (NodeList)xPathId.evaluate(xPathExpr, xDoc, XPathConstants.NODESET);
+                Node nAkte = nlAkte.item(0);
+                elAkte = (Element)nAkte;
+            } catch(XPathExpressionException ex) {
+                infoMessage = String.format("!!! getAkteById: XPath-Fehler (%s) !!!", ex.getMessage());
+                logger.error(infoMessage, ex);
+            }
+        } catch(Exception ex) {
+            infoMessage = String.format("!!! getAkteById: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            logger.error(infoMessage, ex);
+
         }
         return elAkte;
     }
@@ -175,23 +213,27 @@ public class XmlHelper {
      * @return
      */
     public Element getTeilakteById(String Id) {
-        // Das Akte-Element mit der Id per XPath lokalisieren
-        XPath xPathId = XPathFactory.newInstance().newXPath();
-        // Namespaceresolver verwenden
-        xPathId.setNamespaceContext(new NamespaceResolver(xDoc));
         Element elTeilakte = null;
-        // XPath-Ausdruck, der das erste teilakte-Element zum id-Element holt
-        String xPathExpr = "//ns0:teilakte/ns0:identifikation/ns0:id[contains(.,'" + Id + "')]/ancestor::ns0:teilakte[1]";
         try {
-            NodeList nlTeilakte = (NodeList)xPathId.evaluate(xPathExpr, xDoc, XPathConstants.NODESET);
-            Node nAkte = nlTeilakte.item(0);
-            if (nAkte.getNodeType() == Node.ELEMENT_NODE) {
-                elTeilakte = (Element)nAkte;
+                // Das Akte-Element mit der Id per XPath lokalisieren
+            XPath xPathId = XPathFactory.newInstance().newXPath();
+            // Namespaceresolver verwenden
+            xPathId.setNamespaceContext(new NamespaceResolver(xDoc));
+            // XPath-Ausdruck, der das erste teilakte-Element zum id-Element holt
+            String xPathExpr = "//ns0:teilakte/ns0:identifikation/ns0:id[contains(.,'" + Id + "')]/ancestor::ns0:teilakte[1]";
+            try {
+                NodeList nlTeilakte = (NodeList)xPathId.evaluate(xPathExpr, xDoc, XPathConstants.NODESET);
+                Node nAkte = nlTeilakte.item(0);
+                if (nAkte.getNodeType() == Node.ELEMENT_NODE) {
+                    elTeilakte = (Element)nAkte;
+                }
+            } catch(XPathExpressionException ex) {
+                infoMessage = String.format("!!! getTeilakteById: XPath-Fehler (%s) !!!", ex.getMessage());
+                logger.error(infoMessage, ex);
             }
-        } catch(XPathExpressionException ex) {
-            infoMessage = "!!! getTeilakteById - XPath-Fehler (" + ex.getMessage() + ")";
-            logger.error(infoMessage);
-            ex.printStackTrace();
+        } catch(Exception ex) {
+            infoMessage = String.format("!!! getTeilakteById: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            logger.error(infoMessage, ex);
         }
         return elTeilakte;
     }
@@ -208,8 +250,8 @@ public class XmlHelper {
             // Rückgabe ist auch dann nicht null, wenn es kein Element gibt
             hasTeilakten = teilakten.getLength() > 0;
         } catch (Exception ex) {
-            infoMessage = "!!! hasAkteTeilakten - allgemeiner Fehler (" + ex.getMessage() + ")";
-            logger.error(infoMessage);
+            infoMessage = String.format("!!! hasAkteTeilakten: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            logger.error(infoMessage, ex);
         }
         return hasTeilakten;
     }
@@ -224,8 +266,8 @@ public class XmlHelper {
         try {
             aktenId = akte.getElementsByTagNameNS(nsName, "id").item(0).getTextContent();
         } catch(Exception ex) {
-            infoMessage = "!!! getAktenId - allgemeiner Fehler (" + ex.getMessage() + ")";
-            logger.error(infoMessage);
+            infoMessage = String.format("!!! getAktenId: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            logger.error(infoMessage, ex);
         }
         return aktenId;
     }
@@ -237,33 +279,38 @@ public class XmlHelper {
      */
     public List<Teilakte> getTeilakten(String idAkte) {
         List<Teilakte> teilaktenListe = new ArrayList<Teilakte>();
-        // Alle teilakte-Elemente der aktenId holen
-        Element akte = getAkteById(idAkte);
-        // Gibt es Teilakten?
-        if (hasAkteTeilakten(akte)) {
-            try {
-                // Wenn der Typ = DeferredTextImpl ist, dann ist es ein Textknoten
-                // Info: getElementsByTagNameNS gibt ein DeepNodeListImpl-Objekt zurück, das die NodeList-Schnittstelle implementiert
-                NodeList teilakten = akte.getElementsByTagNameNS(nsName, "teilakte");
-                for(int i=0;i<teilakten.getLength();i++) {
-                    if (teilakten.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        Element elTeilakte = (Element)teilakten.item(i);
-                        String idTeilakte = elTeilakte.getElementsByTagNameNS(nsName, "id").item(0).getTextContent();
-                        Teilakte teilakte = new Teilakte(idTeilakte);
-                        String aktenTyp = ((Element)elTeilakte.getElementsByTagNameNS(nsName, "teilaktentyp").item(0)).getElementsByTagName("code").item(0).getTextContent();
-                        String anzeigename = elTeilakte.getElementsByTagNameNS(nsName, "anzeigename").item(0).getTextContent();
-                        String containerNummer = elTeilakte.getElementsByTagNameNS(nsName, "nummerImUebergeordnetenContainer").item(0).getTextContent();
-                        int nummerUebergeordneterContainer = Integer.parseInt(containerNummer);
-                        teilakte.setAnzeigeName(anzeigename);
-                        teilakte.setAktenTyp(aktenTyp);
-                        teilakte.setNummerImUebergeordnetenContainer(nummerUebergeordneterContainer);
-                        teilaktenListe.add(teilakte);
+        try {
+            // Alle teilakte-Elemente der aktenId holen
+            Element akte = getAkteById(idAkte);
+            // Gibt es Teilakten?
+            if (hasAkteTeilakten(akte)) {
+                try {
+                    // Wenn der Typ = DeferredTextImpl ist, dann ist es ein Textknoten
+                    // Info: getElementsByTagNameNS gibt ein DeepNodeListImpl-Objekt zurück, das die NodeList-Schnittstelle implementiert
+                    NodeList teilakten = akte.getElementsByTagNameNS(nsName, "teilakte");
+                    for(int i=0;i<teilakten.getLength();i++) {
+                        if (teilakten.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                            Element elTeilakte = (Element)teilakten.item(i);
+                            String idTeilakte = elTeilakte.getElementsByTagNameNS(nsName, "id").item(0).getTextContent();
+                            Teilakte teilakte = new Teilakte(idTeilakte);
+                            String aktenTyp = ((Element)elTeilakte.getElementsByTagNameNS(nsName, "teilaktentyp").item(0)).getElementsByTagName("code").item(0).getTextContent();
+                            String anzeigename = elTeilakte.getElementsByTagNameNS(nsName, "anzeigename").item(0).getTextContent();
+                            String containerNummer = elTeilakte.getElementsByTagNameNS(nsName, "nummerImUebergeordnetenContainer").item(0).getTextContent();
+                            int nummerUebergeordneterContainer = Integer.parseInt(containerNummer);
+                            teilakte.setAnzeigeName(anzeigename);
+                            teilakte.setAktenTyp(aktenTyp);
+                            teilakte.setNummerImUebergeordnetenContainer(nummerUebergeordneterContainer);
+                            teilaktenListe.add(teilakte);
+                        }
                     }
+                } catch(Exception ex) {
+                    infoMessage = String.format("!!! getTeilakten: Allgemeiner Fehler beim Verarbeiten der Teilakten-Elemente (%s)", ex.getMessage());
+                    logger.error(infoMessage, ex);
                 }
-            } catch(Exception ex) {
-                infoMessage = "!!! getTeilakten - allgemeiner Fehler (" + ex.getMessage() + ")";
-                logger.error(infoMessage);
             }
+        } catch (Exception ex) {
+            infoMessage = String.format("!!! getTeilakten: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            logger.error(infoMessage, ex);
         }
         return teilaktenListe;
 
@@ -277,9 +324,9 @@ public class XmlHelper {
      */
     public List<Dokument> getDokumente(String id, Aktentyp typ) {
         List<Dokument> dokumenteListe = new ArrayList<Dokument>();
-        // Welches Tag?
-        String tagName = typ == Aktentyp.Akte ? "Akte" : "Teilakte";
         try {
+            // Welches Tag?
+            String tagName = typ == Aktentyp.Akte ? "Akte" : "Teilakte";
             Element akte = null;
             if (typ == Aktentyp.Akte) {
                 akte = getAkteById(id);
@@ -305,10 +352,9 @@ public class XmlHelper {
                 }
             }
         } catch(Exception ex) {
-            infoMessage = "!!! getDokumente - allgemeiner Fehler (" + ex.getMessage() + ")";
-            logger.error(infoMessage);
+            infoMessage = String.format("!!! getDokumente: Allgemeiner Fehler (%s)", ex.getMessage());
+            logger.error(infoMessage, ex);
         }
-
         return dokumenteListe;
     }
 
