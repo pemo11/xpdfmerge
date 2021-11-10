@@ -33,9 +33,9 @@ Die einzelnen Schritte, um das Programm ausführen zu können:
 
 **Schritt 1**: Alle Dateien in ein leeres Verzeichnis kopieren (klar)
 
-**Schritt 2**: Sie müssen die Zip-Datei javaFx.zip in dem Verzeichnis mit den Dateien extrahieren, so dass es dort ein Verzeichnis JavaFx gibt.
+**Schritt 2**: Die Zip-Datei javaFx.zip in das Verzeichnis mit den Dateien extrahieren, so dass es dort ein Unterverzeichnis JavaFx gibt.
 
-**Schritt 3**: Start der Ps1-Datei, z.B. .\start.ps1
+**Schritt 3**: Start der Ps1-Datei, z.B. .\start.ps1 (bzw. setzen der Umgebungsvariablen und Ausführen von java, um die jar-Datei zu starten)
 
 Dann sollte das Fenster angezeigt werden und es sollten ein paar Meldungen in der Konsole erscheinen.
 
@@ -45,4 +45,4 @@ Der Rest ist dann hoffentlich selbsterklärend.
 
 Die app.config-Datei enthält den Pfad, in dem sich die Nachrichten-Dateien befinden für den Auswahldialog als Voreinstellung. Gibt es die Datei nicht, wird eine allgemeine Voreinstellung verwendet.
 
-Über die Datei Log4j2.xml kann der Logger konfiguriert werden (noch nicht getestet, da es auch ohne die Xml_Datei funktioniert.
+Über die Datei Log4j2.xml kann der Logger konfiguriert werden (noch nicht getestet, da es anscheinend auch ohne die Xml_Datei funktionier).
