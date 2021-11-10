@@ -1,7 +1,7 @@
 /*
   XJustiz-Pdf-Merge für Windows, MacOs und Linux
   Autor: Peter Monadjemi - pm@eureka-fach.de
-  Letzte Änderung: 09/11/21
+  Letzte Änderung: 10/11/21
 */
 
 package xpdfmergeV1;
@@ -50,11 +50,12 @@ public class XEFPdfMerge extends Application {
     public void start(Stage stage) throws IOException {
         // User directory holen
         String userDir = System.getProperty("user.home");
-        // Voreinstellung für Auswahlpfad für die Xml-Datei setzen
-        xJustizPfad = userDir;
 
         // OS-Name holen
         osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+
+        infoMessage = String.format("XEFPdfMerge->start: osName=%s", osName);
+        logger.info(infoMessage);
 
         // Ausgabeverzeichnis OS-spezifisch festlegen
         // Ist u.U. nicht erforderlich, da user.home bereits OS-spezifisch ist
@@ -63,22 +64,27 @@ public class XEFPdfMerge extends Application {
         } else if (osName.contains("mac")) {
             pdfOutfile = userDir + "/documents/" + pdfOutfile;
         } else {
-            pdfOutfile = userDir + "/documents/" + pdfOutfile;
+            // Bei Linux Documents statt documents?
+            pdfOutfile = userDir + "/Documents/" + pdfOutfile;
         }
 
         // xJustiz-Pfad aus Config-Datei einlesen
         AppConfig config = new AppConfig();
         xJustizPfad = config.getProperty("xJustizPfad");
 
+        // Wenn leer, dann Default setzen
+        if (xJustizPfad == null || xJustizPfad.isEmpty()) {
+            xJustizPfad = userDir + "/documents";
+        }
+
         // Versionsnummer  aus der Config-Datei holen
         if (config.getProperty("version") != null) {
             appVersion = config.getProperty("version");
         }
 
-
-        infoMessage = String.format("xJustizPfad=%s", xJustizPfad);
+        infoMessage = String.format("XEFPdfMerge->start: xJustizPfad=%s", xJustizPfad);
         logger.info(infoMessage);
-        
+
         // FXMLLoader fxmlLoader = new FXMLLoader(XEFPdfMerge.class.getResource("mainView.fxml"));
 
         // Scene scene = new Scene(fxmlLoader.load(), 800, 600);
@@ -174,7 +180,7 @@ public class XEFPdfMerge extends Application {
             @Override
             public void handle(ActionEvent actionEvent) {
                 FileChooser fileChooser = new FileChooser();
-                fileChooser.setInitialDirectory(new File(xJustizPfad));
+                // fileChooser.setInitialDirectory(new File(xJustizPfad));
                 fileChooser.setTitle("Auswahl Nachricht.xml");
                 fileChooser.getExtensionFilters().addAll(
                         new FileChooser.ExtensionFilter("Xml-Dateien", "*.xml"),
