@@ -10,6 +10,7 @@ module pdfmergev1 {
     requires xmpbox;
     requires java.xml;
     requires commons.logging;
+    requires org.apache.logging.log4j;
 
     opens xpdfmergeV1 to javafx.fxml;
     exports xpdfmergeV1;

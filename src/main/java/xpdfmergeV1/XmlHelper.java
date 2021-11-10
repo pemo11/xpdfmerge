@@ -19,7 +19,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import org.apache.commons.logging.Log;
+// import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 
 /*
  * Stellt allgemeine Xml-Funktionen für eine bestimmte Xml-Datei
@@ -27,8 +28,8 @@ import org.apache.commons.logging.Log;
  * @author Pemo
  */
 public class XmlHelper {
-    private Log logger = null;
-    private String xmlPfad = "";
+    private Logger logger;
+    private String xmlPfad;
     private Document xDoc = null;
     private String nsName = "http://www.xjustiz.de";
     private String infoMessage = "";
@@ -41,7 +42,7 @@ public class XmlHelper {
      * @throws ParserConfigurationException
      * @throws SAXException
      */
-    public XmlHelper(Log logger, String xmlPfad) throws IOException, ParserConfigurationException, SAXException {
+    public XmlHelper(Logger logger, String xmlPfad) throws IOException, ParserConfigurationException, SAXException {
         this.logger = logger;
         this.xmlPfad = xmlPfad;
         try {
@@ -54,12 +55,12 @@ public class XmlHelper {
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             xDoc = dBuilder.parse(xmlFile);
             // Kontrollmeldung
-            infoMessage = String.format("*** XML-Datei %s wurde geparsed ***", xmlPfad);
+            infoMessage = String.format("XML-Datei %s wurde geparsed", xmlPfad);
             this.logger.info(infoMessage);
-            infoMessage = String.format("*** XML-Namespace=%s", xDoc.getDocumentElement().getPrefix());
+            infoMessage = String.format("XML-Namespace=%s", xDoc.getDocumentElement().getPrefix());
             this.logger.info(infoMessage);
         } catch (Exception ex) {
-            infoMessage = String.format("!!! XmlHelper-Konstruktor: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("XmlHelper-Konstruktor: Allgemeiner Fehler (%s)", ex.getMessage());
             this.logger.error(infoMessage, ex);
         }
     }
@@ -71,7 +72,7 @@ public class XmlHelper {
      * @return List<Element> der Elemente
      */
     public List<Element> getElements(String tagName, String nsName) {
-        infoMessage = String.format("*** Aufruf von getElements mit tagName=%s und nsName=%s", tagName, nsName);
+        infoMessage = String.format("Aufruf von getElements mit tagName=%s und nsName=%s", tagName, nsName);
         this.logger.info(infoMessage);
         List<Element> tmpListe = new ArrayList<Element>();
         try {
@@ -85,10 +86,10 @@ public class XmlHelper {
                     tmpListe.add((Element)nNode);
                 }
             }
-            infoMessage = String.format("*** getElements: Abschluss mit %d Elementen.", tmpListe.size());
+            infoMessage = String.format("getElements: Abschluss mit %d Elementen.", tmpListe.size());
             this.logger.info(infoMessage);
         } catch (Exception ex) {
-            infoMessage = String.format("!!! getElements: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("getElements: Allgemeiner Fehler (%s)", ex.getMessage());
             this.logger.error(infoMessage, ex);
         }
         return tmpListe;
@@ -110,10 +111,10 @@ public class XmlHelper {
                     pdfListe.add(dateiname);
                 }
             }
-            infoMessage = String.format("*** getPdfNamen: Abschluss mit %d Pdf-Dateinamen.", pdfListe.size());
+            infoMessage = String.format("getPdfNamen: Abschluss mit %d Pdf-Dateinamen.", pdfListe.size());
             this.logger.info(infoMessage);
         } catch (Exception ex) {
-            infoMessage = String.format("!!! getPdfNamen: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("getPdfNamen: Allgemeiner Fehler (%s)", ex.getMessage());
             this.logger.error(infoMessage, ex);
         } 
         return pdfListe;
@@ -134,15 +135,15 @@ public class XmlHelper {
                     String dateiname = ((Element)elListe.get(i)).getElementsByTagNameNS(nsName, "dateiname").item(0).getTextContent();
                     if (dateiname.toLowerCase().endsWith(".pdf")) {
                         pdfListe.add(dateiname);
-                        infoMessage = String.format("*** getPdfNamen2: Pdf-Datei: %s", dateiname);
+                        infoMessage = String.format("getPdfNamen2: Pdf-Datei: %s", dateiname);
                         this.logger.info(infoMessage);
                     }                
                 }
             }
-            infoMessage = String.format("*** getPdfNamen2: Abschluss mit %d Pdf-Dateinamen.", pdfListe.size());
+            infoMessage = String.format("getPdfNamen2: Abschluss mit %d Pdf-Dateinamen.", pdfListe.size());
             this.logger.info(infoMessage);
         } catch (Exception ex) {
-            infoMessage = String.format("!!! getPdfNamen2: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("getPdfNamen2: Allgemeiner Fehler (%s)", ex.getMessage());
             this.logger.error(infoMessage, ex);
         }
         return pdfListe;
@@ -168,10 +169,10 @@ public class XmlHelper {
             neuAkte.setAnzeigeName(anzeigenName);
             aktenListe.add(neuAkte);
         }
-        infoMessage = String.format("*** getAkten: Abschluss mit %d Akten.", aktenListe.size());
+        infoMessage = String.format("getAkten: Abschluss mit %d Akten.", aktenListe.size());
         this.logger.info(infoMessage);
         } catch (Exception ex) {
-            infoMessage = String.format("!!! getAkten: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("getAkten: Allgemeiner Fehler (%s)", ex.getMessage());
             this.logger.error(infoMessage, ex);
         }
         return aktenListe;
@@ -196,11 +197,11 @@ public class XmlHelper {
                 Node nAkte = nlAkte.item(0);
                 elAkte = (Element)nAkte;
             } catch(XPathExpressionException ex) {
-                infoMessage = String.format("!!! getAkteById: XPath-Fehler (%s) !!!", ex.getMessage());
+                infoMessage = String.format("getAkteById: XPath-Fehler (%s)", ex.getMessage());
                 logger.error(infoMessage, ex);
             }
         } catch(Exception ex) {
-            infoMessage = String.format("!!! getAkteById: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("getAkteById: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);
 
         }
@@ -228,11 +229,11 @@ public class XmlHelper {
                     elTeilakte = (Element)nAkte;
                 }
             } catch(XPathExpressionException ex) {
-                infoMessage = String.format("!!! getTeilakteById: XPath-Fehler (%s) !!!", ex.getMessage());
+                infoMessage = String.format("getTeilakteById: XPath-Fehler (%s)", ex.getMessage());
                 logger.error(infoMessage, ex);
             }
         } catch(Exception ex) {
-            infoMessage = String.format("!!! getTeilakteById: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("getTeilakteById: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);
         }
         return elTeilakte;
@@ -250,7 +251,7 @@ public class XmlHelper {
             // Rückgabe ist auch dann nicht null, wenn es kein Element gibt
             hasTeilakten = teilakten.getLength() > 0;
         } catch (Exception ex) {
-            infoMessage = String.format("!!! hasAkteTeilakten: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("hasAkteTeilakten: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);
         }
         return hasTeilakten;
@@ -266,7 +267,7 @@ public class XmlHelper {
         try {
             aktenId = akte.getElementsByTagNameNS(nsName, "id").item(0).getTextContent();
         } catch(Exception ex) {
-            infoMessage = String.format("!!! getAktenId: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("getAktenId: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);
         }
         return aktenId;
@@ -304,12 +305,12 @@ public class XmlHelper {
                         }
                     }
                 } catch(Exception ex) {
-                    infoMessage = String.format("!!! getTeilakten: Allgemeiner Fehler beim Verarbeiten der Teilakten-Elemente (%s)", ex.getMessage());
+                    infoMessage = String.format("getTeilakten: Allgemeiner Fehler beim Verarbeiten der Teilakten-Elemente (%s)", ex.getMessage());
                     logger.error(infoMessage, ex);
                 }
             }
         } catch (Exception ex) {
-            infoMessage = String.format("!!! getTeilakten: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("getTeilakten: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);
         }
         return teilaktenListe;
@@ -352,7 +353,7 @@ public class XmlHelper {
                 }
             }
         } catch(Exception ex) {
-            infoMessage = String.format("!!! getDokumente: Allgemeiner Fehler (%s)", ex.getMessage());
+            infoMessage = String.format("getDokumente: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);
         }
         return dokumenteListe;

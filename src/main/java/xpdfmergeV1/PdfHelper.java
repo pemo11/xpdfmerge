@@ -34,18 +34,19 @@ import java.nio.file.*;
 
 import java.util.*;
 
-import org.apache.commons.logging.Log;
+// import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 
 /*
 * Stellt allgemeine Pdf-Funktionen zur Verfügung (auf der Basis von PdfBox)
  * @author Pemo
  */
 public class PdfHelper {
-    private Log logger = null;
+    private Logger logger;
     // private ProgressBar progressBar;
     private String infoMessage = "";
 
-    public PdfHelper(Log logger) {
+    public PdfHelper(Logger logger) {
         this.logger = logger;
     }
 
@@ -57,14 +58,14 @@ public class PdfHelper {
     */
 
     private PDFMergerUtility createPdfMerger(List<InputStream> sources, ByteArrayOutputStream mergedPdfOutputstream) {
-        infoMessage = "*** createPdfMerger: Initializing PDF Merge Utilty ***";
+        infoMessage = "createPdfMerger: Initializing PDF Merge Utilty";
         PDFMergerUtility pdfMerger = new PDFMergerUtility();
         try {
             this.logger.info(infoMessage);
             pdfMerger.addSources(sources);
             pdfMerger.setDestinationStream(mergedPdfOutputstream);
         } catch (Exception ex) {
-            infoMessage = String.format("!!! createPdfMerger: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("createPdfMerger: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);
         }
         return pdfMerger;
@@ -78,7 +79,7 @@ public class PdfHelper {
      * @return
      */
     private PDDocumentInformation createPdfDocumentInfo(String title, String creator, String subject) {
-        infoMessage = "*** createPdfDocumentInfo: Aufruf ***";
+        infoMessage = "createPdfDocumentInfo: Aufruf";
         this.logger.info(infoMessage);
         PDDocumentInformation documentInformation = new PDDocumentInformation();
         try {
@@ -86,7 +87,7 @@ public class PdfHelper {
             documentInformation.setCreator(creator);
             documentInformation.setSubject(subject);
         } catch (Exception ex) {
-            infoMessage = String.format("!!! createPdfDocumentInfo: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("createPdfDocumentInfo: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);
         }
         return documentInformation;
@@ -105,7 +106,7 @@ public class PdfHelper {
      */
     private PDMetadata createXMPMetadata(COSStream cosStream, String title, String creator, String subject)
             throws BadFieldValueException, TransformerException, IOException  {
-        infoMessage = String.format("*** createXMPMetadata: Aufruf mit XMP metadata (%s,%s,%s,) for merged PDF ***",title, creator, subject);
+        infoMessage = String.format("createXMPMetadata: Aufruf mit XMP metadata (%s,%s,%s,) for merged PDF",title, creator, subject);
         this.logger.info(infoMessage);
         PDMetadata pdMetadata = null;
         XMPMetadata metadata = XMPMetadata.createXMPMetadata();
@@ -138,11 +139,11 @@ public class PdfHelper {
                 cosXMPStream.write(xmpOutputStream.toByteArray());
                 pdMetadata = new PDMetadata(cosStream);
             } catch(Exception ex) {
-                infoMessage = String.format("!!! createXMPMetadata: Fehler beim Schreiben der Metadaten (%s) !!!", ex.getMessage());
+                infoMessage = String.format("createXMPMetadata: Fehler beim Schreiben der Metadaten (%s)", ex.getMessage());
                 logger.error(infoMessage, ex);
             }
         } catch (Exception ex) {
-            infoMessage = String.format("!!! createXMPMetadata: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("createXMPMetadata: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);
         }
         return pdMetadata;
@@ -150,7 +151,7 @@ public class PdfHelper {
 
     public InputStream mergeFiles(final List<InputStream> sources) throws IOException
     {
-        infoMessage = String.format("*** mergeFiles: Aufruf");
+        infoMessage = String.format("mergeFiles: Aufruf");
         this.logger.info(infoMessage);
 
         String title = "Zusammenfassung";
@@ -172,14 +173,14 @@ public class PdfHelper {
 
             pdfMerger.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
 
-            infoMessage = String.format("*** mergeFiles: PDF merge sucessfull, size=%d Bytes.", mergedPdfOutputStream.size());
+            infoMessage = String.format("mergeFiles: PDF merge sucessfull, size=%d Bytes.", mergedPdfOutputStream.size());
             this.logger.info(infoMessage);
 
             return new ByteArrayInputStream(mergedPdfOutputStream.toByteArray());
 
 
         } catch(BadFieldValueException | TransformerException ex) {
-            infoMessage = "!!! mergeFiles: PDF merge problem !!!";
+            infoMessage = "mergeFiles: PDF merge problem";
             throw new IOException(infoMessage, ex);
         } finally {
             sources.forEach(IOUtils::closeQuietly);
@@ -200,7 +201,7 @@ public class PdfHelper {
      */
 
     public void setBookmark(String pdfPfad, String bookmarkText) throws IOException {
-        infoMessage = String.format("*** setBookmark: Aufruf");
+        infoMessage = String.format("setBookmark: Aufruf");
         this.logger.info(infoMessage);
 
         try {
@@ -257,13 +258,13 @@ public class PdfHelper {
                 logger.error(infoMessage);
             }
         } catch (Exception ex) {
-            infoMessage = String.format("!!! setBookmark: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("setBookmark: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);
         }
     }
 
     public void setBookmarks(String pdfOutfile, Hashtable<String, PdfInfo> pdfInfoHashtable) {
-        infoMessage = String.format("*** setBookmarks: Aufruf");
+        infoMessage = String.format("setBookmarks: Aufruf");
         this.logger.info(infoMessage);
 
         String pdfOutfileBak = "";
@@ -322,7 +323,7 @@ public class PdfHelper {
                 bookmark.setTitle(bookmarkText1);
                 pagesOutline.addLast(bookmark);
 
-                infoMessage = String.format("*** Bookmark auf Seite %d gesetzt. ***", pageCounter);
+                infoMessage = String.format("Bookmark auf Seite %d gesetzt.", pageCounter);
                 logger.info(infoMessage);
 
                 // Seitenzähler auf die nächste Startseite eines Teildokuments
@@ -341,7 +342,7 @@ public class PdfHelper {
 
             try {
                 pdfDoc.save(pdfOutfile);
-                infoMessage = String.format("*** %s wurde mit Bookmarks gespeichert. ***", pdfOutfile);
+                infoMessage = String.format("%s wurde mit Bookmarks gespeichert.", pdfOutfile);
                 logger.info(infoMessage);
 
             } catch (IOException ex) {
@@ -361,7 +362,7 @@ public class PdfHelper {
             // logger.info(infoMessage);
 
         } catch (Exception ex) {
-            infoMessage = String.format("!!! setBookmarks: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("setBookmarks: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);
         }
     };
@@ -370,7 +371,7 @@ public class PdfHelper {
     ** Gibt die Seitenzahlen aller Pdf-Dateien als Hashtable zurück
      */
     public Hashtable<String, Integer> getPdfPageCount(List<String> pdfDateien) throws IOException {
-        infoMessage = String.format("*** getPdfPageCount: Aufruf");
+        infoMessage = String.format("getPdfPageCount: Aufruf");
         this.logger.info(infoMessage);
 
         Hashtable<String, Integer> tmpTable = new Hashtable<>();
@@ -383,27 +384,27 @@ public class PdfHelper {
                     Integer pageCount = pdfDoc.getNumberOfPages();
                     tmpTable.put(fileName, pageCount);
                 } catch(Exception ex) {
-                    infoMessage = String.format("!!! getPdfPageCount - Seitenzahl für %s kann nicht abgefragt werden (%s)",
+                    infoMessage = String.format("getPdfPageCount - Seitenzahl für %s kann nicht abgefragt werden (%s)",
                       pdfDatei, ex.getMessage());
                     logger.error(infoMessage, ex);
                 }
             }
         } catch (Exception ex) {
-            infoMessage = String.format("!!! getPdfPageCount: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("getPdfPageCount: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);
         }
         return tmpTable;
     }
 
     public Integer getPdfPageCount(String pdfPfad) throws IOException {
-        infoMessage = String.format("*** getPdfPageCount: Aufruf");
+        infoMessage = String.format("getPdfPageCount: Aufruf");
         int pageCount = 0;
         this.logger.info(infoMessage);
         try {
             PDDocument pdfDoc = Loader.loadPDF(new File(pdfPfad));
             pageCount = pdfDoc.getNumberOfPages();
         } catch (Exception ex) {
-            infoMessage = String.format("!!! getPdfPageCount: Allgemeiner Fehler (%s) !!!", ex.getMessage());
+            infoMessage = String.format("getPdfPageCount: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);
         }
         return pageCount;

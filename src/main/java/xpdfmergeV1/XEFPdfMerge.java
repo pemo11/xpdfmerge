@@ -1,8 +1,9 @@
-/**
- * XJustiz-Pdf-Merge für Windows, MacOs und Linux
- * Autor: Peter Monadjemi - pm@eureka-fach.de
- * Letzte Änderung: 09/11/21
- */
+/*
+  XJustiz-Pdf-Merge für Windows, MacOs und Linux
+  Autor: Peter Monadjemi - pm@eureka-fach.de
+  Letzte Änderung: 09/11/21
+*/
+
 package xpdfmergeV1;
 
 import javafx.application.Application;
@@ -18,8 +19,8 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.xml.sax.SAXException;
 
@@ -36,13 +37,14 @@ public class XEFPdfMerge extends Application {
     private String xJustizPfad;
     private String osName = "Unbekannt";
     private String appVersion = "0.1";
-    private static final Log logger = LogFactory.getLog(XEFPdfMerge.class);
+    private static final Logger logger = LogManager.getLogger(XEFPdfMerge.class);
     private XmlHelper xmlHelper = null;
     private String xmlPfad = "";
     private String basePfad = "";
     private String infoMessage = "";
     private String pdfOutfile = "GesamtePDF.pdf";
     private Hashtable<String, PdfInfo> pdfInfoHashtable = null;
+
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -56,9 +58,9 @@ public class XEFPdfMerge extends Application {
 
         // Ausgabeverzeichnis OS-spezifisch festlegen
         // Ist u.U. nicht erforderlich, da user.home bereits OS-spezifisch ist
-        if (osName.indexOf("win") >= 0 ) {
+        if (osName.contains("win")) {
             pdfOutfile = userDir + "/documents/" + pdfOutfile;
-        } else if (osName.indexOf("mac") >= 0) {
+        } else if (osName.contains("mac")) {
             pdfOutfile = userDir + "/documents/" + pdfOutfile;
         } else {
             pdfOutfile = userDir + "/documents/" + pdfOutfile;
@@ -74,7 +76,7 @@ public class XEFPdfMerge extends Application {
         }
 
 
-        infoMessage = String.format("*** xJustizPfad=%s ***", xJustizPfad);
+        infoMessage = String.format("xJustizPfad=%s", xJustizPfad);
         logger.info(infoMessage);
         
         // FXMLLoader fxmlLoader = new FXMLLoader(XEFPdfMerge.class.getResource("mainView.fxml"));
@@ -190,7 +192,7 @@ public class XEFPdfMerge extends Application {
                     // Basispfad festlegen
                     basePfad = selectedFile.getParent();
 
-                    String anzeigeName = "";
+                    String anzeigeName;
                     String dateiName = "";
 
                     // Erfolgsmeldung ausgeben
@@ -268,12 +270,15 @@ public class XEFPdfMerge extends Application {
                         }
                         // Root-Element des TreeView hinzufügen
                         trvAkten.setRoot(triRoot);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (ParserConfigurationException e) {
-                        e.printStackTrace();
-                    } catch (SAXException e) {
-                        e.printStackTrace();
+                    } catch (IOException ex) {
+                        infoMessage = String.format("openNachrichtXml-ActionHandler: IO-Fehler (%s)", ex.getMessage());
+                        logger.error(infoMessage, ex);
+                    } catch (ParserConfigurationException ex) {
+                        infoMessage = String.format("openNachrichtXml-ActionHandler: Parser-Fehler (%s)", ex.getMessage());
+                        logger.error(infoMessage, ex);
+                    } catch (SAXException ex) {
+                        infoMessage = String.format("openNachrichtXml-ActionHandler: SAX-Fehler (%s)", ex.getMessage());
+                        logger.error(infoMessage, ex);
                     }
                 }
             }
@@ -283,7 +288,7 @@ public class XEFPdfMerge extends Application {
         SeparatorMenuItem sep1 = new SeparatorMenuItem();
 
         MenuItem exitItem =  new MenuItem("Beenden",
-            new ImageView(new Image("file:images/exit.png")));;
+            new ImageView(new Image("file:images/exit.png")));
 
         exitItem.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -315,12 +320,15 @@ public class XEFPdfMerge extends Application {
                 // Pfade aller Pdf-Dateien aus der Xml-Datei ziehen
                 try {
                     xmlHelper = new XmlHelper(logger, xmlPfad);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ParserConfigurationException e) {
-                    e.printStackTrace();
-                } catch (SAXException e) {
-                    e.printStackTrace();
+                } catch (IOException ex) {
+                    infoMessage = String.format("mergePdf-ActionHandler: IO-Fehler (%s)", ex.getMessage());
+                    logger.error(infoMessage, ex);
+                } catch (ParserConfigurationException ex) {
+                    infoMessage = String.format("mergePdf-ActionHandler: Parser-Fehler (%s)", ex.getMessage());
+                    logger.error(infoMessage, ex);
+                } catch (SAXException ex) {
+                    infoMessage = String.format("mergePdf-ActionHandler: SAX-Fehler (%s)", ex.getMessage());
+                    logger.error(infoMessage, ex);
                 }
 
                 // Basispfad zuweisen
@@ -337,7 +345,7 @@ public class XEFPdfMerge extends Application {
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
-                    infoMessage = String.format("*** Hinzugefügt: %s", tmpPath);
+                    infoMessage = String.format("mergePdf: %s hinzugefügt", tmpPath);
                     logger.info(infoMessage);
                 }
 
@@ -363,29 +371,32 @@ public class XEFPdfMerge extends Application {
                         Integer pageCount = pdfHelper.getPdfPageCount(pdfInfo.getFilePath());
                         pdfInfo.setPageCount(pageCount);
                     } catch (IOException ex) {
-                        ex.printStackTrace();
+                        infoMessage = String.format("mergePdf-ActionHandler: IO-Fehler (%s)", ex.getMessage());
+                        logger.error(infoMessage, ex);
                     }
-
                 }
 
                 InputStream pdfStream = null;
                 try {
                     pdfStream = pdfHelper.mergeFiles(inputList);
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    infoMessage = String.format("mergePdf-ActionHandler: IO-Fehler (%s)", ex.getMessage());
+                    logger.error(infoMessage, ex);
                 }
 
                 File pdfFile = new File(pdfOutfile);
                 try {
                     Files.copy(pdfStream, pdfFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    infoMessage = String.format("mergePdf-ActionHandler: IO-Fehler (%s)", ex.getMessage());
+                    logger.error(infoMessage, ex);
                 }
 
                 try {
                     pdfStream.close();
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    infoMessage = String.format("mergePdf-ActionHandler: IO-Fehler (%s)", ex.getMessage());
+                    logger.error(infoMessage, ex);
                 }
 
                 // Booksmarks in die erstellte Pdf-Datei eintragen
