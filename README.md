@@ -22,7 +22,11 @@ https://github.com/PowerShell/PowerShell
 
 Alle für die Ausführung benötigten Dateien, befinden sich in einer Zip-Datei.
 
-<<< Der DOWNLOAD LINK FOLGT NOCH >>>
+https://github.com/pemo11/xpdfmerge/blob/main/xpdfMerge_Stand1011A.zip
+
+**Wichtig:** Die Zip-Datei enthält NICHT die JavaFx-Dateien und nicht das Java 11-SDK.
+
+Bei den JavaFx-Dateien kommt es darauf an, dass sie zum OS passen müssen (Windows, MacOS und Linux).
 
 Die einzelnen Schritte, um das Programm ausführen zu können:
 
