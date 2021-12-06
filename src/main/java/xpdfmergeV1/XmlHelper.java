@@ -13,11 +13,18 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.*;
 
+import javax.xml.XMLConstants;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Validator;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
+
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 // import org.apache.commons.logging.Log;
 import org.apache.logging.log4j.Logger;
@@ -357,6 +364,47 @@ public class XmlHelper {
             logger.error(infoMessage, ex);
         }
         return dokumenteListe;
+    }
+
+    public List<String> validateXMLSchema(String xsdPfad, String xmlPfad) throws IOException {
+        List<String> errorList = new ArrayList<>();
+        try {
+            javax.xml.validation.SchemaFactory factory = javax.xml.validation.SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            javax.xml.validation.Schema schema = factory.newSchema(new File(xsdPfad));
+            final List<SAXParseException> SAXExceptions = new ArrayList<>();
+            Validator validator = schema.newValidator();
+            validator.setErrorHandler(new ErrorHandler() {
+                @Override
+                public void warning(SAXParseException exception) throws SAXException
+                {
+                    SAXExceptions.add(exception);
+                }
+
+                @Override
+                public void error(SAXParseException exception) throws SAXException
+                {
+                    SAXExceptions.add(exception);
+                }
+
+                @Override
+                public void fatalError(SAXParseException exception) throws SAXException
+                {
+                    SAXExceptions.add(exception);
+                }
+            });
+            validator.validate(new StreamSource(new File(xmlPfad)));
+            // Gab es Fehler?
+            if (SAXExceptions.size() > 0) {
+                for(SAXParseException ex: SAXExceptions) {
+                    String errorMsg = String.format("SAXException in %s: %s", ex.getSystemId(), ex.getMessage());
+                    errorList.add(errorMsg);
+                }
+            }
+        } catch(Exception ex) {
+            infoMessage = "Allgemeiner Fehler: " + ex.getMessage();
+            logger.error(infoMessage, ex);
+        }
+        return errorList;
     }
 
 }

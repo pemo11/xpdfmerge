@@ -1,7 +1,7 @@
 /*
   XJustiz-Pdf-Merge für Windows, MacOs und Linux
   Autor: Peter Monadjemi - pm@eureka-fach.de
-  Letzte Änderung: 10/11/21
+  Letzte Änderung: 06/12/21
 */
 
 package xpdfmergeV1;
@@ -216,6 +216,18 @@ public class XEFPdfMerge extends Application {
 
                     try {
                         XmlHelper xmlHelper = new XmlHelper(logger, xmlPfad);
+                        // Schema-Validierung
+                        String xsdPfad = "schemas/xjustiz_0005_nachrichten_3_0.xsd";
+                        List<String> validateErrors = xmlHelper.validateXMLSchema(xsdPfad, xmlPfad);
+                        // Wenn es Validierungsfehler gab, dann alle loggen, aber die Ausführung geht weiter
+                        if (validateErrors.size() == 0) {
+                            infoMessage = "XSD-Schemavalidierung ohne Fehler";
+                            logger.info(infoMessage);
+                        } else {
+                            for(String validateError: validateErrors) {
+                                logger.warn(validateError);
+                            }
+                        }
                         PdfHelper pdfHelper = new PdfHelper(logger);
                         List<Akte> akten = xmlHelper.getAkten();
                         TreeItem triRoot = new TreeItem("Akten");

@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema elementFormDefault="qualified" targetNamespace="http://xoev.de/latinchars"
+  version="1.2.1" xmlns:xml="http://www.w3.org/XML/1998/namespace"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:lc="http://xoev.de/latinchars"
+  vc:minVersion="1.1" xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning">
+
+  <xs:annotation>
+    <xs:documentation>Schema für die Datenbank der lateinischen Zeichen in Unicode. SVN: $Id: latinchars.xsd 10324 2019-04-10 06:07:08Z frank.steimke $</xs:documentation>
+  </xs:annotation>
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+  <xs:simpleType name="Version">
+    <xs:annotation>
+      <xs:documentation>Datentyp für Versionsbezeichnungen</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\d\.\d[a-z]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="RemarkType">
+    <xs:annotation>
+      <xs:documentation>Datentyp für den Hinweis zu einem Eintrag in der Liste Lateinischer Zeichen in Unicode: Ein Text mit optionalem Rollenattribut.</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:extension base="xs:token">
+        <xs:attribute name="type">
+          <xs:annotation>
+            <xs:documentation>Mit dem optionalen type Attribut kann der Typ der Bemerkung bestimmt werden.</xs:documentation>
+          </xs:annotation>
+          <xs:simpleType>
+            <xs:restriction base="xs:token">
+              <xs:enumeration value="countries"/>
+              <xs:enumeration value="modifier"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="see-also" type="lc:Codepoints">
+          <xs:annotation>
+            <xs:documentation>Mit diesem optionalen Attribut kann auf einen anderen Eintrag verwiesen werden.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:assert
+          test="
+            if (@type eq 'countries') then
+              matches(., '^[A-Z\-]+(\s*,\s*[A-Z\-]+)*$')
+            else
+              true()"
+        />
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:simpleType name="Name">
+    <xs:annotation>
+      <xs:documentation>Einfacher Datentyp (simple type) für Namen von Zeichen und Sequenzen, sowohl in UCD als auch String.Latin</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[A-Z\-]+( [A-Z\d\-\(\)]+)*"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="Codepoints">
+    <xs:annotation>
+      <xs:documentation>Datentyp für eine Folge von Codepoints, die durch ein Leerzeichen getrennt werden. Jeder Codepoint wird durch genau vier HEX-Ziffern beschreiben. Die Schreibweise der Copdepoints entspricht der in der Unicode Character Database UCD.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9A-F]{4}( [0-9A-F]{4})*"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="SingleCodepoint">
+    <xs:annotation>
+      <xs:documentation>Datentyp für einen einzelnen Codepoint</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="lc:Codepoints">
+      <xs:length value="4"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="MultiCodepoint">
+    <xs:annotation>
+      <xs:documentation>Datentyp für eine Sequenz aus zwei oder drei Codepoints.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="lc:Codepoints">
+      <xs:minLength value="9"/>
+      <xs:maxLength value="14"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="Entry" abstract="true">
+    <xs:annotation>
+      <xs:documentation>Datentyp für einen Eintrag in der Datenbank der lateinischen Zeichen in Unicode.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:annotation>
+        <xs:documentation>Die Sequenz der Schriftzeichen</xs:documentation>
+      </xs:annotation>
+      <xs:element name="cp" type="lc:Codepoints">
+        <xs:annotation>
+          <xs:documentation>Der Codepoint (bei einem Zeichen) oder die Codepoints (bei einer Zeichensequenz) dieses Eintrags in der Datenbank. Bei einzelnen Zeichen muss es einen entsprechenden Eintrag in der UCD geben. Bei Zeichensequenzen kann es ebenfalls eine entsprechung geben, dann ist es eine Named Sequenz in der UCD.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="name" type="lc:Name">
+        <xs:annotation>
+          <xs:documentation>Zum Zwecke des einfacheren Umgangs mit der Datenbank kann hier der Name des Zeichens oder der Sequenz angegeben werden.
+Bei Abweichungen ist der offizielle Name der UCD führend.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="mapping" type="lc:Entry-mapping">
+        <xs:annotation>
+          <xs:documentation>Abbildung dieses Eintrags auf einen Unicode Codepoint oder eine Sequenz von Codepoints.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="transliteration" type="lc:Translation">
+        <xs:annotation>
+          <xs:documentation>Die Transliteration von Codepoint* → diesen Entry oder von diesem Entry → Codepoint* soll angegeben werden, wenn es eine Transliterationsempfehlung gibt (insbesondere von der ISO).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="remark" maxOccurs="unbounded" type="lc:RemarkType">
+        <xs:annotation>
+          <xs:documentation>Es können eine oder mehrere Hinweise / Bemerkungen zum Eintrag in der Datenbank gemacht werden. Eine Qualifikation über das @type Attribut ist möglich.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="insert" type="lc:Version" use="required">
+      <xs:annotation>
+        <xs:documentation>Die Bezeichnung der Version, in der dieser Eintrag der Datenbank zugefügt wurde.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="group" use="required" type="xs:NMTOKEN">
+      <xs:annotation>
+        <xs:documentation>Jedes Zeichen muss einer Gruppe zugeordnet werden.
+Die Zeichentabellen der Spezifikation fassen jeweils eine oder mehrere Gruppen zusammen.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="CharacterType">
+    <xs:annotation>
+      <xs:documentation>Datentyp für die Angabe eines durch einen einzigen Codepoint festgelegten Zeichen.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:restriction base="lc:Entry">
+        <xs:sequence>
+          <xs:element name="cp" type="lc:SingleCodepoint">
+            <xs:annotation>
+              <xs:documentation>Der Codepoint (bei einem Zeichen) oder die Codepoints (bei einer Zeichensequenz) dieses Eintrags in der Datenbank. Bei einzelnen Zeichen muss es einen entsprechenden Eintrag in der UCD geben. Bei Zeichensequenzen kann es ebenfalls eine entsprechung geben, dann ist es eine Named Sequenz in der UCD.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="name" type="lc:Name">
+            <xs:annotation>
+              <xs:documentation>Zum Zwecke des einfacheren Umgangs mit der Datenbank kann hier der Name des Zeichens oder der Sequenz angegeben werden.
+Bei Abweichungen ist der offizielle Name der UCD führend.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="mapping" type="lc:Entry-mapping">
+            <xs:annotation>
+              <xs:documentation>Abbildung dieses Eintrags auf einen Unicode Codepoint oder eine Sequenz von Codepoints.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="transliteration"
+            type="lc:Translation">
+            <xs:annotation>
+              <xs:documentation>Transliteration von Codepoint* → diesen Entry oder von diesem Entry → Codepoint*.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="remark" maxOccurs="unbounded" type="lc:RemarkType">
+            <xs:annotation>
+              <xs:documentation>Es können eine oder mehrere Hinweise / Bemerkungen zum Eintrag in der Datenbank gemacht werden. Eine Qualifikation über das @type Attribut ist möglich.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="SequenceType">
+    <xs:annotation>
+      <xs:documentation>Datentyp für einen Eintrag in der Liste Lateinischer Zeichen in Unicode, der durch eine Sequenz von Codepoints festgelegt wird.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:restriction base="lc:Entry">
+        <xs:sequence>
+          <xs:element name="cp" type="lc:MultiCodepoint">
+            <xs:annotation>
+              <xs:documentation>Der Codepoint (bei einem Zeichen) oder die Codepoints (bei einer Zeichensequenz) dieses Eintrags in der Datenbank. Bei einzelnen Zeichen muss es einen entsprechenden Eintrag in der UCD geben. Bei Zeichensequenzen kann es ebenfalls eine entsprechung geben, dann ist es eine Named Sequenz in der UCD.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="name" type="lc:Name">
+            <xs:annotation>
+              <xs:documentation>Zum Zwecke des einfacheren Umgangs mit der Datenbank kann hier der Name des Zeichens oder der Sequenz angegeben werden.
+Bei Abweichungen ist der offizielle Name der UCD führend.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="mapping" type="lc:Entry-mapping">
+            <xs:annotation>
+              <xs:documentation>Abbildung dieses Eintrags auf einen Unicode Codepoint oder eine Sequenz von Codepoints.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="transliteration"
+            type="lc:Translation">
+            <xs:annotation>
+              <xs:documentation>Transliteration von Codepoint* → diesen Entry oder von diesem Entry → Codepoint*.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="remark" maxOccurs="unbounded" type="lc:RemarkType">
+            <xs:annotation>
+              <xs:documentation>Es können eine oder mehrere Hinweise / Bemerkungen zum Eintrag in der Datenbank gemacht werden. Eine Qualifikation über das @type Attribut ist möglich.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="characterSet">
+    <xs:annotation>
+      <xs:documentation>Die Datenbank der lateinischen Zeichen in Unicode</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="releases">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" name="release">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element maxOccurs="unbounded" name="changelog">
+                      <xs:annotation>
+                        <xs:documentation>Die Versionshistorie der Datenbank</xs:documentation>
+                      </xs:annotation>
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element maxOccurs="unbounded" name="p" type="xs:normalizedString">
+                            <xs:annotation>
+                              <xs:documentation>Ein Textabschnitt</xs:documentation>
+                            </xs:annotation>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="date" type="xs:date" use="required">
+                          <xs:annotation>
+                            <xs:documentation>Datum des Eintrag in der Versionshistorie</xs:documentation>
+                          </xs:annotation>
+                        </xs:attribute>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="version" type="xs:token" use="required">
+                    <xs:annotation>
+                      <xs:documentation>Die Version der Datenbank, auf die sich dieser Eintrag bezieht.</xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element minOccurs="0" name="groups">
+          <xs:annotation>
+            <xs:documentation>Deklaration der Schriftzeichengruppen.</xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" name="group" type="lc:Group">
+                <xs:annotation>
+                  <xs:documentation>Definition einer Schriftzeichengruppe. Jeder Eintrag muss sich einer Schriftzeichengruppe zugehören. Siehe Constraint group-keyref.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="transliterations" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Deklaration von Abbildungsvorschriften Codepoint* → Entry oder Entry → Codepoint*. Insbesondere für ISO Transliterationsempfehlungen.</xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" name="transliteration">
+                <xs:annotation>
+                  <xs:documentation>Deklaration einer Abbildungsvorschrift Codepoint* → Entry oder Entry → Codepoint*. Insbesondere für eine ISO Transliteration.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="title" type="xs:token">
+                      <xs:annotation>
+                        <xs:documentation>Der offizielle Titel der Transliterationsvorschrift bzw. -empfehlung</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="id" type="xs:ID" use="required"/>
+                  <xs:attribute name="remark">
+                    <xs:annotation>
+                      <xs:documentation>Kurzer Hinweis zur Charakterisierung dieser Abbildungsvorschrift.</xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element minOccurs="0" name="internal-mappings">
+          <xs:annotation>
+            <xs:documentation>Deklarationen von Abbildungen Entry → Entry*</xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" name="internal-mapping">
+                <xs:annotation>
+                  <xs:documentation>Deklaration einer Abbildung Entry → Entry*</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="name" type="xs:token">
+                      <xs:annotation>
+                        <xs:documentation>Name der Abbildung</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element name="description" minOccurs="0" maxOccurs="unbounded">
+                      <xs:annotation>
+                        <xs:documentation>Beschreibung der Abbildung</xs:documentation>
+                      </xs:annotation>
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:token">
+                            <xs:attribute ref="xml:lang" use="optional" default="de"/>
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="id" type="xs:token" use="required">
+                    <xs:annotation>
+                      <xs:documentation>id der Abbildung</xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:choice maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>Die Sequenz der Schriftzeichen</xs:documentation>
+          </xs:annotation>
+          <xs:element name="char" type="lc:CharacterType">
+            <xs:annotation>
+              <xs:documentation>Ein Eintrag für ein einzelnes Zeichen</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="sequence" type="lc:SequenceType">
+            <xs:annotation>
+              <xs:documentation>Ein Eintrag einer Zeichensequenz</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="name" type="xs:token">
+        <xs:annotation>
+          <xs:documentation>Die Bezeichnung der Datenbank</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="version" type="lc:Version">
+        <xs:annotation>
+          <xs:documentation>Die Version dieser Datenbank</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+    <xs:unique name="codepoints-unique">
+      <xs:selector xpath="lc:char | lc:sequence"/>
+      <xs:field xpath="lc:cp"/>
+    </xs:unique>
+    <xs:unique name="name-unique">
+      <xs:selector xpath="lc:char | lc:sequence"/>
+      <xs:field xpath="lc:name"/>
+    </xs:unique>
+    <xs:key name="group-key">
+      <xs:selector xpath="lc:groups/lc:group"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:keyref name="group-keyref" refer="lc:group-key">
+      <xs:annotation>
+        <xs:documentation>Das @group Attribut eines Eintrags muss auf eine definierte Schriftzeichengruppe verweisen.</xs:documentation>
+      </xs:annotation>
+      <xs:selector xpath="lc:char | lc:sequence"/>
+      <xs:field xpath="@group"/>
+    </xs:keyref>
+    <xs:key name="version-key">
+      <xs:selector xpath="lc:releases/lc:release"/>
+      <xs:field xpath="@version"/>
+    </xs:key>
+    <xs:keyref name="version-keyref" refer="lc:version-key">
+      <xs:annotation>
+        <xs:documentation>Das @insert Attribut eines Eintrags muss auf ein definiertes Release mit der entsprechenden @version verweisen.</xs:documentation>
+      </xs:annotation>
+      <xs:selector xpath="lc:char | lc:sequence"/>
+      <xs:field xpath="@insert"/>
+    </xs:keyref>
+    <xs:key name="internal-mapping-key">
+      <xs:selector xpath="lc:internal-mappings/lc:internal-mapping"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:keyref name="internal-mapping-keyref" refer="lc:internal-mapping-key">
+      <xs:selector xpath=".//lc:mapping"/>
+      <xs:field xpath="@internal-mapping"/>
+    </xs:keyref>
+    <xs:key name="transliteration-key">
+      <xs:selector xpath="lc:transliterations/lc:transliteration"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:keyref name="transliteration-keyref" refer="lc:transliteration-key">
+      <xs:selector xpath=".//lc:transliteration"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+  </xs:element>
+  <xs:complexType name="Translation">
+    <xs:annotation>
+      <xs:documentation>Eine Abbildung von Codepoint* → diesen Entry oder von diesem Entry → Codepoint*.</xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="ref">
+      <xs:annotation>
+        <xs:documentation>Referenz auf die Deklaration einer Abbildungsvorschrift.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="Entry-mapping">
+    <xs:annotation>
+      <xs:documentation>Datentyp für eine intern festgelegte Abbildung eines Eintrags der Datenbasis auf eine Sequenz von Entries, die anhand ihrer Codepoints identifiziert werden.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="dest" type="lc:Codepoints" maxOccurs="unbounded"> </xs:element>
+      <xs:element minOccurs="0" name="remark" type="xs:token"/>
+    </xs:sequence>
+    <xs:attribute name="internal-mapping" type="xs:token" use="required"/>
+    <xs:attribute name="type" use="required">
+      <xs:annotation>
+        <xs:documentation>Klassifikation der Abbildung source → dest
+mapped:   dest ≠ source 
+identity: dest = source
+empty:    dest = {}</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="empty"/>
+          <xs:enumeration value="identity"/>
+          <xs:enumeration value="mapped"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:assert
+      test="
+        if (@type eq 'mapped') then
+          exists(lc:dest)
+        else
+          not(exists(lc:dest))"
+    />
+  </xs:complexType>
+  <xs:element name="table">
+    <xs:annotation>
+      <xs:documentation>Eine tabellarische Darstellung des characterSet, für einen Import in Excel</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" name="row" type="lc:Row">
+          <xs:annotation>
+            <xs:documentation>Je eine Zeile für ein char bzw. ein sequence Element</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="Row">
+    <xs:annotation>
+      <xs:documentation>Datentyp für die Darstellung eines Eintrags der Datenbank in einer Zeile der tabellarischen Darstellung.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="pos" type="xs:integer">
+        <xs:annotation>
+          <xs:documentation>Laufende Nummer des Eintrags</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="group" type="xs:token">
+        <xs:annotation>
+          <xs:documentation>Welcher Gruppe ist der Eintrag zugeordnet?</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="insert" type="lc:Version">
+        <xs:annotation>
+          <xs:documentation>Seit wann in der Datenbank?</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="cp" type="lc:Codepoints">
+        <xs:annotation>
+          <xs:documentation>Der Codepoint (bei einem Zeichen) oder die Codepoints (bei einer Zeichensequenz) dieses Eintrags in der Datenbank. Bei einzelnen Zeichen muss es einen entsprechenden Eintrag in der UCD geben. Bei Zeichensequenzen kann es ebenfalls eine entsprechung geben, dann ist es eine Named Sequenz in der UCD.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="string" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Repräsentation des Zeichens bzw. der Zeichen für den jeweiligen Eintrag.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="name" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Der Name des Zeichens bzw. der Sequenz gemäß UCD</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="gc" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Unicode General Category gemäß UCD</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="blk" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Unicode Block gemäß UCD</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:any processContents="lax" namespace="##targetNamespace" minOccurs="0"
+        maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Diverse Spalten.
+                        Eine abschließende Nennung der Elemente ist nicht möglich, weil es pro technischem Datentyp eine Spalte geben soll, 
+                        deren Name dynamisch ist (sich aus der Spezifikation ergibt).
+                    Für den Import in Excel wird aus diesem Grund eine Schemadatei dynamisch erzeugt,
+                    darin sind die Namen der Spalten festgelegt.
+                    Excel kann nämlich nicht mit xs:any umgehen...</xs:documentation>
+        </xs:annotation>
+      </xs:any>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType abstract="true" name="PatternFragment">
+    <xs:annotation>
+      <xs:documentation>Abstrakter Datentyp für das Fragment einer pattern Facette in eimem xs:simpleType als Restriction von xs:string.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="fragment" type="xs:token">
+        <xs:annotation>
+          <xs:documentation>Das Fragment der pattern Facette</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="PatternCharacterRange">
+    <xs:annotation>
+      <xs:documentation>Ein Fragment einer pattern Facette eines xs:simpleType (Restriction von xs:string) für eine Sequenz von Zeichen in einem zusammenhängenden Bereich von Codepoints.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="lc:PatternFragment">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" name="char" type="lc:CharacterType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="PatternSequences">
+    <xs:annotation>
+      <xs:documentation>Ein Fragment einer pattern Facette eines xs:simpleType (Restriction von xs:string) für eine Sequenz von Sequenzen, die alle mit dem gleichen Codepoint beginnen.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="lc:PatternFragment">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" name="sequence" type="lc:SequenceType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Group">
+    <xs:sequence>
+      <xs:element name="name" type="xs:token"/>
+      <xs:element name="description">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:token">
+              <xs:attribute ref="xml:lang" use="optional" default="de"/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:NMTOKEN" use="required"/>
+    <xs:attribute name="mandatory" type="xs:boolean" use="required">
+      <xs:annotation>
+        <xs:documentation>Ist diese Schriftzeichengruppe im normativen Bereich?</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:element name="legacy-mappingtable">
+    <xs:annotation>
+      <xs:documentation>Eine Zusammenfassung von Abbildungsvorschriften von Legacy Zeichensätzen (z. B. ISO 8859-1, 8859-15, cpc1252) auf Unicode Codepoints in einer gemeinsamen Tabelle.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence maxOccurs="unbounded">
+        <xs:element name="legacy-code">
+          <xs:annotation>
+            <xs:documentation>Zusammenfassung der Abbildungen dieses Legacy Codes in unterschiedlichen charSets auf Unicode Codepoints</xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence maxOccurs="unbounded">
+              <xs:element name="legacy-mapping" type="lc:Legacy-Mapping"/>
+            </xs:sequence>
+            <xs:attribute name="code" type="lc:LegacyCode" use="required"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="ts" type="xs:dateTime" use="required">
+        <xs:annotation>
+          <xs:documentation>Zeitpunkt der Erstellung</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="textfiles" type="xs:string" use="required">
+        <xs:annotation>
+          <xs:documentation>Die Quelldateien, aus denen diese Mappingtabelle erstellt worden ist.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="Legacy-Mapping">
+    <xs:annotation>
+      <xs:documentation>Abbildung des legacy-code auf einen Unicode Codepoint @cp für einen bestimmten @charset </xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:extension base="lc:Name">
+        <xs:attribute name="charset" type="xs:token" use="required">
+          <xs:annotation>
+            <xs:documentation>Die Bezeichnung des Legacy Zeichensatzes.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="cp" type="lc:SingleCodepoint" use="required">
+          <xs:annotation>
+            <xs:documentation>Der Unicode Codepoint, auf den das Zeichen mit dem @code des Parent-Elements im Zeichensatz @charset abgebildet wird.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="group" use="optional" type="xs:NMTOKEN">
+          <xs:annotation>
+            <xs:documentation>Sofern das Legacy Zeichen Bestandteil von String.Latin ist: Die Schriftzeichengruppe, der das Zeichen in String.Latin zugeordnet ist. Andernfalls fehlt dieses Attribut.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="remark" type="xs:token">
+          <xs:annotation>
+            <xs:documentation>Sofern das Legacy Zeichen nicht Bestandteil von String.Latin ist, soll hier eine Begründung genannt werden weshalb es nicht aufgenommen worden ist.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:simpleType name="LegacyCode">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9A-F]{2}"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

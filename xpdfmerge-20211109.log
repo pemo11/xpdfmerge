@@ -1,0 +1,140 @@
+2021-11-09 22:02:40.018 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** xJustizPfad=D:\EurekaFach\BEAkten-Projekt2021\baakte ***
+2021-11-09 22:02:49.370 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - xmlPfad = D:\EurekaFach\BEAkten-Projekt2021\baakte\xjustiz_nachricht.xml
+2021-11-09 22:02:50.969 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** XML-Datei D:\EurekaFach\BEAkten-Projekt2021\baakte\xjustiz_nachricht.xml wurde geparsed ***
+2021-11-09 22:02:50.969 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** XML-Namespace=ns0
+2021-11-09 22:02:50.979 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** Aufruf von getElements mit tagName=akte und nsName=http://www.xjustiz.de
+2021-11-09 22:02:50.981 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getElements: Abschluss mit 3 Elementen.
+2021-11-09 22:02:50.985 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getAkten: Abschluss mit 3 Akten.
+2021-11-09 22:02:51.031 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:02:51.112 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:02:51.120 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:02:51.133 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:02:51.288 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:02:51.307 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:02:51.411 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:02:51.426 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:02:51.433 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:03:14.470 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** XML-Datei D:\EurekaFach\BEAkten-Projekt2021\baakte\xjustiz_nachricht.xml wurde geparsed ***
+2021-11-09 22:03:14.470 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** XML-Namespace=ns0
+2021-11-09 22:03:14.471 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** Aufruf von getElements mit tagName=datei und nsName=http://www.xjustiz.de
+2021-11-09 22:03:14.471 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getElements: Abschluss mit 11 Elementen.
+2021-11-09 22:03:14.471 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfNamen2: Pdf-Datei: be0ef33f-9b6e-47bf-9127-819c6aaa3a2d_ANHOERUNG01.pdf
+2021-11-09 22:03:14.471 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfNamen2: Pdf-Datei: 51ef1bc8-0c1b-4092-b6eb-d2ddd61ac1b5_EINSPRUCH01.pdf
+2021-11-09 22:03:14.472 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfNamen2: Pdf-Datei: 735bf579-1305-46f3-824a-8f51e2da8882_EINSPRUCH01.pdf
+2021-11-09 22:03:14.472 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfNamen2: Pdf-Datei: 9a5d3ab0-8e27-47fd-8f6e-c68506afbf25_MASSNBESCHRE01.pdf
+2021-11-09 22:03:14.472 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfNamen2: Pdf-Datei: 54025744-f7fc-478a-81e7-8156c0866302_MASSNBOGEN02.pdf
+2021-11-09 22:03:14.472 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfNamen2: Pdf-Datei: f91e7bbb-e5a8-4baf-9203-7b9cd4132de3_FB03.pdf
+2021-11-09 22:03:14.472 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfNamen2: Pdf-Datei: ded507c6-82cc-4c31-9a29-42fdb0fb3703_VANZEIGE04.pdf
+2021-11-09 22:03:14.472 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfNamen2: Pdf-Datei: 22d281ec-f544-44fe-a327-32903c0c4149_ANLAGE05.pdf
+2021-11-09 22:03:14.472 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfNamen2: Pdf-Datei: 974005fb-7eac-416d-8219-2245c3a72477_ANHOERUNG06.pdf
+2021-11-09 22:03:14.472 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfNamen2: Abschluss mit 9 Pdf-Dateinamen.
+2021-11-09 22:03:14.473 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/be0ef33f-9b6e-47bf-9127-819c6aaa3a2d_ANHOERUNG01.pdf
+2021-11-09 22:03:14.473 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/51ef1bc8-0c1b-4092-b6eb-d2ddd61ac1b5_EINSPRUCH01.pdf
+2021-11-09 22:03:14.473 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/735bf579-1305-46f3-824a-8f51e2da8882_EINSPRUCH01.pdf
+2021-11-09 22:03:14.474 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/9a5d3ab0-8e27-47fd-8f6e-c68506afbf25_MASSNBESCHRE01.pdf
+2021-11-09 22:03:14.474 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/54025744-f7fc-478a-81e7-8156c0866302_MASSNBOGEN02.pdf
+2021-11-09 22:03:14.474 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/f91e7bbb-e5a8-4baf-9203-7b9cd4132de3_FB03.pdf
+2021-11-09 22:03:14.474 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/ded507c6-82cc-4c31-9a29-42fdb0fb3703_VANZEIGE04.pdf
+2021-11-09 22:03:14.474 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/22d281ec-f544-44fe-a327-32903c0c4149_ANLAGE05.pdf
+2021-11-09 22:03:14.474 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/974005fb-7eac-416d-8219-2245c3a72477_ANHOERUNG06.pdf
+2021-11-09 22:03:14.474 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:03:14.475 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:03:14.476 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:03:14.477 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** mergeFiles: Aufruf
+2021-11-09 22:03:14.480 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** createPdfMerger: Initializing PDF Merge Utilty ***
+2021-11-09 22:03:14.480 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** createPdfDocumentInfo: Aufruf ***
+2021-11-09 22:03:14.481 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** createXMPMetadata: Aufruf mit XMP metadata (Zusammenfassung,Eureka-Fach,XJustiz,) for merged PDF ***
+2021-11-09 22:03:14.548 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - mergeFiles: mergin: 9 source documents into one PDF.
+2021-11-09 22:03:18.674 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** mergeFiles: PDF merge sucessfull, size=9211771 Bytes.
+2021-11-09 22:03:18.688 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** setBookmarks: Aufruf
+2021-11-09 22:03:18.984 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** Bookmark auf Seite 1 gesetzt. ***
+2021-11-09 22:03:18.985 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** Bookmark auf Seite 2 gesetzt. ***
+2021-11-09 22:03:18.985 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** Bookmark auf Seite 3 gesetzt. ***
+2021-11-09 22:03:24.624 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - *** C:\Users\pemo20/documents/GesamtePDF.pdf wurde mit Bookmarks gespeichert. ***
+2021-11-09 22:03:24.625 [JavaFX Application Thread] INFO  xpdfmergeV1.XEFPdfMerge - Ausgeführt in: PT44.4229956S
+2021-11-09 22:19:52.549 INFO  xpdfmergeV1.XEFPdfMerge - *** xJustizPfad=D:\EurekaFach\BEAkten-Projekt2021\baakte ***
+2021-11-09 22:19:57.971 INFO  xpdfmergeV1.XEFPdfMerge - xmlPfad = D:\EurekaFach\BEAkten-Projekt2021\baakte\xjustiz_nachricht.xml
+2021-11-09 22:20:00.066 INFO  xpdfmergeV1.XEFPdfMerge - *** XML-Datei D:\EurekaFach\BEAkten-Projekt2021\baakte\xjustiz_nachricht.xml wurde geparsed ***
+2021-11-09 22:20:00.067 INFO  xpdfmergeV1.XEFPdfMerge - *** XML-Namespace=ns0
+2021-11-09 22:20:00.069 INFO  xpdfmergeV1.XEFPdfMerge - *** Aufruf von getElements mit tagName=akte und nsName=http://www.xjustiz.de
+2021-11-09 22:20:00.071 INFO  xpdfmergeV1.XEFPdfMerge - *** getElements: Abschluss mit 3 Elementen.
+2021-11-09 22:20:00.072 INFO  xpdfmergeV1.XEFPdfMerge - *** getAkten: Abschluss mit 3 Akten.
+2021-11-09 22:20:00.095 INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:20:00.134 INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:20:00.136 INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:20:00.140 INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:20:00.201 INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:20:00.207 INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:20:00.248 INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:20:00.251 INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:20:00.253 INFO  xpdfmergeV1.XEFPdfMerge - *** getPdfPageCount: Aufruf
+2021-11-09 22:23:31.923 INFO  xpdfmergeV1.XEFPdfMerge - xJustizPfad=D:\EurekaFach\BEAkten-Projekt2021\baakte
+2021-11-09 22:23:42.750 INFO  xpdfmergeV1.XEFPdfMerge - xmlPfad = D:\EurekaFach\BEAkten-Projekt2021\baakte\xjustiz_nachricht.xml
+2021-11-09 22:23:44.201 INFO  xpdfmergeV1.XEFPdfMerge - XML-Datei D:\EurekaFach\BEAkten-Projekt2021\baakte\xjustiz_nachricht.xml wurde geparsed
+2021-11-09 22:23:44.202 INFO  xpdfmergeV1.XEFPdfMerge - XML-Namespace=ns0
+2021-11-09 22:23:44.211 INFO  xpdfmergeV1.XEFPdfMerge - Aufruf von getElements mit tagName=akte und nsName=http://www.xjustiz.de
+2021-11-09 22:23:44.213 INFO  xpdfmergeV1.XEFPdfMerge - getElements: Abschluss mit 3 Elementen.
+2021-11-09 22:23:44.214 INFO  xpdfmergeV1.XEFPdfMerge - getAkten: Abschluss mit 3 Akten.
+2021-11-09 22:23:44.235 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:23:44.274 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:23:44.277 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:23:44.281 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:23:44.341 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:23:44.347 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:23:44.400 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:23:44.404 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:23:44.407 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:24:00.968 INFO  xpdfmergeV1.XEFPdfMerge - XML-Datei D:\EurekaFach\BEAkten-Projekt2021\baakte\xjustiz_nachricht.xml wurde geparsed
+2021-11-09 22:24:00.969 INFO  xpdfmergeV1.XEFPdfMerge - XML-Namespace=ns0
+2021-11-09 22:24:00.969 INFO  xpdfmergeV1.XEFPdfMerge - Aufruf von getElements mit tagName=datei und nsName=http://www.xjustiz.de
+2021-11-09 22:24:00.970 INFO  xpdfmergeV1.XEFPdfMerge - getElements: Abschluss mit 11 Elementen.
+2021-11-09 22:24:00.970 INFO  xpdfmergeV1.XEFPdfMerge - getPdfNamen2: Pdf-Datei: be0ef33f-9b6e-47bf-9127-819c6aaa3a2d_ANHOERUNG01.pdf
+2021-11-09 22:24:00.970 INFO  xpdfmergeV1.XEFPdfMerge - getPdfNamen2: Pdf-Datei: 51ef1bc8-0c1b-4092-b6eb-d2ddd61ac1b5_EINSPRUCH01.pdf
+2021-11-09 22:24:00.970 INFO  xpdfmergeV1.XEFPdfMerge - getPdfNamen2: Pdf-Datei: 735bf579-1305-46f3-824a-8f51e2da8882_EINSPRUCH01.pdf
+2021-11-09 22:24:00.970 INFO  xpdfmergeV1.XEFPdfMerge - getPdfNamen2: Pdf-Datei: 9a5d3ab0-8e27-47fd-8f6e-c68506afbf25_MASSNBESCHRE01.pdf
+2021-11-09 22:24:00.970 INFO  xpdfmergeV1.XEFPdfMerge - getPdfNamen2: Pdf-Datei: 54025744-f7fc-478a-81e7-8156c0866302_MASSNBOGEN02.pdf
+2021-11-09 22:24:00.970 INFO  xpdfmergeV1.XEFPdfMerge - getPdfNamen2: Pdf-Datei: f91e7bbb-e5a8-4baf-9203-7b9cd4132de3_FB03.pdf
+2021-11-09 22:24:00.971 INFO  xpdfmergeV1.XEFPdfMerge - getPdfNamen2: Pdf-Datei: ded507c6-82cc-4c31-9a29-42fdb0fb3703_VANZEIGE04.pdf
+2021-11-09 22:24:00.971 INFO  xpdfmergeV1.XEFPdfMerge - getPdfNamen2: Pdf-Datei: 22d281ec-f544-44fe-a327-32903c0c4149_ANLAGE05.pdf
+2021-11-09 22:24:00.971 INFO  xpdfmergeV1.XEFPdfMerge - getPdfNamen2: Pdf-Datei: 974005fb-7eac-416d-8219-2245c3a72477_ANHOERUNG06.pdf
+2021-11-09 22:24:00.971 INFO  xpdfmergeV1.XEFPdfMerge - getPdfNamen2: Abschluss mit 9 Pdf-Dateinamen.
+2021-11-09 22:24:00.971 INFO  xpdfmergeV1.XEFPdfMerge - Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/be0ef33f-9b6e-47bf-9127-819c6aaa3a2d_ANHOERUNG01.pdf
+2021-11-09 22:24:00.972 INFO  xpdfmergeV1.XEFPdfMerge - Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/51ef1bc8-0c1b-4092-b6eb-d2ddd61ac1b5_EINSPRUCH01.pdf
+2021-11-09 22:24:00.972 INFO  xpdfmergeV1.XEFPdfMerge - Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/735bf579-1305-46f3-824a-8f51e2da8882_EINSPRUCH01.pdf
+2021-11-09 22:24:00.972 INFO  xpdfmergeV1.XEFPdfMerge - Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/9a5d3ab0-8e27-47fd-8f6e-c68506afbf25_MASSNBESCHRE01.pdf
+2021-11-09 22:24:00.972 INFO  xpdfmergeV1.XEFPdfMerge - Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/54025744-f7fc-478a-81e7-8156c0866302_MASSNBOGEN02.pdf
+2021-11-09 22:24:00.973 INFO  xpdfmergeV1.XEFPdfMerge - Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/f91e7bbb-e5a8-4baf-9203-7b9cd4132de3_FB03.pdf
+2021-11-09 22:24:00.973 INFO  xpdfmergeV1.XEFPdfMerge - Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/ded507c6-82cc-4c31-9a29-42fdb0fb3703_VANZEIGE04.pdf
+2021-11-09 22:24:00.973 INFO  xpdfmergeV1.XEFPdfMerge - Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/22d281ec-f544-44fe-a327-32903c0c4149_ANLAGE05.pdf
+2021-11-09 22:24:00.973 INFO  xpdfmergeV1.XEFPdfMerge - Hinzugefügt: D:\EurekaFach\BEAkten-Projekt2021\baakte/974005fb-7eac-416d-8219-2245c3a72477_ANHOERUNG06.pdf
+2021-11-09 22:24:00.973 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:24:00.974 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:24:00.975 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:24:00.977 INFO  xpdfmergeV1.XEFPdfMerge - mergeFiles: Aufruf
+2021-11-09 22:24:00.980 INFO  xpdfmergeV1.XEFPdfMerge - createPdfMerger: Initializing PDF Merge Utilty
+2021-11-09 22:24:00.980 INFO  xpdfmergeV1.XEFPdfMerge - createPdfDocumentInfo: Aufruf
+2021-11-09 22:24:00.981 INFO  xpdfmergeV1.XEFPdfMerge - createXMPMetadata: Aufruf mit XMP metadata (Zusammenfassung,Eureka-Fach,XJustiz,) for merged PDF
+2021-11-09 22:24:01.041 INFO  xpdfmergeV1.XEFPdfMerge - mergeFiles: mergin: 9 source documents into one PDF.
+2021-11-09 22:24:05.396 INFO  xpdfmergeV1.XEFPdfMerge - mergeFiles: PDF merge sucessfull, size=9211771 Bytes.
+2021-11-09 22:24:05.410 INFO  xpdfmergeV1.XEFPdfMerge - setBookmarks: Aufruf
+2021-11-09 22:24:05.735 INFO  xpdfmergeV1.XEFPdfMerge - Bookmark auf Seite 1 gesetzt.
+2021-11-09 22:24:05.736 INFO  xpdfmergeV1.XEFPdfMerge - Bookmark auf Seite 2 gesetzt.
+2021-11-09 22:24:05.736 INFO  xpdfmergeV1.XEFPdfMerge - Bookmark auf Seite 3 gesetzt.
+2021-11-09 22:24:11.062 INFO  xpdfmergeV1.XEFPdfMerge - C:\Users\pemo20/documents/GesamtePDF.pdf wurde mit Bookmarks gespeichert.
+2021-11-09 22:24:11.063 INFO  xpdfmergeV1.XEFPdfMerge - Ausgeführt in: PT38.9699957S
+2021-11-09 22:26:35.725 INFO  xpdfmergeV1.XEFPdfMerge - xJustizPfad=D:\EurekaFach\BEAkten-Projekt2021\baakte
+2021-11-09 22:26:41.829 INFO  xpdfmergeV1.XEFPdfMerge - xmlPfad = D:\EurekaFach\BEAkten-Projekt2021\baakte\xjustiz_nachricht.xml
+2021-11-09 22:26:43.733 INFO  xpdfmergeV1.XEFPdfMerge - XML-Datei D:\EurekaFach\BEAkten-Projekt2021\baakte\xjustiz_nachricht.xml wurde geparsed
+2021-11-09 22:26:43.734 INFO  xpdfmergeV1.XEFPdfMerge - XML-Namespace=ns0
+2021-11-09 22:26:43.738 INFO  xpdfmergeV1.XEFPdfMerge - Aufruf von getElements mit tagName=akte und nsName=http://www.xjustiz.de
+2021-11-09 22:26:43.741 INFO  xpdfmergeV1.XEFPdfMerge - getElements: Abschluss mit 3 Elementen.
+2021-11-09 22:26:43.743 INFO  xpdfmergeV1.XEFPdfMerge - getAkten: Abschluss mit 3 Akten.
+2021-11-09 22:26:43.768 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:26:43.839 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:26:43.842 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:26:43.846 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:26:43.902 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:26:43.907 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:26:43.945 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:26:43.948 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf
+2021-11-09 22:26:43.951 INFO  xpdfmergeV1.XEFPdfMerge - getPdfPageCount: Aufruf

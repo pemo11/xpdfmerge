@@ -8,3 +8,4 @@ bis 09/11/21 - Version 0.15 umfasst die Kernfunktionalität
 
 09/11/21     - try/catch in alle Methoden in XmlHelper eingefügt
 
+06/12/21     - Schemavalidierung

@@ -46,3 +46,10 @@ Der Rest ist dann hoffentlich selbsterklärend.
 Die app.config-Datei enthält den Pfad, in dem sich die Nachrichten-Dateien befinden für den Auswahldialog als Voreinstellung. Gibt es die Datei nicht, wird eine allgemeine Voreinstellung verwendet.
 
 Über die Datei Log4j2.xml kann der Logger konfiguriert werden (noch nicht getestet, da es anscheinend auch ohne die Xml_Datei funktioniert).
+
+Die app.config-Datei enthält den Pfad, in dem sich die Nachrichten-Dateien befinden für den Auswahldialog als Voreinstellung. Gibt es die Datei nicht, wird eine allgemeine Voreinstellung verwendet.
+
+#Versionsgeschichte:
+
+* 0.16 - erste Version mit Minimalfunktionsumfang
+* 0.20 - XML-Schemavalidierung mit Logging-Meldung
