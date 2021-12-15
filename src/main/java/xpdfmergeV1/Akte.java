@@ -8,10 +8,19 @@ public class Akte {
     private String id;
     private String anzeigeName;
     private String aktenTyp;
+    private Integer nummerImUebergeordnetenContainer;
     boolean hasTeilakten;
 
     public Akte(String id) {
         this.id = id;
+    }
+
+    public Integer getNummerImUebergeordnetenContainer() {
+        return nummerImUebergeordnetenContainer;
+    }
+
+    public void setNummerImUebergeordnetenContainer(Integer nummerImUebergeordnetenContainer) {
+        this.nummerImUebergeordnetenContainer = nummerImUebergeordnetenContainer;
     }
 
     public String getId() {

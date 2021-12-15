@@ -53,3 +53,4 @@ Die app.config-Datei enthält den Pfad, in dem sich die Nachrichten-Dateien befi
 
 * 0.16 - erste Version mit Minimalfunktionsumfang
 * 0.20 - XML-Schemavalidierung mit Logging-Meldung
+* 0.22 - keine neuen Funktionen, aber Aktualisierung auf Log4J 2.16.0 (aus aktuellem Anlass)

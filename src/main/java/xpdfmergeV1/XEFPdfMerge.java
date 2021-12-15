@@ -37,7 +37,7 @@ public class XEFPdfMerge extends Application {
     private String xJustizPfad;
     private String osName = "Unbekannt";
     private String appVersion = "0.1";
-    private static final Logger logger = LogManager.getLogger(XEFPdfMerge.class);
+    private static  Logger logger = null; // LogManager.getLogger(XEFPdfMerge.class);
     private XmlHelper xmlHelper = null;
     private String xmlPfad = "";
     private String basePfad = "";
@@ -48,6 +48,13 @@ public class XEFPdfMerge extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
+        logger = LogManager.getLogger(XEFPdfMerge.class);
+
+        // Die Versionsnummer von Log4J loggen
+        String log4JVersion = logger.getClass().getPackage().getSpecificationVersion();
+        infoMessage = String.format("*** Using Log4J version %s ***", log4JVersion);
+        logger.info(infoMessage);
+        
         // User directory holen
         String userDir = System.getProperty("user.home");
 

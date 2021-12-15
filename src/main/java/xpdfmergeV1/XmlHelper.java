@@ -166,14 +166,14 @@ public class XmlHelper {
         List<Akte> aktenListe = new ArrayList<Akte>();
         try {
             for(Element el: tmpListe) {
-            String dateiname = el.getElementsByTagNameNS(nsName, "dateiname").item(0).getTextContent();
             String id = el.getElementsByTagNameNS(nsName, "id").item(0).getTextContent();
             String aktenTyp = el.getElementsByTagName("code").item(0).getTextContent();
             String anzeigenName = el.getElementsByTagNameNS(nsName,"anzeigename").item(0).getTextContent();
-            String nummerImUebergeordnetenContainer = el.getElementsByTagNameNS(nsName,"nummerImUebergeordnetenContainer").item(0).getTextContent();
+            Integer nummerImUebergeordnetenContainer = Integer.parseInt(el.getElementsByTagNameNS(nsName, "nummerImUebergeordnetenContainer").item(0).getTextContent());
             Akte neuAkte = new Akte(id);
             neuAkte.setAktenTyp(aktenTyp);
             neuAkte.setAnzeigeName(anzeigenName);
+            neuAkte.setNummerImUebergeordnetenContainer(nummerImUebergeordnetenContainer);
             aktenListe.add(neuAkte);
         }
         infoMessage = String.format("getAkten: Abschluss mit %d Akten.", aktenListe.size());
