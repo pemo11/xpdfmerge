@@ -21,11 +21,13 @@ Es kann natürlich genauso eine Stapeldatei oder eine Sh-Skriptdatei verwendet. 
 
 Unter MacOS und Linux muss die PowerShell in der Regel installiert werden, was schnell und unkompliziert möglich sein sollte: https://github.com/PowerShell/PowerShell
 
-Die für die Ausführung von xpdfmerge benötigten Dateien befinden sich in einer Zip-Datei.
+Die für die Ausführung von xpdfmerge benötigten Dateien befinden sich in einer Zip-Datei (Download am einfachsten per Rechter Maustaste -> Ziel speichern unter).
 
 https://github.com/pemo11/xpdfmerge/blob/main/deploy/xpdfMerge_Stand1011A.zip
 
-**Wichtig:** Die Zip-Datei enthält NICHT die JavaFx-Dateien und nicht das Java 11-SDK.
+**Wichtig:** Die Zip-Datei enthält nur die jar-Datei und alle zur Ausführung benötigten Datein, NICHT die JavaFx-Dateien und nicht das Java 11-SDK.
+
+JavaFx und Java SDK müssen vorab installiert werden (oder nachträglich;)
 
 Bei den JavaFx-Dateien kommt es (natürlich) darauf an, das sie zum OS passen müssen (Windows, MacOS und Linux).
 
