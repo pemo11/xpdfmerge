@@ -23,7 +23,7 @@ Unter MacOS und Linux muss die PowerShell in der Regel installiert werden, was s
 
 Die für die Ausführung von xpdfmerge benötigten Dateien befinden sich in einer Zip-Datei.
 
-https://github.com/pemo11/xpdfmerge/deploy/xpdfMerge_Stand1011A.zip
+https://github.com/pemo11/xpdfmerge/blob/main/deploy/xpdfMerge_Stand1011A.zip
 
 **Wichtig:** Die Zip-Datei enthält NICHT die JavaFx-Dateien und nicht das Java 11-SDK.
 
