@@ -25,7 +25,7 @@ Die für die Ausführung von xpdfmerge benötigten Dateien befinden sich in eine
 
 https://github.com/pemo11/xpdfmerge/blob/main/deploy/xpdfMerge_Stand1011A.zip
 
-**Wichtig:** Die Zip-Datei enthält nur die jar-Datei und alle zur Ausführung benötigten Datein, NICHT die JavaFx-Dateien und nicht das Java 11-SDK.
+**Wichtig:** Die Zip-Datei enthält nur die jar-Datei und alle zur Ausführung der Anwendung benötigten Dateien, NICHT die JavaFx-Dateien und nicht das Java 11-SDK.
 
 JavaFx und Java SDK müssen vorab installiert werden (oder nachträglich;)
 
