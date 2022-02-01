@@ -36,7 +36,7 @@ import java.util.*;
 public class XEFPdfMerge extends Application {
     private String xJustizPfad;
     private String osName = "Unbekannt";
-    private String appVersion = "0.1";
+    private String appVersion = "0.0";
     private static  Logger logger = null; // LogManager.getLogger(XEFPdfMerge.class);
     private XmlHelper xmlHelper = null;
     private String xmlPfad = "";
