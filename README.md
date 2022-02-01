@@ -14,12 +14,14 @@ Aufgrund der Abhängigkeit zu JavaFx muss der Verzeichnispfad der JavaFx-Lib-Dat
 
 Damit dieser Pfad beim Start des Java-Launchers nicht jedes Mal angegeben werden muss, habe ich eine kleine PowerShell-Skriptdatei angelegt.
 
-Es kann natürlich genauso eine Stapeldatei oder eine Sh-Skriptdatei verwendet. Es werden immer zwei Schritte durchgeführt:
+Unter MacOS und Linux muss die PowerShell in der Regel installiert werden, was schnell und unkompliziert möglich sein sollte: https://github.com/PowerShell/PowerShell
+
+Wer sich mit Stapeldateien oder allgemein Shellscripting auskennt, verwendet natürlich eine Stapeldatei oder ein kleines Bash-Skript oder was auch immer;)
+
+Es werden in dem "Skript" zwei Schritte durchgeführt:
 
 1) Setzen der Umgebungsvariablen PATH_TO_FX
 2) Starten von java mit den erforderlichen Angaben.
-
-Unter MacOS und Linux muss die PowerShell in der Regel installiert werden, was schnell und unkompliziert möglich sein sollte: https://github.com/PowerShell/PowerShell
 
 Die für die Ausführung von xpdfmerge benötigten Dateien befinden sich in einer Zip-Datei (Download am einfachsten per Rechter Maustaste -> Ziel speichern unter).
 
@@ -55,4 +57,5 @@ Die app.config-Datei enthält den Pfad, in dem sich die Nachrichten-Dateien befi
 
 * 0.16 - erste Version mit Minimalfunktionsumfang
 * 0.20 - XML-Schemavalidierung mit Logging-Meldung
-* 0.22 - keine neuen Funktionen, aber Aktualisierung auf Log4J 2.16.0 (aus aktuellem Anlass)
+* 0.22 - keine neuen Funktionen, aber Aktualisierung auf Log4J 2.17.1 (aus aktuellem Anlass)
+ 
