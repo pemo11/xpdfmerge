@@ -37,7 +37,8 @@ public class XEFPdfMerge extends Application {
     private String xJustizPfad;
     private String osName = "Unbekannt";
     private String appVersion = "0.0";
-    private static  Logger logger = null; // LogManager.getLogger(XEFPdfMerge.class);
+    // Kein Scope Modifier, daher Sichtbarkeit innerhalb des Package
+    static  Logger logger = null; // LogManager.getLogger(XEFPdfMerge.class);
     private XmlHelper xmlHelper = null;
     private String xmlPfad = "";
     private String basePfad = "";
@@ -76,8 +77,14 @@ public class XEFPdfMerge extends Application {
         }
 
         // xJustiz-Pfad aus Config-Datei einlesen
-        AppConfig config = new AppConfig();
-        xJustizPfad = config.getProperty("xJustizPfad");
+        AppConfig config = null;
+        try {
+            config = new AppConfig();
+            xJustizPfad = config.getProperty("xJustizPfad");
+        } catch (Exception ex) {
+            infoMessage = "Config-Datei kann nicht gelesen werden und wird ausgelassen.";
+            XEFPdfMerge.logger.error(infoMessage);
+        }
 
         // Wenn leer, dann Default setzen
         if (xJustizPfad == null || xJustizPfad.isEmpty()) {
@@ -85,7 +92,7 @@ public class XEFPdfMerge extends Application {
         }
 
         // Versionsnummer  aus der Config-Datei holen
-        if (config.getProperty("version") != null) {
+        if (config != null && config.getProperty("version") != null) {
             appVersion = config.getProperty("version");
         }
 

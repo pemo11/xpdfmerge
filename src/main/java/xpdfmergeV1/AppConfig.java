@@ -5,21 +5,29 @@
 
 package xpdfmergeV1;
 
+import java.io.IOException;
 import java.util.Properties;
 import java.io.FileInputStream;
 
 public class AppConfig {
         Properties configFile;
+        private String infoMessage = "";
 
-        AppConfig() {
+        AppConfig() throws IOException {
             configFile = new java.util.Properties();
+            String configPath = "";
+            String curPath = "";
             try {
-                String curPath = System.getProperty("user.dir");
-                String configPath = curPath + "/" + "app.config";
+                curPath = System.getProperty("user.dir");
+                configPath = curPath + "/" + "app.config";
+                // TODO: Abfrage, ob Datei existiert
                 FileInputStream stream = new FileInputStream(configPath);
                 configFile.load(stream);
             } catch(Exception ex) {
-                ex.printStackTrace();
+                infoMessage = String.format("Fehler beim Zugriff auf %s.", configPath);
+                XEFPdfMerge.logger.error(infoMessage);
+                // IOException weiterreichen
+                throw ex;
             }
         }
 

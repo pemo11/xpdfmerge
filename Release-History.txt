@@ -11,3 +11,5 @@ bis 09/11/21 - Version 0.15 umfasst die Kernfunktionalität
 06/12/21     - Schemavalidierung
 
 15/12/21     - Aktualisierung auf Log4J 2.16.0 (auch wenn keine Gefahr von "außen" besteht)
+
+02/02/22     - Abfrage auf app.config nach dem Start und "Umstellen" auf Log4J 2.17.1
