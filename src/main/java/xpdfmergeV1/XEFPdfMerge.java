@@ -1,7 +1,7 @@
 /*
   XJustiz-Pdf-Merge für Windows, MacOs und Linux
   Autor: Peter Monadjemi - pm@eureka-fach.de
-  Letzte Änderung: 06/12/21
+  Letzte Änderung: 04/02/22
 */
 
 package xpdfmergeV1;
@@ -26,6 +26,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -44,11 +45,12 @@ public class XEFPdfMerge extends Application {
     private String basePfad = "";
     private String infoMessage = "";
     private String pdfOutfile = "GesamtePDF.pdf";
+    private String imgPfad = "";
     private Hashtable<String, PdfInfo> pdfInfoHashtable = null;
 
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) throws IOException, URISyntaxException {
         logger = LogManager.getLogger(XEFPdfMerge.class);
 
         // Die Versionsnummer von Log4J loggen
@@ -127,7 +129,6 @@ public class XEFPdfMerge extends Application {
         // final ProgressIndicator progressIndicator = new ProgressIndicator();
 
         // vbox.getChildren().addAll(progressBar);
-
         VBox vbox2 = new VBox();
 
         Label lbl1 = new Label();
@@ -186,8 +187,9 @@ public class XEFPdfMerge extends Application {
 
         Menu menuFile = new Menu("eAkte");
 
-        MenuItem openNachrichtXml = new MenuItem("Nachricht.xml öffnen",
-         new ImageView(new Image("file:images/nachrichtxml.png")));
+        // PM: 04/02/22 - image Pfad als uri holen - eventuell try/catch statt Methoden-Erweiterung
+        imgPfad = getClass().getResource("/images/nachrichtxml.png").toURI().toString();
+        MenuItem openNachrichtXml = new MenuItem("Nachricht.xml öffnen", new ImageView(new Image(imgPfad)));
 
         openNachrichtXml.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -318,9 +320,8 @@ public class XEFPdfMerge extends Application {
 
         // Trennlinie für das Menü
         SeparatorMenuItem sep1 = new SeparatorMenuItem();
-
-        MenuItem exitItem =  new MenuItem("Beenden",
-            new ImageView(new Image("file:images/exit.png")));
+        imgPfad = getClass().getResource("/images/exit.png").toURI().toString();
+        MenuItem exitItem =  new MenuItem("Beenden", new ImageView(new Image(imgPfad)));
 
         exitItem.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -333,8 +334,8 @@ public class XEFPdfMerge extends Application {
         menuFile.getItems().addAll(openNachrichtXml, sep1, exitItem);
 
         Menu menuAction = new Menu("Aktionen");
-        MenuItem pdfMerge = new MenuItem("GesamtPDF erstellen",
-                new ImageView(new Image("file:images/pdfmerge.png")));
+        imgPfad = getClass().getResource("/images/pdfmerge.png").toURI().toString();
+        MenuItem pdfMerge = new MenuItem("GesamtPDF erstellen",  new ImageView(new Image(imgPfad)));
 
         // Ausführen der Merge-Aktion
         pdfMerge.setOnAction(new EventHandler<ActionEvent>() {
@@ -457,8 +458,9 @@ public class XEFPdfMerge extends Application {
         menuAction.getItems().add(pdfMerge);
 
         Menu menuInfo = new Menu("Info");
-        MenuItem aboutItem = new MenuItem("Über das Programm",
-                new ImageView(new Image("file:images/info.png")));
+
+        imgPfad = getClass().getResource("/images/info.png").toURI().toString();
+        MenuItem aboutItem = new MenuItem("Über das Programm", new ImageView(new Image(imgPfad)));
 
         aboutItem.setOnAction(new EventHandler<ActionEvent>() {
 

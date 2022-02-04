@@ -13,3 +13,7 @@ bis 09/11/21 - Version 0.15 umfasst die Kernfunktionalität
 15/12/21     - Aktualisierung auf Log4J 2.16.0 (auch wenn keine Gefahr von "außen" besteht)
 
 02/02/22     - Abfrage auf app.config nach dem Start und "Umstellen" auf Log4J 2.17.1
+
+04/02/22     - Auslagern der Config-Datei als efxapp.config und Log-Datei in das Userprofile-Verzeichnis/Bitmaps werden als Ressourcen eingelesen
+
+06/02/22     - Version 0.25
