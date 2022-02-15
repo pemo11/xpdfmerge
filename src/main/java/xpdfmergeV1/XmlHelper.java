@@ -316,12 +316,10 @@ public class XmlHelper {
                             String aktenTyp = ((Element)elTeilakte.getElementsByTagNameNS(nsName, "teilaktentyp").item(0)).getElementsByTagName("code").item(0).getTextContent();
                             String anzeigename = elTeilakte.getElementsByTagNameNS(nsName, "anzeigename").item(0).getTextContent();
                             String containerNummer = elTeilakte.getElementsByTagNameNS(nsName, "nummerImUebergeordnetenContainer").item(0).getTextContent();
-                            String az = elTeilakte.getElementsByTagNameNS(nsName, "aktenzeichen.freitext").item(0).getTextContent();
                             int nummerUebergeordneterContainer = Integer.parseInt(containerNummer);
                             teilakte.setAnzeigeName(anzeigename);
                             teilakte.setAktenTyp(aktenTyp);
                             teilakte.setNummerImUebergeordnetenContainer(nummerUebergeordneterContainer);
-                            teilakte.setAktenzeichen(az);
                             teilaktenListe.add(teilakte);
                             infoMessage = String.format("getTeilakten: Teilakte %s wurde hinzugefügt.", idTeilakte);
                             logger.info(infoMessage);

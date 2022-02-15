@@ -37,7 +37,7 @@ import java.util.*;
 public class XEFPdfMerge extends Application {
     private String xJustizPfad;
     private String osName = "Unbekannt";
-    private String appVersion = "0.30";
+    private String appVersion = "0.32";
     // Kein Scope Modifier, daher Sichtbarkeit innerhalb des Package
     static  Logger logger = null; // LogManager.getLogger(XEFPdfMerge.class);
     private XmlHelper xmlHelper = null;
@@ -92,11 +92,6 @@ public class XEFPdfMerge extends Application {
         if (xJustizPfad == null || xJustizPfad.isEmpty()) {
             xJustizPfad = userDir + "/documents";
         }
-
-        // Versionsnummer  aus der Config-Datei holen
-        // if (config != null && config.getProperty("version") != null) {
-        //     appVersion = config.getProperty("version");
-        // }
 
         infoMessage = String.format("XEFPdfMerge->start: xJustizPfad=%s", xJustizPfad);
         logger.info(infoMessage);
@@ -240,7 +235,7 @@ public class XEFPdfMerge extends Application {
                     lbl3.setText(xmlPfad + " wurde geladen.");
 
                     // Anlegen der Bookmarks in der Ausgabe-Pdf
-                    // Es soll pro Dokument eine Bookmark angelegt werden - allerdings hierarchisch Akte -> Dokument1 -> Dokument2 usw.
+                    // Pro Dokument soll eine Bookmark angelegt werden - allerdings hierarchisch Akte -> Dokument1 -> Dokument2 usw.
                     // Der Key ist der Name der Akte, der Value eine Liste mit PdfInfo-Objekten
                     pdfInfoHashtable = new Hashtable<>();
 
@@ -326,7 +321,7 @@ public class XEFPdfMerge extends Application {
                                     documentInfo.setPageCount(pageCount);
                                     documentInfo.getBookmarks().put("Posteingangsdatum", dokument.getDatumPosteingang());
                                     documentInfo.getBookmarks().put("Veraktungsdatum", dokument.getDatumVeraktung());
-                                    pdfInfoHashtable.get(akteInfo).add(documentInfo);
+                                    // pdfInfoHashtable.get(akteInfo).add(documentInfo);
                                 }
                             }
 

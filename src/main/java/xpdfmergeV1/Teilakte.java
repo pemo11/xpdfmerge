@@ -9,7 +9,6 @@ public class Teilakte {
     private String id;
     private String anzeigeName;
     private String aktenTyp;
-    private String az;
     private Integer nummerImUebergeordnetenContainer;
 
     public Integer getNummerImUebergeordnetenContainer() {
@@ -44,7 +43,4 @@ public class Teilakte {
         this.aktenTyp = aktenTyp;
     }
 
-    public String getAktenzeichen() { return this.az;}
-
-    public void setAktenzeichen(String Az) { this.az = Az;}
 }

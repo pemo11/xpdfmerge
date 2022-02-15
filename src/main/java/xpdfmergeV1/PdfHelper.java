@@ -228,7 +228,7 @@ public class PdfHelper {
 
             pdfDoc.getDocumentCatalog().setPageMode(PageMode.USE_OUTLINES);
 
-            // Für alle Seitene eine Bookmark setzen
+            // Für alle Seiten eine Bookmark setzen
             for(int i=0;i<pdfDoc.getNumberOfPages();i++) {
                 PDPageDestination pageDestination = new PDPageFitWidthDestination();
                 pageDestination.setPage(pdfDoc.getPage(i));
@@ -270,7 +270,7 @@ public class PdfHelper {
      * @param pdfInfoHashtable
      */
     public void setBookmarks(String pdfOutfile, Hashtable<AkteInfo, List<PdfDocumentInfo>> pdfInfoHashtable) {
-        infoMessage = String.format("setBookmarks: Aufruf");
+        infoMessage = String.format("setBookmarks: Aufruf ");
         this.logger.info(infoMessage);
 
         String pdfOutfileBak = "";
@@ -336,15 +336,19 @@ public class PdfHelper {
                 // Jetzt die Bookmarks für das Dokument setzen
                 List<PdfDocumentInfo> infoListe = pdfInfoHashtable.get(akte);
                 for(var pdfInfo : infoListe) {
+                    // Bookmark für das Dokument anlegen
                     PDOutlineItem bookmarkDokument = new PDOutlineItem();
                     PDPageDestination pageDestinationDokument = new PDPageFitWidthDestination();
-                    page = pdfDoc.getPage(pdfInfo.getPageCount());
+                    // Seitenzahl für das aktuelle Dokument abrufen
+                    int pageCount = pdfInfo.getPageCount();
+                    page = pdfDoc.getPage(pageCount);
+                    // Bookmark für das Dokument setzen
                     try {
                         pageDestinationDokument.setPage(page);
                         bookmarkDokument.setTitle(pdfInfo.getDisplayName());
                         bookmarkDokument.setDestination(pageDestinationDokument);
 
-                        // Jetzt die Bookmarks für das Dokument setzen
+                        // Detail-Bookmarks für das Dokument setzen
                         Hashtable<String, String> htBookmarks = pdfInfo.getBookmarks();
                         Enumeration enKeys = htBookmarks.keys();
                         while(enKeys.hasMoreElements()) {
@@ -355,6 +359,7 @@ public class PdfHelper {
                             bm.setTitle(bmName + "=" + bmText);
                             bookmarkDokument.addLast(bm);
                         }
+                        // dokument-Bookmark an die Akte-Bookmark anhängen
                         bookmarkAkte.addLast(bookmarkDokument);
                         infoMessage = String.format("setBookmarks: Bookmark für Dokument auf Seite %d gesetzt.", pageCounter);
                         logger.info(infoMessage);
@@ -363,29 +368,30 @@ public class PdfHelper {
                         logger.error(infoMessage, ex);
                     }
                     // Seitenzähler auf die nächste Startseite eines Teildokuments
-                    pageCounter += pdfInfo.getPageCount();
+                    pageCounter += pageCount;
                 }
+                // Bookmark für Akte setzen
                 pagesOutline.addLast(bookmarkAkte);
-                infoMessage = String.format("Bookmark für Akte auf Seite %d gesetzt.", pageCounter);
+                infoMessage = String.format("setBookmarks: Bookmark für Akte auf Seite %d gesetzt.", pageCounter);
                 logger.info(infoMessage);
             };
 
-            // Dokument wieder speichern - das Originaldokument aber zuvor löschen
+            // Dokument wieder speichern - das Originaldokument zuvor löschen
             try {
                 Files.delete(pdfFile.toPath());
             } catch (NoSuchFileException ex) {
-                System.err.format("%s gibt es leider nicht.", pdfOutfile);
+                System.err.format("setBookmarks: %s gibt es leider nicht.", pdfOutfile);
             } catch (IOException ex) {
-                System.err.format("Allgemeiner Fehler beim Löschen von %s", pdfOutfile);
+                System.err.format("setBookmarks: Allgemeiner Fehler beim Löschen von %s", pdfOutfile);
             }
 
             try {
                 pdfDoc.save(pdfOutfile);
-                infoMessage = String.format("%s wurde mit Bookmarks gespeichert.", pdfOutfile);
+                infoMessage = String.format("setBookmarks: %s wurde mit Bookmarks gespeichert.", pdfOutfile);
                 logger.info(infoMessage);
 
             } catch (IOException ex) {
-                infoMessage = String.format("Allgemeiner Fehler beim Speichern von %s", pdfOutfile);
+                infoMessage = String.format("setBookmarks: Allgemeiner Fehler beim Speichern von %s", pdfOutfile);
                 logger.error(infoMessage);
             }
 
