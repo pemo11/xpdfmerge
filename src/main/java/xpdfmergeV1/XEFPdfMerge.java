@@ -46,7 +46,7 @@ public class XEFPdfMerge extends Application {
     private String infoMessage = "";
     private String pdfOutfile = "GesamtePDF.pdf";
     private String imgPfad = "";
-    private Hashtable<String, PdfInfo> pdfInfoHashtable = null;
+    private Hashtable<AkteInfo, List<PdfDocumentInfo>> pdfInfoHashtable = null;
     private AppConfig config = null;
 
     @Override
@@ -240,6 +240,8 @@ public class XEFPdfMerge extends Application {
                     lbl3.setText(xmlPfad + " wurde geladen.");
 
                     // Anlegen der Bookmarks in der Ausgabe-Pdf
+                    // Es soll pro Dokument eine Bookmark angelegt werden - allerdings hierarchisch Akte -> Dokument1 -> Dokument2 usw.
+                    // Der Key ist der Name der Akte, der Value eine Liste mit PdfInfo-Objekten
                     pdfInfoHashtable = new Hashtable<>();
 
                     try {
@@ -247,7 +249,7 @@ public class XEFPdfMerge extends Application {
                         // Schema-Validierung
                         String xsdPfad = "schemas/xjustiz_0005_nachrichten_3_0.xsd";
                         List<String> validateErrors = xmlHelper.validateXMLSchema(xsdPfad, xmlPfad);
-                        // Wenn es Validierungsfehler gab, dann alle loggen, aber die Ausführung geht weiter
+                        // Gab es Validierungsfehler, alle loggen, die Ausführung geht weiter
                         if (validateErrors.size() == 0) {
                             infoMessage = "XSD-Schemavalidierung ohne Fehler";
                             logger.info(infoMessage);
@@ -268,6 +270,9 @@ public class XEFPdfMerge extends Application {
                             triAkte.getChildren().add(new TreeItem("Anzeigename=" + anzeigeName));
                             triAkte.getChildren().add(new TreeItem("Aktentyp=" + akte.getAktenTyp()));
                             triAkte.getChildren().add(new TreeItem("Erstellungsdatum=" + datumErstellung));
+                            // Hashtable-Eintrag für Booksmarks mit dem Aktennamen als Key anlegen
+                            AkteInfo akteInfo = new AkteInfo(anzeigeName, 0);
+                            pdfInfoHashtable.put(akteInfo, new ArrayList<>());
                             // Alle Teilakten holen
                             List<Teilakte> teilakten = xmlHelper.getTeilakten(aktenId);
                             // Gibt es Teilakten?
@@ -304,20 +309,16 @@ public class XEFPdfMerge extends Application {
                                     triDokument.getChildren().add(new TreeItem("Veraktungsdatum=" + dokument.getDatumVeraktung()));
                                     triDokument.getChildren().add(new TreeItem("Anzahl Seiten=" + pageCount));
                                     triAkte.getChildren().add(triDokument);
+                                    // Eintrag in pdfInfoHashtable, damit das Setzen von Bookmarks später möglich ist
+                                    PdfDocumentInfo documentInfo = new PdfDocumentInfo();
+                                    documentInfo.setFileName(pdfPfad);
+                                    documentInfo.setDisplayName(dokument.getAnzeigename());
+                                    documentInfo.setPageCount(pageCount);
+                                    documentInfo.getBookmarks().put("Posteingangsdatum", dokument.getDatumPosteingang());
+                                    documentInfo.getBookmarks().put("Veraktungsdatum", dokument.getDatumVeraktung());
+                                    pdfInfoHashtable.get(akteInfo).add(documentInfo);
                                 }
                             }
-
-                            // TODO: Anzeigename und Datumsangaben als Bookmark setzen
-                            // Hashtable mit Daten der Pdf-Datei aktualisieren
-                            PdfInfo pdfInfo = new PdfInfo();
-                            pdfInfo.setDisplayName(anzeigeName);
-                            pdfInfo.setFileName(dateiName);
-                            pdfInfo.getBookmarks().put("Erstellungsdatum", datumErstellung);
-                            // TODO: Offenbar gibt es bei Java noch kein Pendant zu Combine()?
-                            pdfInfo.setFilePath(basePfad + "/" + dateiName);
-                            // TODO: Hier fehlt noch was?
-                            // Eintrag in pdfInfoHashtable, damit das Setzen von Bookmarks später möglich ist
-                            pdfInfoHashtable.put(dateiName, pdfInfo);
 
                             triRoot.getChildren().add(triAkte);
 
@@ -395,11 +396,12 @@ public class XEFPdfMerge extends Application {
                     String tmpPath = basePfad + "/" + pdfPfad;
                     try {
                         inputList.add(new FileInputStream(tmpPath));
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
+                        infoMessage = String.format("mergePdf: %s hinzugefügt", tmpPath);
+                        logger.info(infoMessage);
+                    } catch (FileNotFoundException ex) {
+                        infoMessage = String.format("Fehler in mergePdf: %s gibt es nicht", tmpPath);
+                        logger.error(infoMessage, ex);
                     }
-                    infoMessage = String.format("mergePdf: %s hinzugefügt", tmpPath);
-                    logger.info(infoMessage);
                 }
 
                 // Jetzt wird gemerged
@@ -416,6 +418,8 @@ public class XEFPdfMerge extends Application {
 
                 PdfHelper pdfHelper = new PdfHelper(logger);
 
+                /*
+                Das Setzen der Seitenzahlen sollte nicht mehr erforderlich sein
                 Enumeration<String> e = pdfInfoHashtable.keys();
                 while (e.hasMoreElements()) {
                     String datei = e.nextElement();
@@ -428,6 +432,7 @@ public class XEFPdfMerge extends Application {
                         logger.error(infoMessage, ex);
                     }
                 }
+                 */
 
                 InputStream pdfStream = null;
                 try {

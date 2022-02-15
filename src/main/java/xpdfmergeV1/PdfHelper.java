@@ -171,6 +171,7 @@ public class PdfHelper {
             infoMessage = String.format("mergeFiles: mergin: %d source documents into one PDF.",sources.size());
             this.logger.info(infoMessage);
 
+            // Dieser Aufruf dauert sehr bis relativ lange und sollte auf einem Backgroundthread ausgeführt werden
             pdfMerger.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
 
             infoMessage = String.format("mergeFiles: PDF merge sucessfull, size=%d Bytes.", mergedPdfOutputStream.size());
@@ -268,7 +269,7 @@ public class PdfHelper {
      * @param pdfOutfile
      * @param pdfInfoHashtable
      */
-    public void setBookmarks(String pdfOutfile, Hashtable<String, PdfInfo> pdfInfoHashtable) {
+    public void setBookmarks(String pdfOutfile, Hashtable<AkteInfo, List<PdfDocumentInfo>> pdfInfoHashtable) {
         infoMessage = String.format("setBookmarks: Aufruf");
         this.logger.info(infoMessage);
 
@@ -313,42 +314,52 @@ public class PdfHelper {
 
             // forEach ist nicht geeignet, da keine lokale Variable in dem Lambda verwendet werden kann?
             // pdfInfoHashtable.forEach((String fileName, PdfInfo pdfInfo) -> {
-            Enumeration en = pdfInfoHashtable.elements();
+            Enumeration enAkten = pdfInfoHashtable.keys();
 
-            while(en.hasMoreElements()) {
-                PdfInfo pdfInfo = (PdfInfo) en.nextElement();
-                // Bookmark setzen
-                String bookmarkText1 = pdfInfo.getDisplayName();
-                PDPageDestination pageDestination = new PDPageFitWidthDestination();
+            while(enAkten.hasMoreElements()) {
+                // Die Eckdaten der Akte holen
+                AkteInfo akte = (AkteInfo) enAkten.nextElement();
+
+                // PdfDocumentInfo pdfInfo = (PdfDocumentInfo)en.nextElement();
+                // Bookmark für Akte setzen
+                // String bookmarkText1 = pdfInfo.getDisplayName();
+                PDPageDestination pageDestinationAkte = new PDPageFitWidthDestination();
                 PDPage page = pdfDoc.getPage(pageCounter);
-                pageDestination.setPage(page);
+                pageDestinationAkte.setPage(page);
 
-                PDOutlineItem bookmark = new PDOutlineItem();
-                bookmark.setDestination(pageDestination);
-                bookmark.setTitle(bookmarkText1);
+                PDOutlineItem bookmarkAkte = new PDOutlineItem();
+                bookmarkAkte.setDestination(pageDestinationAkte);
+                bookmarkAkte.setTitle(akte.getAnzeigeName());
                 // pagesOutline.addLast(bookmark);
 
                 // Jetzt die allgemeinen Bookmarks setzen
-                Hashtable<String, String> htBookmarks = pdfInfo.getBookmarks();
+                List<PdfDocumentInfo> infoListe = pdfInfoHashtable.get(akte);
+                for(var pdfInfo : infoListe) {
+                    PDOutlineItem bookmarkDokument = new PDOutlineItem();
+                    PDPageDestination pageDestinationDokument = new PDPageFitWidthDestination();
+                    page = pdfDoc.getPage(pdfInfo.getPageCount());
+                    pageDestinationDokument.setPage(page);
+                    bookmarkDokument.setDestination(pageDestinationDokument);
 
-                Enumeration en1 = htBookmarks.keys();
-                while(en1.hasMoreElements()) {
-                    String bmName = en1.nextElement().toString();
-                    String bmText = htBookmarks.get(bmName);
-                    PDOutlineItem bm = new PDOutlineItem();
-                    bm.setDestination(pageDestination);
-                    bm.setTitle(bmName + "=" + bmText);
-                    // pagesOutline.addLast(bm);
-                    bookmark.addLast(bm);
+                    Hashtable<String, String> htBookmarks = pdfInfo.getBookmarks();
+                    Enumeration enKeys = htBookmarks.keys();
+                    while(enKeys.hasMoreElements()) {
+                        String bmName = enKeys.nextElement().toString();
+                        String bmText = htBookmarks.get(bmName);
+                        PDOutlineItem bm = new PDOutlineItem();
+                        bm.setDestination(pageDestinationDokument);
+                        bm.setTitle(bmName + "=" + bmText);
+                        bookmarkDokument.addLast(bm);
+                    }
+                    bookmarkAkte.addLast(bookmarkDokument);
+                    infoMessage = String.format("Bookmark für Dokument auf Seite %d gesetzt.", pageCounter);
+                    logger.info(infoMessage);
+                    // Seitenzähler auf die nächste Startseite eines Teildokuments
+                    pageCounter += pdfInfo.getPageCount();
                 }
-
-                pagesOutline.addLast(bookmark);
-                infoMessage = String.format("Bookmark auf Seite %d gesetzt.", pageCounter);
+                pagesOutline.addLast(bookmarkAkte);
+                infoMessage = String.format("Bookmark für Akte auf Seite %d gesetzt.", pageCounter);
                 logger.info(infoMessage);
-
-                // Seitenzähler auf die nächste Startseite eines Teildokuments
-                pageCounter += pdfInfo.getPageCount();
-
             };
 
             // Dokument wieder speichern - das Originaldokument aber zuvor löschen
