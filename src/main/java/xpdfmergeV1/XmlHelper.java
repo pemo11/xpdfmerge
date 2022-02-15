@@ -3,6 +3,9 @@ file: XmlHelper.java
 */
 package xpdfmergeV1;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import java.io.File;
@@ -169,10 +172,17 @@ public class XmlHelper {
             String id = el.getElementsByTagNameNS(nsName, "id").item(0).getTextContent();
             String aktenTyp = el.getElementsByTagName("code").item(0).getTextContent();
             String anzeigenName = el.getElementsByTagNameNS(nsName,"anzeigename").item(0).getTextContent();
+            String posteingangsDatum = el.getElementsByTagNameNS(nsName, "posteingangsdatum").item(0).getTextContent();
             Integer nummerImUebergeordnetenContainer = Integer.parseInt(el.getElementsByTagNameNS(nsName, "nummerImUebergeordnetenContainer").item(0).getTextContent());
             Akte neuAkte = new Akte(id);
             neuAkte.setAktenTyp(aktenTyp);
             neuAkte.setAnzeigeName(anzeigenName);
+            // Datumsformat z-B. 2021-05-12T09:36:20 auf dd-MM-jjjj umstellen
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+            Date tmpDate = dateFormat.parse(posteingangsDatum);
+            dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+            posteingangsDatum = dateFormat.format(tmpDate);
+            neuAkte.setPosteingangsDatum(posteingangsDatum);
             neuAkte.setNummerImUebergeordnetenContainer(nummerImUebergeordnetenContainer);
             aktenListe.add(neuAkte);
         }

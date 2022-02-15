@@ -263,6 +263,11 @@ public class PdfHelper {
         }
     }
 
+    /**
+     * Setzen der Lesemarken in der Gesamt-Pdfdatei
+     * @param pdfOutfile
+     * @param pdfInfoHashtable
+     */
     public void setBookmarks(String pdfOutfile, Hashtable<String, PdfInfo> pdfInfoHashtable) {
         infoMessage = String.format("setBookmarks: Aufruf");
         this.logger.info(infoMessage);
@@ -321,8 +326,23 @@ public class PdfHelper {
                 PDOutlineItem bookmark = new PDOutlineItem();
                 bookmark.setDestination(pageDestination);
                 bookmark.setTitle(bookmarkText1);
-                pagesOutline.addLast(bookmark);
+                // pagesOutline.addLast(bookmark);
 
+                // Jetzt die allgemeinen Bookmarks setzen
+                Hashtable<String, String> htBookmarks = pdfInfo.getBookmarks();
+
+                Enumeration en1 = htBookmarks.keys();
+                while(en1.hasMoreElements()) {
+                    String bmName = en1.nextElement().toString();
+                    String bmText = htBookmarks.get(bmName);
+                    PDOutlineItem bm = new PDOutlineItem();
+                    bm.setDestination(pageDestination);
+                    bm.setTitle(bmName + "=" + bmText);
+                    // pagesOutline.addLast(bm);
+                    bookmark.addLast(bm);
+                }
+
+                pagesOutline.addLast(bookmark);
                 infoMessage = String.format("Bookmark auf Seite %d gesetzt.", pageCounter);
                 logger.info(infoMessage);
 

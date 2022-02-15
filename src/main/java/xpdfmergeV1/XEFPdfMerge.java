@@ -1,7 +1,7 @@
 /*
   XJustiz-Pdf-Merge für Windows, MacOs und Linux
   Autor: Peter Monadjemi - pm@eureka-fach.de
-  Letzte Änderung: 04/02/22
+  Letzte Änderung: 14/02/22
 */
 
 package xpdfmergeV1;
@@ -37,7 +37,7 @@ import java.util.*;
 public class XEFPdfMerge extends Application {
     private String xJustizPfad;
     private String osName = "Unbekannt";
-    private String appVersion = "0.0";
+    private String appVersion = "0.26";
     // Kein Scope Modifier, daher Sichtbarkeit innerhalb des Package
     static  Logger logger = null; // LogManager.getLogger(XEFPdfMerge.class);
     private XmlHelper xmlHelper = null;
@@ -57,7 +57,7 @@ public class XEFPdfMerge extends Application {
         String log4JVersion = logger.getClass().getPackage().getSpecificationVersion();
         infoMessage = String.format("*** Using Log4J version %s ***", log4JVersion);
         logger.info(infoMessage);
-        
+
         // User directory holen
         String userDir = System.getProperty("user.home");
 
@@ -94,9 +94,9 @@ public class XEFPdfMerge extends Application {
         }
 
         // Versionsnummer  aus der Config-Datei holen
-        if (config != null && config.getProperty("version") != null) {
-            appVersion = config.getProperty("version");
-        }
+        // if (config != null && config.getProperty("version") != null) {
+        //     appVersion = config.getProperty("version");
+        // }
 
         infoMessage = String.format("XEFPdfMerge->start: xJustizPfad=%s", xJustizPfad);
         logger.info(infoMessage);
@@ -214,8 +214,9 @@ public class XEFPdfMerge extends Application {
                     // Basispfad festlegen
                     basePfad = selectedFile.getParent();
 
-                    String anzeigeName;
+                    String anzeigeName = "";;
                     String dateiName = "";
+                    String posteingangsDatum = "";
 
                     // Erfolgsmeldung ausgeben
                     Alert alert = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.OK);
@@ -252,8 +253,10 @@ public class XEFPdfMerge extends Application {
                             String aktenId = akte.getId();
                             TreeItem triAkte = new TreeItem("Akte=" + aktenId);
                             anzeigeName = akte.getAnzeigeName();
+                            posteingangsDatum = akte.getPosteingangsDatum();
                             triAkte.getChildren().add(new TreeItem("Anzeigename=" + anzeigeName));
                             triAkte.getChildren().add(new TreeItem("Aktentyp=" + akte.getAktenTyp()));
+                            triAkte.getChildren().add(new TreeItem("Posteingang=" + akte.getPosteingangsDatum()));
                             // Alle Teilakten holen
                             List<Teilakte> teilakten = xmlHelper.getTeilakten(aktenId);
                             // Gibt es Teilakten?
@@ -289,10 +292,12 @@ public class XEFPdfMerge extends Application {
                                 }
                             }
 
+                            // TODO: Anzeigename und Datumsangaben als Book setzen
                             // Hashtable mit Daten der Pdf-Datei aktualisieren
                             PdfInfo pdfInfo = new PdfInfo();
                             pdfInfo.setDisplayName(anzeigeName);
                             pdfInfo.setFileName(dateiName);
+                            pdfInfo.getBookmarks().put("Posteingang", posteingangsDatum);
                             // TODO: Offenbar gibt es bei Java noch kein Pendant zu Combine()?
                             pdfInfo.setFilePath(basePfad + "/" + dateiName);
                             // TODO: Hier fehlt noch was?
@@ -477,6 +482,9 @@ public class XEFPdfMerge extends Application {
         menuInfo.getItems().add(aboutItem);
 
         menuBar.getMenus().addAll(menuFile, menuAction, menuInfo);
+
+        // Wichtg für MacOS, damit die App sich in das Systemmenü integrieren kann (?)
+        menuBar.useSystemMenuBarProperty().set(true);
 
         // ((VBox) scene.getRoot()).getChildren().addAll(menuBar);
 
