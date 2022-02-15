@@ -10,7 +10,7 @@ public class Akte {
     private String aktenTyp;
     private String anzeigeName;
     private String aktenzeichen;
-    private String datumErstellung;
+    private String zeitpunktErstellungVersand;
     boolean hasTeilakten;
 
     public Akte(String id) {
@@ -25,9 +25,9 @@ public class Akte {
         this.nummerImUebergeordnetenContainer = nummerImUebergeordnetenContainer;
     }
 
-    public void setDatumErstellung(String datum) { this.datumErstellung = datum;  }
+    public void setZeitpunktErstellungVersand(String zeitpunkt) { this.zeitpunktErstellungVersand = zeitpunkt;  }
 
-    public String getDatumErstellung() {  return this.datumErstellung;  }
+    public String getZeitpunktErstellungVersand() {  return this.zeitpunktErstellungVersand;  }
 
     public String getAktenzeichen() {  return this.aktenzeichen;  }
 

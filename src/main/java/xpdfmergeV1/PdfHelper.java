@@ -332,28 +332,35 @@ public class PdfHelper {
                 bookmarkAkte.setTitle(akte.getAnzeigeName());
                 // pagesOutline.addLast(bookmark);
 
-                // Jetzt die allgemeinen Bookmarks setzen
+                // Jetzt die Bookmarks für das Dokument setzen
                 List<PdfDocumentInfo> infoListe = pdfInfoHashtable.get(akte);
                 for(var pdfInfo : infoListe) {
                     PDOutlineItem bookmarkDokument = new PDOutlineItem();
                     PDPageDestination pageDestinationDokument = new PDPageFitWidthDestination();
                     page = pdfDoc.getPage(pdfInfo.getPageCount());
-                    pageDestinationDokument.setPage(page);
-                    bookmarkDokument.setDestination(pageDestinationDokument);
+                    try {
+                        pageDestinationDokument.setPage(page);
+                        bookmarkDokument.setTitle(pdfInfo.getDisplayName());
+                        bookmarkDokument.setDestination(pageDestinationDokument);
 
-                    Hashtable<String, String> htBookmarks = pdfInfo.getBookmarks();
-                    Enumeration enKeys = htBookmarks.keys();
-                    while(enKeys.hasMoreElements()) {
-                        String bmName = enKeys.nextElement().toString();
-                        String bmText = htBookmarks.get(bmName);
-                        PDOutlineItem bm = new PDOutlineItem();
-                        bm.setDestination(pageDestinationDokument);
-                        bm.setTitle(bmName + "=" + bmText);
-                        bookmarkDokument.addLast(bm);
+                        // Jetzt die Bookmarks für das Dokument setzen
+                        Hashtable<String, String> htBookmarks = pdfInfo.getBookmarks();
+                        Enumeration enKeys = htBookmarks.keys();
+                        while(enKeys.hasMoreElements()) {
+                            String bmName = enKeys.nextElement().toString();
+                            String bmText = htBookmarks.get(bmName);
+                            PDOutlineItem bm = new PDOutlineItem();
+                            bm.setDestination(pageDestinationDokument);
+                            bm.setTitle(bmName + "=" + bmText);
+                            bookmarkDokument.addLast(bm);
+                        }
+                        bookmarkAkte.addLast(bookmarkDokument);
+                        infoMessage = String.format("setBookmarks: Bookmark für Dokument auf Seite %d gesetzt.", pageCounter);
+                        logger.info(infoMessage);
+                    } catch (Exception ex) {
+                        infoMessage = String.format("setBookmarks: Fehler beim Setzen einer Bookmark auf Seite %d", pageCounter);
+                        logger.error(infoMessage, ex);
                     }
-                    bookmarkAkte.addLast(bookmarkDokument);
-                    infoMessage = String.format("Bookmark für Dokument auf Seite %d gesetzt.", pageCounter);
-                    logger.info(infoMessage);
                     // Seitenzähler auf die nächste Startseite eines Teildokuments
                     pageCounter += pdfInfo.getPageCount();
                 }

@@ -227,7 +227,7 @@ public class XEFPdfMerge extends Application {
 
                     String anzeigeName = "";;
                     String dateiName = "";
-                    String datumErstellung  = "";
+                    String zeitpunktErstellung  = "";
 
                     // Erfolgsmeldung ausgeben
                     Alert alert = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.OK);
@@ -264,12 +264,12 @@ public class XEFPdfMerge extends Application {
                         // Ins TreeView übertragen
                         for(Akte akte: akten) {
                             String aktenId = akte.getId();
-                            TreeItem triAkte = new TreeItem("Akte=" + aktenId);
                             anzeigeName = akte.getAnzeigeName();
-                            datumErstellung  = akte.getDatumErstellung();
-                            triAkte.getChildren().add(new TreeItem("Anzeigename=" + anzeigeName));
+                            zeitpunktErstellung  = akte.getZeitpunktErstellungVersand();
+                            TreeItem triAkte = new TreeItem("Akte=" + anzeigeName);
+                            triAkte.getChildren().add(new TreeItem("Id=" + aktenId));
                             triAkte.getChildren().add(new TreeItem("Aktentyp=" + akte.getAktenTyp()));
-                            triAkte.getChildren().add(new TreeItem("Erstellungsdatum=" + datumErstellung));
+                            triAkte.getChildren().add(new TreeItem("Zeitpunkt Erstellung=" + zeitpunktErstellung));
                             // Hashtable-Eintrag für Booksmarks mit dem Aktennamen als Key anlegen
                             AkteInfo akteInfo = new AkteInfo(anzeigeName, 0);
                             pdfInfoHashtable.put(akteInfo, new ArrayList<>());
@@ -279,20 +279,30 @@ public class XEFPdfMerge extends Application {
                             if (teilakten.size() > 0) {
                                 for(Teilakte teilakte: teilakten) {
                                     String teilakteId = teilakte.getId();
-                                    TreeItem triTeilakte = new TreeItem("Teilakte=" + teilakteId);
+                                    anzeigeName = teilakte.getAnzeigeName();
+                                    TreeItem triTeilakte = new TreeItem("Teilakte=" + anzeigeName);
+                                    triTeilakte.getChildren().add(new TreeItem("Id=" + teilakteId));
                                     triTeilakte.getChildren().add(new TreeItem("Nummer im übg. Container=" + teilakte.getNummerImUebergeordnetenContainer()));
                                     // Alle Dokumente durchgehen
                                     List<Dokument> dokumente = xmlHelper.getDokumente(teilakteId, Aktentyp.Teilakte);
                                     for(Dokument dokument: dokumente) {
-                                        TreeItem triDokument = new TreeItem("Dokument=" + dokument.getId());
                                         dateiName = dokument.getDateiname();
-                                        triDokument.getChildren().add(new TreeItem("Pdf-Datei=" + dateiName));
+                                        TreeItem triDokument = new TreeItem("Dokument=" + dateiName);
+                                        triDokument.getChildren().add(new TreeItem("Id=" + dokument.getId()));
                                         String pdfPfad = basePfad + "/" + dateiName;
                                         Integer pageCount = pdfHelper.getPdfPageCount(pdfPfad);
                                         triDokument.getChildren().add(new TreeItem("Posteingangsdatum=" + dokument.getDatumPosteingang()));
                                         triDokument.getChildren().add(new TreeItem("Veraktungsdatum=" + dokument.getDatumVeraktung()));
                                         triDokument.getChildren().add(new TreeItem("Anzahl Seiten=" + pageCount));
                                         triTeilakte.getChildren().add(triDokument);
+                                        // Eintrag in pdfInfoHashtable, damit das Setzen von Bookmarks später möglich ist
+                                        PdfDocumentInfo documentInfo = new PdfDocumentInfo();
+                                        documentInfo.setFileName(pdfPfad);
+                                        documentInfo.setDisplayName(dokument.getAnzeigename());
+                                        documentInfo.setPageCount(pageCount);
+                                        documentInfo.getBookmarks().put("Posteingangsdatum", dokument.getDatumPosteingang());
+                                        documentInfo.getBookmarks().put("Veraktungsdatum", dokument.getDatumVeraktung());
+                                        pdfInfoHashtable.get(akteInfo).add(documentInfo);
                                     }
                                     triAkte.getChildren().add(triTeilakte);
                                 }
@@ -300,10 +310,10 @@ public class XEFPdfMerge extends Application {
                                 // Alle Dokumente der Akte durchgehen
                                 List<Dokument> dokumente = xmlHelper.getDokumente(aktenId, Aktentyp.Akte);
                                 for(Dokument dokument: dokumente) {
-                                    TreeItem triDokument = new TreeItem("Dokument=" + dokument.getId());
                                     dateiName = dokument.getDateiname();
-                                    triDokument.getChildren().add(new TreeItem("Pdf-Datei=" + dateiName));
                                     String pdfPfad = basePfad + "/" + dateiName;
+                                    TreeItem triDokument = new TreeItem("Dokument=" + dateiName);
+                                    triDokument.getChildren().add(new TreeItem("Id=" + dokument.getId()));
                                     Integer pageCount = pdfHelper.getPdfPageCount(pdfPfad);
                                     triDokument.getChildren().add(new TreeItem("Posteingangsdatum=" + dokument.getDatumPosteingang()));
                                     triDokument.getChildren().add(new TreeItem("Veraktungsdatum=" + dokument.getDatumVeraktung()));

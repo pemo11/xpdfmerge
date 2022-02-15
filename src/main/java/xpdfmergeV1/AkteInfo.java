@@ -5,20 +5,20 @@ package xpdfmergeV1;
  * Eventuell ist diese Klasse auch nicht erforderlich, da diese Infos auch über das Akte-Objekt zur Verfügung stehen
  */
 public class AkteInfo {
-    private int pageCount;
+    private int pageNumber;
     private String anzeigeName;
 
-    public AkteInfo(String anzeigeName, int pageCount) {
+    public AkteInfo(String anzeigeName, int pageNumber) {
         this.anzeigeName = anzeigeName;
-        this.pageCount = pageCount;
+        this.pageNumber = pageNumber;
     }
 
     public String getAnzeigeName() {
         return this.anzeigeName;
     }
 
-    public int getPageCount() {
-        return this.pageCount;
+    public int getPageNumber() {
+        return this.pageNumber;
     }
 
 }

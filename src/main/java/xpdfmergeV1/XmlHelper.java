@@ -172,17 +172,17 @@ public class XmlHelper {
             String id = el.getElementsByTagNameNS(nsName, "id").item(0).getTextContent();
             String aktenTyp = el.getElementsByTagName("code").item(0).getTextContent();
             String anzeigenName = el.getElementsByTagNameNS(nsName,"anzeigename").item(0).getTextContent();
-            String datumErstellung = el.getElementsByTagNameNS(nsName, "erstellungszeitpunktAkteVersand").item(0).getTextContent();
+            String zeitpunktErstellung = el.getElementsByTagNameNS(nsName, "erstellungszeitpunktAkteVersand").item(0).getTextContent();
             Integer nummerImUebergeordnetenContainer = Integer.parseInt(el.getElementsByTagNameNS(nsName, "nummerImUebergeordnetenContainer").item(0).getTextContent());
             Akte neuAkte = new Akte(id);
             neuAkte.setAktenTyp(aktenTyp);
             neuAkte.setAnzeigeName(anzeigenName);
             // Datumsformat z-B. 2021-05-12T09:36:20 auf dd-MM-jjjj umstellen
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
-            Date tmpDate = dateFormat.parse(datumErstellung);
+            Date tmpDate = dateFormat.parse(zeitpunktErstellung);
             dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-            datumErstellung = dateFormat.format(tmpDate);
-            neuAkte.setDatumErstellung(datumErstellung);
+                zeitpunktErstellung = dateFormat.format(tmpDate);
+            neuAkte.setZeitpunktErstellungVersand(zeitpunktErstellung);
             neuAkte.setNummerImUebergeordnetenContainer(nummerImUebergeordnetenContainer);
             aktenListe.add(neuAkte);
         }
@@ -319,6 +319,8 @@ public class XmlHelper {
                             teilakte.setAktenTyp(aktenTyp);
                             teilakte.setNummerImUebergeordnetenContainer(nummerUebergeordneterContainer);
                             teilaktenListe.add(teilakte);
+                            infoMessage = String.format("getTeilakten: Teilakte %s wurde hinzugefügt.", idTeilakte);
+                            logger.info(infoMessage);
                         }
                     }
                 } catch(Exception ex) {
@@ -377,6 +379,9 @@ public class XmlHelper {
                     dokument.setDatumPosteingang(datumPosteingang);
                     dokument.setDatumVeraktung(datumVeraktung);
                     dokumenteListe.add(dokument);
+                    infoMessage = String.format("getDokumente: Dokument %s wurde hinzugefügt.", idDokument);
+                    logger.info(infoMessage);
+
                 }
             }
         } catch(Exception ex) {
