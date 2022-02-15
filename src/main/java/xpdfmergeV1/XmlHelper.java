@@ -173,10 +173,12 @@ public class XmlHelper {
             String aktenTyp = el.getElementsByTagName("code").item(0).getTextContent();
             String anzeigenName = el.getElementsByTagNameNS(nsName,"anzeigename").item(0).getTextContent();
             String zeitpunktErstellung = el.getElementsByTagNameNS(nsName, "erstellungszeitpunktAkteVersand").item(0).getTextContent();
+            String az = el.getElementsByTagNameNS(nsName, "aktenzeichen.freitext").item(0).getTextContent();
             Integer nummerImUebergeordnetenContainer = Integer.parseInt(el.getElementsByTagNameNS(nsName, "nummerImUebergeordnetenContainer").item(0).getTextContent());
             Akte neuAkte = new Akte(id);
             neuAkte.setAktenTyp(aktenTyp);
             neuAkte.setAnzeigeName(anzeigenName);
+            neuAkte.setAktenzeichen(az);
             // Datumsformat z-B. 2021-05-12T09:36:20 auf dd-MM-jjjj umstellen
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
             Date tmpDate = dateFormat.parse(zeitpunktErstellung);
@@ -314,10 +316,12 @@ public class XmlHelper {
                             String aktenTyp = ((Element)elTeilakte.getElementsByTagNameNS(nsName, "teilaktentyp").item(0)).getElementsByTagName("code").item(0).getTextContent();
                             String anzeigename = elTeilakte.getElementsByTagNameNS(nsName, "anzeigename").item(0).getTextContent();
                             String containerNummer = elTeilakte.getElementsByTagNameNS(nsName, "nummerImUebergeordnetenContainer").item(0).getTextContent();
+                            String az = elTeilakte.getElementsByTagNameNS(nsName, "aktenzeichen.freitext").item(0).getTextContent();
                             int nummerUebergeordneterContainer = Integer.parseInt(containerNummer);
                             teilakte.setAnzeigeName(anzeigename);
                             teilakte.setAktenTyp(aktenTyp);
                             teilakte.setNummerImUebergeordnetenContainer(nummerUebergeordneterContainer);
+                            teilakte.setAktenzeichen(az);
                             teilaktenListe.add(teilakte);
                             infoMessage = String.format("getTeilakten: Teilakte %s wurde hinzugefügt.", idTeilakte);
                             logger.info(infoMessage);

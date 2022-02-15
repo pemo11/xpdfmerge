@@ -310,7 +310,7 @@ public class PdfHelper {
 
             pdfDoc.getDocumentCatalog().setPageMode(PageMode.USE_OUTLINES);
 
-            Integer pageCounter = 1;
+            Integer pageCounter = 0;
 
             // forEach ist nicht geeignet, da keine lokale Variable in dem Lambda verwendet werden kann?
             // pdfInfoHashtable.forEach((String fileName, PdfInfo pdfInfo) -> {
@@ -318,6 +318,7 @@ public class PdfHelper {
 
             while(enAkten.hasMoreElements()) {
                 // Die Eckdaten der Akte holen
+                // Das az (aktenzeichen.freitext) spielt aktuell keine Rolle, wird aber aus dem Xml ausgelesen
                 AkteInfo akte = (AkteInfo) enAkten.nextElement();
 
                 // PdfDocumentInfo pdfInfo = (PdfDocumentInfo)en.nextElement();
