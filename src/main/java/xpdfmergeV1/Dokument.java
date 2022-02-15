@@ -8,7 +8,8 @@ public class Dokument {
     private String id;
     private String anzeigename;
     private String dateiname;
-    private String posteingangsDatum;
+    private String datumPosteingang;
+    private String datumVeraktung;
     private Integer nummerUebergeordneterContainer;
 
     public Dokument(String Id) {
@@ -27,12 +28,20 @@ public class Dokument {
         this.anzeigename = anzeigename;
     }
 
-    public String getPosteingangsDatum() {
-        return posteingangsDatum;
+    public String getDatumPosteingang() {
+        return datumPosteingang;
     }
 
-    public void setPosteingangsDatum(String posteingangsDatum) {
-        this.posteingangsDatum = posteingangsDatum;
+    public void setDatumPosteingang(String datum) {
+        this.datumPosteingang = datum;
+    }
+
+    public String getDatumVeraktung() {
+        return datumVeraktung;
+    }
+
+    public void setDatumVeraktung(String datum) {
+        this.datumVeraktung = datum;
     }
 
     public String getDateiname() {

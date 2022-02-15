@@ -172,17 +172,17 @@ public class XmlHelper {
             String id = el.getElementsByTagNameNS(nsName, "id").item(0).getTextContent();
             String aktenTyp = el.getElementsByTagName("code").item(0).getTextContent();
             String anzeigenName = el.getElementsByTagNameNS(nsName,"anzeigename").item(0).getTextContent();
-            String posteingangsDatum = el.getElementsByTagNameNS(nsName, "posteingangsdatum").item(0).getTextContent();
+            String datumErstellung = el.getElementsByTagNameNS(nsName, "erstellungszeitpunktAkteVersand").item(0).getTextContent();
             Integer nummerImUebergeordnetenContainer = Integer.parseInt(el.getElementsByTagNameNS(nsName, "nummerImUebergeordnetenContainer").item(0).getTextContent());
             Akte neuAkte = new Akte(id);
             neuAkte.setAktenTyp(aktenTyp);
             neuAkte.setAnzeigeName(anzeigenName);
             // Datumsformat z-B. 2021-05-12T09:36:20 auf dd-MM-jjjj umstellen
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
-            Date tmpDate = dateFormat.parse(posteingangsDatum);
+            Date tmpDate = dateFormat.parse(datumErstellung);
             dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-            posteingangsDatum = dateFormat.format(tmpDate);
-            neuAkte.setPosteingangsDatum(posteingangsDatum);
+            datumErstellung = dateFormat.format(tmpDate);
+            neuAkte.setDatumErstellung(datumErstellung);
             neuAkte.setNummerImUebergeordnetenContainer(nummerImUebergeordnetenContainer);
             aktenListe.add(neuAkte);
         }
@@ -358,14 +358,24 @@ public class XmlHelper {
                     Element elDokument = (Element)dokumente.item(i);
                     String idDokument = elDokument.getElementsByTagNameNS(nsName, "id").item(0).getTextContent();
                     String nummerUebergeordneterContainer = elDokument.getElementsByTagNameNS(nsName, "nummerImUebergeordnetenContainer").item(0).getTextContent();
-                    String posteingang = elDokument.getElementsByTagNameNS(nsName, "posteingangsdatum").item(0).getTextContent();
+                    String datumPosteingang = elDokument.getElementsByTagNameNS(nsName, "posteingangsdatum").item(0).getTextContent();
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+                    Date tmpDate = dateFormat.parse(datumPosteingang);
+                    dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                    datumPosteingang = dateFormat.format(tmpDate);
+                    String datumVeraktung = elDokument.getElementsByTagNameNS(nsName, "veraktungsdatum").item(0).getTextContent();
+                    dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                    tmpDate = dateFormat.parse(datumVeraktung);
+                    dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                    datumVeraktung = dateFormat.format(tmpDate);
                     String anzeigeName = elDokument.getElementsByTagNameNS(nsName, "anzeigename").item(0).getTextContent();
                     String dateiname = elDokument.getElementsByTagNameNS(nsName, "dateiname").item(0).getTextContent();
                     Dokument dokument = new Dokument(idDokument);
                     dokument.setNummerUebergeordneterContainer(Integer.parseInt(nummerUebergeordneterContainer));
                     dokument.setAnzeigename(anzeigeName);
                     dokument.setDateiname(dateiname);
-                    dokument.setPosteingangsDatum(posteingang);
+                    dokument.setDatumPosteingang(datumPosteingang);
+                    dokument.setDatumVeraktung(datumVeraktung);
                     dokumenteListe.add(dokument);
                 }
             }

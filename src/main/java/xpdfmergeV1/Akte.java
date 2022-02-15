@@ -6,11 +6,11 @@ package xpdfmergeV1;
  */
 public class Akte {
     private String id;
-    private String anzeigeName;
-    private String veraktungsDatum;
-    private String posteingangsDatum;
-    private String aktenTyp;
     private Integer nummerImUebergeordnetenContainer;
+    private String aktenTyp;
+    private String anzeigeName;
+    private String aktenzeichen;
+    private String datumErstellung;
     boolean hasTeilakten;
 
     public Akte(String id) {
@@ -25,13 +25,13 @@ public class Akte {
         this.nummerImUebergeordnetenContainer = nummerImUebergeordnetenContainer;
     }
 
-    public void setVeraktungsdatum(String datum) { this.veraktungsDatum = datum;  }
+    public void setDatumErstellung(String datum) { this.datumErstellung = datum;  }
 
-    public String getVeraktungsDatum() {  return this.veraktungsDatum;  }
+    public String getDatumErstellung() {  return this.datumErstellung;  }
 
-    public String getPosteingangsDatum() {  return this.posteingangsDatum;  }
+    public String getAktenzeichen() {  return this.aktenzeichen;  }
 
-    public void setPosteingangsDatum(String datum) { this.posteingangsDatum = datum;  }
+    public void setAktenzeichen(String az) { this.aktenzeichen = az; }
 
     public String getId() {
         return this.id;

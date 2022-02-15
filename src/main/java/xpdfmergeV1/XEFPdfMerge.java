@@ -37,7 +37,7 @@ import java.util.*;
 public class XEFPdfMerge extends Application {
     private String xJustizPfad;
     private String osName = "Unbekannt";
-    private String appVersion = "0.26";
+    private String appVersion = "0.30";
     // Kein Scope Modifier, daher Sichtbarkeit innerhalb des Package
     static  Logger logger = null; // LogManager.getLogger(XEFPdfMerge.class);
     private XmlHelper xmlHelper = null;
@@ -47,7 +47,7 @@ public class XEFPdfMerge extends Application {
     private String pdfOutfile = "GesamtePDF.pdf";
     private String imgPfad = "";
     private Hashtable<String, PdfInfo> pdfInfoHashtable = null;
-
+    private AppConfig config = null;
 
     @Override
     public void start(Stage stage) throws IOException, URISyntaxException {
@@ -79,7 +79,7 @@ public class XEFPdfMerge extends Application {
         }
 
         // xJustiz-Pfad aus Config-Datei einlesen
-        AppConfig config = null;
+
         try {
             config = new AppConfig();
             xJustizPfad = config.getProperty("xJustizPfad");
@@ -196,6 +196,12 @@ public class XEFPdfMerge extends Application {
             @Override
             public void handle(ActionEvent actionEvent) {
                 FileChooser fileChooser = new FileChooser();
+                // Gibt es einen gespeicherten pfad
+                if (config != null && config.getProperty("LastPathSelected") != null) {
+                    String lastPath = config.getProperty("LastPathSelected");
+                    fileChooser.setInitialDirectory(new File(lastPath));
+                }
+
                 // fileChooser.setInitialDirectory(new File(xJustizPfad));
                 fileChooser.setTitle("Auswahl Nachricht.xml");
                 fileChooser.getExtensionFilters().addAll(
@@ -214,9 +220,14 @@ public class XEFPdfMerge extends Application {
                     // Basispfad festlegen
                     basePfad = selectedFile.getParent();
 
+                    // Basispfad in Config-Datei speichern (sofern vorhanden)
+                    if (config != null) {
+                        config.setProperty("LastPathSelected", basePfad);
+                    }
+
                     String anzeigeName = "";;
                     String dateiName = "";
-                    String posteingangsDatum = "";
+                    String datumErstellung  = "";
 
                     // Erfolgsmeldung ausgeben
                     Alert alert = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.OK);
@@ -253,10 +264,10 @@ public class XEFPdfMerge extends Application {
                             String aktenId = akte.getId();
                             TreeItem triAkte = new TreeItem("Akte=" + aktenId);
                             anzeigeName = akte.getAnzeigeName();
-                            posteingangsDatum = akte.getPosteingangsDatum();
+                            datumErstellung  = akte.getDatumErstellung();
                             triAkte.getChildren().add(new TreeItem("Anzeigename=" + anzeigeName));
                             triAkte.getChildren().add(new TreeItem("Aktentyp=" + akte.getAktenTyp()));
-                            triAkte.getChildren().add(new TreeItem("Posteingang=" + akte.getPosteingangsDatum()));
+                            triAkte.getChildren().add(new TreeItem("Erstellungsdatum=" + datumErstellung));
                             // Alle Teilakten holen
                             List<Teilakte> teilakten = xmlHelper.getTeilakten(aktenId);
                             // Gibt es Teilakten?
@@ -273,6 +284,8 @@ public class XEFPdfMerge extends Application {
                                         triDokument.getChildren().add(new TreeItem("Pdf-Datei=" + dateiName));
                                         String pdfPfad = basePfad + "/" + dateiName;
                                         Integer pageCount = pdfHelper.getPdfPageCount(pdfPfad);
+                                        triDokument.getChildren().add(new TreeItem("Posteingangsdatum=" + dokument.getDatumPosteingang()));
+                                        triDokument.getChildren().add(new TreeItem("Veraktungsdatum=" + dokument.getDatumVeraktung()));
                                         triDokument.getChildren().add(new TreeItem("Anzahl Seiten=" + pageCount));
                                         triTeilakte.getChildren().add(triDokument);
                                     }
@@ -287,17 +300,19 @@ public class XEFPdfMerge extends Application {
                                     triDokument.getChildren().add(new TreeItem("Pdf-Datei=" + dateiName));
                                     String pdfPfad = basePfad + "/" + dateiName;
                                     Integer pageCount = pdfHelper.getPdfPageCount(pdfPfad);
+                                    triDokument.getChildren().add(new TreeItem("Posteingangsdatum=" + dokument.getDatumPosteingang()));
+                                    triDokument.getChildren().add(new TreeItem("Veraktungsdatum=" + dokument.getDatumVeraktung()));
                                     triDokument.getChildren().add(new TreeItem("Anzahl Seiten=" + pageCount));
                                     triAkte.getChildren().add(triDokument);
                                 }
                             }
 
-                            // TODO: Anzeigename und Datumsangaben als Book setzen
+                            // TODO: Anzeigename und Datumsangaben als Bookmark setzen
                             // Hashtable mit Daten der Pdf-Datei aktualisieren
                             PdfInfo pdfInfo = new PdfInfo();
                             pdfInfo.setDisplayName(anzeigeName);
                             pdfInfo.setFileName(dateiName);
-                            pdfInfo.getBookmarks().put("Posteingang", posteingangsDatum);
+                            pdfInfo.getBookmarks().put("Erstellungsdatum", datumErstellung);
                             // TODO: Offenbar gibt es bei Java noch kein Pendant zu Combine()?
                             pdfInfo.setFilePath(basePfad + "/" + dateiName);
                             // TODO: Hier fehlt noch was?
