@@ -8,17 +8,20 @@ public class AkteInfo {
     private int pageNumber;
     private String anzeigeName;
 
-    public AkteInfo(String anzeigeName, int pageNumber) {
+    public AkteInfo(String anzeigeName) {
         this.anzeigeName = anzeigeName;
-        this.pageNumber = pageNumber;
     }
 
-    public String getAnzeigeName() {
-        return this.anzeigeName;
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
     }
 
     public int getPageNumber() {
         return this.pageNumber;
+    }
+
+    public String getAnzeigeName() {
+        return this.anzeigeName;
     }
 
 }

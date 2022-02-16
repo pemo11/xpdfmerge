@@ -190,6 +190,7 @@ public class XEFPdfMerge extends Application {
 
             @Override
             public void handle(ActionEvent actionEvent) {
+                AkteInfo akteInfo = null;
                 FileChooser fileChooser = new FileChooser();
                 // Gibt es einen gespeicherten pfad
                 if (config != null && config.getProperty("LastPathSelected") != null) {
@@ -236,7 +237,8 @@ public class XEFPdfMerge extends Application {
 
                     // Anlegen der Bookmarks in der Ausgabe-Pdf
                     // Pro Dokument soll eine Bookmark angelegt werden - allerdings hierarchisch Akte -> Dokument1 -> Dokument2 usw.
-                    // Der Key ist der Name der Akte, der Value eine Liste mit PdfInfo-Objekten
+                    // Der Key ist ein AkteInfo-Objekt mit Namen der Akte, der Value eine Liste mit PdfInfo-Objekten, die für alle
+                    // Pdf-Dateien der Akte stehen
                     pdfInfoHashtable = new Hashtable<>();
 
                     try {
@@ -265,9 +267,6 @@ public class XEFPdfMerge extends Application {
                             triAkte.getChildren().add(new TreeItem("Id=" + aktenId));
                             triAkte.getChildren().add(new TreeItem("Aktentyp=" + akte.getAktenTyp()));
                             triAkte.getChildren().add(new TreeItem("Zeitpunkt Erstellung=" + zeitpunktErstellung));
-                            // Hashtable-Eintrag für Booksmarks mit dem Aktennamen als Key anlegen
-                            AkteInfo akteInfo = new AkteInfo(anzeigeName, 0);
-                            pdfInfoHashtable.put(akteInfo, new ArrayList<>());
                             // Alle Teilakten holen
                             List<Teilakte> teilakten = xmlHelper.getTeilakten(aktenId);
                             // Gibt es Teilakten?
@@ -275,6 +274,10 @@ public class XEFPdfMerge extends Application {
                                 for(Teilakte teilakte: teilakten) {
                                     String teilakteId = teilakte.getId();
                                     anzeigeName = teilakte.getAnzeigeName();
+                                    // Akteinfo-Objekt für Teilakte anlegen
+                                    akteInfo = new AkteInfo(anzeigeName);
+                                    pdfInfoHashtable.put(akteInfo, new ArrayList<>());
+
                                     TreeItem triTeilakte = new TreeItem("Teilakte=" + anzeigeName);
                                     triTeilakte.getChildren().add(new TreeItem("Id=" + teilakteId));
                                     triTeilakte.getChildren().add(new TreeItem("Nummer im übg. Container=" + teilakte.getNummerImUebergeordnetenContainer()));
@@ -297,11 +300,16 @@ public class XEFPdfMerge extends Application {
                                         documentInfo.setPageCount(pageCount);
                                         documentInfo.getBookmarks().put("Posteingangsdatum", dokument.getDatumPosteingang());
                                         documentInfo.getBookmarks().put("Veraktungsdatum", dokument.getDatumVeraktung());
+                                        // Dokument an Dokumenteliste der Akte anhängen
                                         pdfInfoHashtable.get(akteInfo).add(documentInfo);
                                     }
                                     triAkte.getChildren().add(triTeilakte);
                                 }
                             } else {
+                                // Hashtable-Eintrag für Booksmarks mit dem Aktennamen als Key anlegen
+                                akteInfo = new AkteInfo(anzeigeName);
+                                pdfInfoHashtable.put(akteInfo, new ArrayList<>());
+
                                 // Alle Dokumente der Akte durchgehen
                                 List<Dokument> dokumente = xmlHelper.getDokumente(aktenId, Aktentyp.Akte);
                                 for(Dokument dokument: dokumente) {
@@ -321,7 +329,8 @@ public class XEFPdfMerge extends Application {
                                     documentInfo.setPageCount(pageCount);
                                     documentInfo.getBookmarks().put("Posteingangsdatum", dokument.getDatumPosteingang());
                                     documentInfo.getBookmarks().put("Veraktungsdatum", dokument.getDatumVeraktung());
-                                    // pdfInfoHashtable.get(akteInfo).add(documentInfo);
+                                    // Dokument an Dokumenteliste der Akte anhängen
+                                    pdfInfoHashtable.get(akteInfo).add(documentInfo);
                                 }
                             }
 

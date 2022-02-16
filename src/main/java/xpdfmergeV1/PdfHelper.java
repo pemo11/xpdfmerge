@@ -310,22 +310,27 @@ public class PdfHelper {
 
             pdfDoc.getDocumentCatalog().setPageMode(PageMode.USE_OUTLINES);
 
-            Integer pageCounter = 0;
+            // Integer pageCounter = 0;
+            int currentPageNumber = 0;
+            int aktePageNumber = 0;
 
             // forEach ist nicht geeignet, da keine lokale Variable in dem Lambda verwendet werden kann?
             // pdfInfoHashtable.forEach((String fileName, PdfInfo pdfInfo) -> {
             Enumeration enAkten = pdfInfoHashtable.keys();
 
+            // Alle Akten durchgehen
             while(enAkten.hasMoreElements()) {
                 // Die Eckdaten der Akte holen
                 // Das az (aktenzeichen.freitext) spielt aktuell keine Rolle, wird aber aus dem Xml ausgelesen
                 AkteInfo akte = (AkteInfo) enAkten.nextElement();
 
+                aktePageNumber = currentPageNumber;
                 // PdfDocumentInfo pdfInfo = (PdfDocumentInfo)en.nextElement();
                 // Bookmark für Akte setzen
                 // String bookmarkText1 = pdfInfo.getDisplayName();
                 PDPageDestination pageDestinationAkte = new PDPageFitWidthDestination();
-                PDPage page = pdfDoc.getPage(pageCounter);
+                // Aktuelle Seiten im Gesamtdokument holen
+                PDPage page = pdfDoc.getPage(currentPageNumber);
                 pageDestinationAkte.setPage(page);
 
                 PDOutlineItem bookmarkAkte = new PDOutlineItem();
@@ -335,13 +340,15 @@ public class PdfHelper {
 
                 // Jetzt die Bookmarks für das Dokument setzen
                 List<PdfDocumentInfo> infoListe = pdfInfoHashtable.get(akte);
+                // Alle Dokumente durchgehen
                 for(var pdfInfo : infoListe) {
                     // Bookmark für das Dokument anlegen
                     PDOutlineItem bookmarkDokument = new PDOutlineItem();
                     PDPageDestination pageDestinationDokument = new PDPageFitWidthDestination();
+                    // Erste Seite des aktuellen Dokuments holen
+                    page = pdfDoc.getPage(currentPageNumber);
                     // Seitenzahl für das aktuelle Dokument abrufen
                     int pageCount = pdfInfo.getPageCount();
-                    page = pdfDoc.getPage(pageCount);
                     // Bookmark für das Dokument setzen
                     try {
                         pageDestinationDokument.setPage(page);
@@ -361,18 +368,18 @@ public class PdfHelper {
                         }
                         // dokument-Bookmark an die Akte-Bookmark anhängen
                         bookmarkAkte.addLast(bookmarkDokument);
-                        infoMessage = String.format("setBookmarks: Bookmark für Dokument auf Seite %d gesetzt.", pageCounter);
+                        infoMessage = String.format("setBookmarks: Bookmark für Dokument auf Seite %d gesetzt.", currentPageNumber);
                         logger.info(infoMessage);
                     } catch (Exception ex) {
-                        infoMessage = String.format("setBookmarks: Fehler beim Setzen einer Bookmark auf Seite %d", pageCounter);
+                        infoMessage = String.format("setBookmarks: Fehler beim Setzen einer Bookmark auf Seite %d", currentPageNumber);
                         logger.error(infoMessage, ex);
                     }
                     // Seitenzähler auf die nächste Startseite eines Teildokuments
-                    pageCounter += pageCount;
+                    currentPageNumber += pageCount;
                 }
                 // Bookmark für Akte setzen
                 pagesOutline.addLast(bookmarkAkte);
-                infoMessage = String.format("setBookmarks: Bookmark für Akte auf Seite %d gesetzt.", pageCounter);
+                infoMessage = String.format("setBookmarks: Bookmark für Akte auf Seite %d gesetzt.", aktePageNumber);
                 logger.info(infoMessage);
             };
 
