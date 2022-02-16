@@ -269,7 +269,7 @@ public class PdfHelper {
      * @param pdfOutfile
      * @param pdfInfoHashtable
      */
-    public void setBookmarks(String pdfOutfile, Hashtable<AkteInfo, List<PdfDocumentInfo>> pdfInfoHashtable) {
+    public void setBookmarks(String pdfOutfile, LinkedHashMap<AkteInfo, List<PdfDocumentInfo>> pdfInfoHashtable) {
         infoMessage = String.format("setBookmarks: Aufruf ");
         this.logger.info(infoMessage);
 
@@ -316,27 +316,22 @@ public class PdfHelper {
 
             // forEach ist nicht geeignet, da keine lokale Variable in dem Lambda verwendet werden kann?
             // pdfInfoHashtable.forEach((String fileName, PdfInfo pdfInfo) -> {
-            Enumeration enAkten = pdfInfoHashtable.keys();
+            Set<AkteInfo> akteInfoSet = pdfInfoHashtable.keySet();
 
             // Alle Akten durchgehen
-            while(enAkten.hasMoreElements()) {
-                // Die Eckdaten der Akte holen
-                // Das az (aktenzeichen.freitext) spielt aktuell keine Rolle, wird aber aus dem Xml ausgelesen
-                AkteInfo akte = (AkteInfo) enAkten.nextElement();
-
+            // Das az (aktenzeichen.freitext) spielt aktuell keine Rolle, wird aber aus dem Xml ausgelesen
+            for(AkteInfo akte  : akteInfoSet) {
+                // Die Seitenzahl der Akte ist die aktuelle Seitennummer in Bezug auf die Gesamt-Pdf
                 aktePageNumber = currentPageNumber;
-                // PdfDocumentInfo pdfInfo = (PdfDocumentInfo)en.nextElement();
                 // Bookmark für Akte setzen
-                // String bookmarkText1 = pdfInfo.getDisplayName();
                 PDPageDestination pageDestinationAkte = new PDPageFitWidthDestination();
-                // Aktuelle Seiten im Gesamtdokument holen
+                // Seite in Bezug auf das Gesamtdokument holen
                 PDPage page = pdfDoc.getPage(currentPageNumber);
                 pageDestinationAkte.setPage(page);
 
                 PDOutlineItem bookmarkAkte = new PDOutlineItem();
                 bookmarkAkte.setDestination(pageDestinationAkte);
                 bookmarkAkte.setTitle(akte.getAnzeigeName());
-                // pagesOutline.addLast(bookmark);
 
                 // Jetzt die Bookmarks für das Dokument setzen
                 List<PdfDocumentInfo> infoListe = pdfInfoHashtable.get(akte);

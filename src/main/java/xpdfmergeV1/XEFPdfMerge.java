@@ -46,7 +46,8 @@ public class XEFPdfMerge extends Application {
     private String infoMessage = "";
     private String pdfOutfile = "GesamtePDF.pdf";
     private String imgPfad = "";
-    private Hashtable<AkteInfo, List<PdfDocumentInfo>> pdfInfoHashtable = null;
+    // Wichtig: LinkedHashMap statt (veralteter) Hashtable, da die Reihenfolge erhalten bleibt
+    private LinkedHashMap<AkteInfo, List<PdfDocumentInfo>> pdfInfoHashtable = null;
     private AppConfig config = null;
 
     @Override
@@ -239,7 +240,7 @@ public class XEFPdfMerge extends Application {
                     // Pro Dokument soll eine Bookmark angelegt werden - allerdings hierarchisch Akte -> Dokument1 -> Dokument2 usw.
                     // Der Key ist ein AkteInfo-Objekt mit Namen der Akte, der Value eine Liste mit PdfInfo-Objekten, die für alle
                     // Pdf-Dateien der Akte stehen
-                    pdfInfoHashtable = new Hashtable<>();
+                    pdfInfoHashtable = new LinkedHashMap<>();
 
                     try {
                         XmlHelper xmlHelper = new XmlHelper(logger, xmlPfad);
@@ -314,13 +315,15 @@ public class XEFPdfMerge extends Application {
                                 List<Dokument> dokumente = xmlHelper.getDokumente(aktenId, Aktentyp.Akte);
                                 for(Dokument dokument: dokumente) {
                                     dateiName = dokument.getDateiname();
+                                    anzeigeName = dokument.getAnzeigename();
                                     String pdfPfad = basePfad + "/" + dateiName;
-                                    TreeItem triDokument = new TreeItem("Dokument=" + dateiName);
-                                    triDokument.getChildren().add(new TreeItem("Id=" + dokument.getId()));
                                     Integer pageCount = pdfHelper.getPdfPageCount(pdfPfad);
+                                    TreeItem triDokument = new TreeItem("Dokument=" + anzeigeName);
+                                    triDokument.getChildren().add(new TreeItem("Id=" + dokument.getId()));
+                                    triDokument.getChildren().add(new TreeItem("Datei=" + dokument.getDateiname()));
+                                    triDokument.getChildren().add(new TreeItem("Anzahl Seiten=" + pageCount));
                                     triDokument.getChildren().add(new TreeItem("Posteingangsdatum=" + dokument.getDatumPosteingang()));
                                     triDokument.getChildren().add(new TreeItem("Veraktungsdatum=" + dokument.getDatumVeraktung()));
-                                    triDokument.getChildren().add(new TreeItem("Anzahl Seiten=" + pageCount));
                                     triAkte.getChildren().add(triDokument);
                                     // Eintrag in pdfInfoHashtable, damit das Setzen von Bookmarks später möglich ist
                                     PdfDocumentInfo documentInfo = new PdfDocumentInfo();
