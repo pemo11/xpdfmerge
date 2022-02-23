@@ -37,7 +37,9 @@ import java.util.*;
 public class XEFPdfMerge extends Application {
     private String xJustizPfad;
     private String osName = "Unbekannt";
-    private String appVersion = "0.32";
+    private String appVersion = "0.33";
+    // Nur provisorisch - falls die Version-Abfrage null liefert
+    private String log4VersionDefault = "2.17.1";
     // Kein Scope Modifier, daher Sichtbarkeit innerhalb des Package
     static  Logger logger = null; // LogManager.getLogger(XEFPdfMerge.class);
     private XmlHelper xmlHelper = null;
@@ -56,6 +58,10 @@ public class XEFPdfMerge extends Application {
 
         // Die Versionsnummer von Log4J loggen
         String log4JVersion = logger.getClass().getPackage().getSpecificationVersion();
+        // Nur prosivorisch, da unter Linux null resultiert?
+        log4JVersion = log4JVersion == null ? log4VersionDefault : log4JVersion;
+        // geht nicht, da versionInfo private ist?
+        // String log4JVersion = logger.getClass().getPackage().versionInfo.implVersion;
         infoMessage = String.format("*** Using Log4J version %s ***", log4JVersion);
         logger.info(infoMessage);
 
