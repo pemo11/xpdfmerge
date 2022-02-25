@@ -10,7 +10,7 @@ Voraussetzung für die Ausführung der Anwendung ist, dass das JDK (ab Version 1
 
 https://developers.redhat.com/products/openjdk/download
 
-Theoretisch ist das Liberica SDK eine gute Alternative (https://bell-sw.com/pages/downloads/), da hier (bei Full SDK) JavaFx dabei ist - das habe ich aber noch nicht getestet. Auf der anderen Seite ist es eventuell flexibler, die JavaFx-Dateien beim Start der Jar-Datei auswählen zu können. Aktuell geht die Start-Datei davon aus, dass alle JavaFx-Dateien in einem eigenen Verzeichnis vorliegen.
+Theoretisch ist das Liberica SDK eine gute Alternative (https://bell-sw.com/pages/downloads/), da hier (bei Full SDK) JavaFx dabei ist - das habe ich aber noch nicht getestet. Auf der anderen Seite ist es eventuell flexibler, die JavaFx-Dateien beim Start der Jar-Datei über den *--module-path**-Parameter auswählen zu können. Aktuell geht die Start-Datei davon aus, dass alle JavaFx-Dateien in einem eigenen Verzeichnis vorliegen (das bei der Linux-Version Teil der deb-Datei ist, die über das EurekaFach-Ftp-Verzeichnis zur Verfügung gestellt wird).
 
 Da (bekanntlich) JavaFx ab JDK 9 nicht mehr dabei ist, müssen die Progrmambibliotheken separat heruntergeladen und in einem eigenen Verzeichnis abgelegt werden. Dieser Verzeichnispfad muss über den Parameter **--module-path** bei der Ausführung der Jar-Datei angegeben werden (mehr dazu später).
 
@@ -34,7 +34,7 @@ Es müssen zwei Schritte durchgeführt werden:
 
 1) Setzen der Umgebungsvariablen *PATH_TO_FX* auf das lib-Unterverzeichnis im JavaFx-Verzeichnis
 
-2) Starten von java mit den erforderlichen Angaben.
+2) Starten von java mit den erforderlichen Angaben (ein Beispiel folgt etwas weiter unten auf dieser Seite).
 
 Die Programmdatei besteht (wie bei Java üblich) aus einer einzigen Jar-Datei.
 
@@ -74,11 +74,14 @@ xJustizPfad=C:\\EurekaFach\\BEAkten
 
 Über die Datei Log4j2.xml kann der Logger konfiguriert werden (noch nicht getestet, da es anscheinend auch ohne die Xml_Datei funktioniert).
 
-#Installation unter Linux
+Installation unter Linux
+========================
 
-Die obige "Installationsanleitung" funktioniert natürlich auch unter Linux. Damit die Anwendung etwas komfortabler per Doppelklick gestartet werden kann, gibt es eine Alternative in Gestalt einer Deb-Datei und einer desktop-Datei, die das Skript *start.sh* ausführt.
+Die obige "Installationsanleitung" funktioniert natürlich auch unter Linux. Damit die Anwendung etwas komfortabler per Doppelklick gestartet werden kann, gibt es eine Alternative in Gestalt einer Deb-Datei und einer desktop-Datei, die das Skript *start.sh* ausführt, das wiederum java wie gezeigt startet.
 
-Aktuell müssen daher noch mehrere Schritte ausgeführt werden, um eine Datei zu erhalten, die "doppelgeklickt" werden kann:
+*Wichtig*: Die JavaFx-Dateien sind Teil des deb-Pakets, JavaFx muss also in diesem Fall nicht separat installiert werden, sondern nur das Java 11-SDK.
+
+Aktuell müssen drei Schritte ausgeführt werden, um eine Datei zu erhalten, die "doppelgeklickt" werden kann:
 
 **Schritt 1:** Download der Deb-Datei aus dem deploy-Verzeichnis im Projektportal
 
@@ -86,11 +89,13 @@ Aktuell müssen daher noch mehrere Schritte ausgeführt werden, um eine Datei zu
 
 **Schritt 3:** Alle Dateien werden in das Verzeichnis */usr/local/bin* kopiert (das wird ggf. noch geändert).
 
-**Schritt 4:** In der Datei *start.sh* muss das Verzeichnis der JavaFx-Dateien angepasst werden (voreingestellt ist */usr/lib/jvm/javafx-sdk-17.0.2/lib*).
+Optional kann die Datei *pdfmergev1.desktop* in das desktop-Verzeichnis kopiert werden, so dass sie einfacher erreichbar ist.
 
-**Schritt 5:** Die Datei *pdfmergev1.desktop* muss über *Properties* im Kontextmenü ausführbar gemacht werden.
+Über
 
-**Schritt 6:** Optional kann die Datei *pdfmergev1.desktop* in das desktop-Verzeichnis kopiert werden, so dass sie einfacher erreichbar ist.
+sudo desktop-file-install pfdmergev1.desktop
+
+wird die desktop-Datei im Verzeichnis /usr/share/applications abgelegt und kann dort per Doppeklick gestartet werden.
 
 Danach sollte das Anwendungfenster starten.
 
