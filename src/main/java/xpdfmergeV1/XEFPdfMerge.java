@@ -37,7 +37,7 @@ import java.util.*;
 public class XEFPdfMerge extends Application {
     private String xJustizPfad;
     private String osName = "Unbekannt";
-    private String appVersion = "0.33";
+    private String appVersion = "0.35";
     // Nur provisorisch - falls die Version-Abfrage null liefert
     private String log4VersionDefault = "2.17.1";
     // Kein Scope Modifier, daher Sichtbarkeit innerhalb des Package
@@ -48,6 +48,9 @@ public class XEFPdfMerge extends Application {
     private String infoMessage = "";
     private String pdfOutfile = "GesamtePDF.pdf";
     private String imgPfad = "";
+    private int dokumentNr = 0;
+    // Betrifft die XML-Validierung
+    private boolean errorFlag = false;
     // Wichtig: LinkedHashMap statt (veralteter) Hashtable, da die Reihenfolge erhalten bleibt
     private LinkedHashMap<AkteInfo, List<PdfDocumentInfo>> pdfInfoHashtable = null;
     private AppConfig config = null;
@@ -193,16 +196,23 @@ public class XEFPdfMerge extends Application {
         imgPfad = getClass().getResource("/images/nachrichtxml.png").toURI().toString();
         MenuItem openNachrichtXml = new MenuItem("Nachricht.xml öffnen", new ImageView(new Image(imgPfad)));
 
+        /**
+        * Xml-Nachricht einlesen und in treeView darstellen
+         */
         openNachrichtXml.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent actionEvent) {
                 AkteInfo akteInfo = null;
                 FileChooser fileChooser = new FileChooser();
-                // Gibt es einen gespeicherten pfad
+                // Gibt es einen gespeicherten Pfad
                 if (config != null && config.getProperty("LastPathSelected") != null) {
                     String lastPath = config.getProperty("LastPathSelected");
-                    fileChooser.setInitialDirectory(new File(lastPath));
+                    File lastpathFile = new File(lastPath);
+                    // Gibt es den zuletzt verwendeten Pfad noch?
+                    if (lastpathFile.exists()) {
+                        fileChooser.setInitialDirectory(new File(lastPath));
+                    }
                 }
 
                 // fileChooser.setInitialDirectory(new File(xJustizPfad));
@@ -232,15 +242,10 @@ public class XEFPdfMerge extends Application {
                     String dateiName = "";
                     String zeitpunktErstellung  = "";
 
-                    // Erfolgsmeldung ausgeben
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.OK);
-                    alert.setTitle("Hinweis");
-                    alert.setHeaderText("");
-                    alert.setContentText(xmlPfad + " wurde ausgewertet.");
-                    alert.showAndWait();
-
-                    // Pfad in "Statusbar" anzeigen
-                    lbl3.setText(xmlPfad + " wurde geladen.");
+                    // dokumentNr für die Dokumenteliste in der TreeView zurücksetzen
+                    dokumentNr = 0;
+                    // Fehlerflag zurücksetzen
+                    errorFlag = false;
 
                     // Anlegen der Bookmarks in der Ausgabe-Pdf
                     // Pro Dokument soll eine Bookmark angelegt werden - allerdings hierarchisch Akte -> Dokument1 -> Dokument2 usw.
@@ -260,8 +265,28 @@ public class XEFPdfMerge extends Application {
                         } else {
                             for(String validateError: validateErrors) {
                                 logger.warn(validateError);
+                                errorFlag = true;
                             }
                         }
+                        if (!errorFlag) {
+                            // Erfolgsmeldung ausgeben
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.OK);
+                            alert.setTitle("Hinweis");
+                            alert.setHeaderText("");
+                            alert.setContentText(xmlPfad + " wurde ausgewertet.");
+                            alert.showAndWait();
+
+                            // Pfad in "Statusbar" anzeigen
+                            lbl3.setText(xmlPfad + " wurde geladen.");
+                        } else {
+                            // Fehlermeldung ausgeben
+                            Alert alert = new Alert(Alert.AlertType.WARNING, "", ButtonType.OK);
+                            alert.setTitle("Fehler");
+                            alert.setHeaderText("");
+                            alert.setContentText("Beim Laden von " + xmlPfad + " traten Validierungsfehler auf. \n\n(weitere Details in der Log-Datei)");
+                            alert.showAndWait();
+                        }
+
                         PdfHelper pdfHelper = new PdfHelper(logger);
                         List<Akte> akten = xmlHelper.getAkten();
                         TreeItem triRoot = new TreeItem("Akten");
@@ -291,8 +316,9 @@ public class XEFPdfMerge extends Application {
                                     // Alle Dokumente durchgehen
                                     List<Dokument> dokumente = xmlHelper.getDokumente(teilakteId, Aktentyp.Teilakte);
                                     for(Dokument dokument: dokumente) {
+                                        dokumentNr++;
                                         dateiName = dokument.getDateiname();
-                                        TreeItem triDokument = new TreeItem("Dokument=" + dateiName);
+                                        TreeItem triDokument = new TreeItem(String.format("Dokument (%d) %s", dokumentNr, dateiName));
                                         triDokument.getChildren().add(new TreeItem("Id=" + dokument.getId()));
                                         String pdfPfad = basePfad + "/" + dateiName;
                                         Integer pageCount = pdfHelper.getPdfPageCount(pdfPfad);
@@ -320,11 +346,12 @@ public class XEFPdfMerge extends Application {
                                 // Alle Dokumente der Akte durchgehen
                                 List<Dokument> dokumente = xmlHelper.getDokumente(aktenId, Aktentyp.Akte);
                                 for(Dokument dokument: dokumente) {
+                                    dokumentNr++;
                                     dateiName = dokument.getDateiname();
                                     anzeigeName = dokument.getAnzeigename();
                                     String pdfPfad = basePfad + "/" + dateiName;
                                     Integer pageCount = pdfHelper.getPdfPageCount(pdfPfad);
-                                    TreeItem triDokument = new TreeItem("Dokument=" + anzeigeName);
+                                    TreeItem triDokument = new TreeItem(String.format("Dokument (%d) %s", dokumentNr, dateiName));
                                     triDokument.getChildren().add(new TreeItem("Id=" + dokument.getId()));
                                     triDokument.getChildren().add(new TreeItem("Datei=" + dokument.getDateiname()));
                                     triDokument.getChildren().add(new TreeItem("Anzahl Seiten=" + pageCount));
