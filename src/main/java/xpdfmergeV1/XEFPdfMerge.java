@@ -68,6 +68,13 @@ public class XEFPdfMerge extends Application {
         infoMessage = String.format("*** Using Log4J version %s ***", log4JVersion);
         logger.info(infoMessage);
 
+        // Application Icon festlegen
+        imgPfad = getClass().getResource("/images/EFXLogo.png").toURI().toString();
+
+        // stage.getIcons().add(new Image("file:EFXLogo.png"));
+        Image imgLogo = new Image(imgPfad);
+        stage.getIcons().add(imgLogo);
+
         // User directory holen
         String userDir = System.getProperty("user.home");
 
