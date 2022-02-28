@@ -281,9 +281,14 @@ public class XEFPdfMerge extends Application {
                         } else {
                             // Fehlermeldung ausgeben
                             Alert alert = new Alert(Alert.AlertType.WARNING, "", ButtonType.OK);
-                            alert.setTitle("Fehler");
+                            alert.setTitle("XML-Validierung mit Fehlern");
                             alert.setHeaderText("");
-                            alert.setContentText("Beim Laden von " + xmlPfad + " traten Validierungsfehler auf. \n\n(weitere Details in der Log-Datei)");
+                            String contentText = "Beim Laden von " + xmlPfad + " traten Validierungsfehler auf.";
+                            contentText += "\n\n";
+                            contentText += "(weitere Details in der Log-Datei)";
+                            alert.setContentText(contentText);
+                            // Höhe explizit setzen
+                            alert.setHeight(200);
                             alert.showAndWait();
                         }
 
