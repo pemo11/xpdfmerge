@@ -1,5 +1,7 @@
 # xpdfmerge
 
+(letzte Aktualisierung: 01/03/2022)
+
 *xpdfmerge* ist eine kleine Java-Anwendung, die alle in einer XJustiz-Nachricht über Dateinamen angegebenen Pdf-Dateien zu einer Pdf-Datei zusammenfasst und diese im documents-Verzeichnis ablegt.
 
 Der Autor der Anwendung ist Mitglied des EurekaFach-Entwicklerteams.
@@ -9,7 +11,7 @@ Die Anwendung kann unter Windows, MacOS und Linux ausgeführt werden.
 Die Anwendung wird auf zwei unterschiedlichen Wegen zur Verfügung gestellt:
 
 1. Als Quelltext über dieses Projektportal.
-2. Als lauffähige Packages für MacOS und Linux über das Ftp-Verzeichnis.
+2. Als lauffähige Packages für MacOS und Linux über das Ftp-Verzeichnis (der Zugang muss angefordert werden).
 
 Hinweise zur Ausführung unter MacOS und Linux folgen am Ende dieser Übersicht.
 
@@ -130,5 +132,5 @@ Bei Fragen und Problemen bitte eine Mail an pm@eureka-fach.de
 * 0.24 - Abfrage auf app.config nach dem Start und "Umstellen" auf Log4J 2.17.1
 * 0.32 - Mehr Details in der Baumansicht und korrekte Bookmarks für die Gesamt-PdfDatei
 * 0.33 - Korrekte Anzeige der Log4j-Versionsnummer nach dem Start in der Log-Datei
-* 0.35 - u.a. Anwendungsicon und numerierte Dokument-Einträge in der Baumansicht
+* 0.35 - u.a. Anzeige von Validierungsfehlern, Anwendungsicon und nummerierte Dokument-Einträge in der Baumansicht
 * 0.36 - Ein PdfMerge ist nur möglich, wenn eine Xml-Datei geladen wurde
