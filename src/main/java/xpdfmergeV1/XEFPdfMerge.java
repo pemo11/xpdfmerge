@@ -37,7 +37,7 @@ import java.util.*;
 public class XEFPdfMerge extends Application {
     private String xJustizPfad;
     private String osName = "Unbekannt";
-    private String appVersion = "0.35";
+    private String appVersion = "0.36";
     // Nur provisorisch - falls die Version-Abfrage null liefert
     private String log4VersionDefault = "2.17.1";
     // Kein Scope Modifier, daher Sichtbarkeit innerhalb des Package
@@ -54,6 +54,10 @@ public class XEFPdfMerge extends Application {
     // Wichtig: LinkedHashMap statt (veralteter) Hashtable, da die Reihenfolge erhalten bleibt
     private LinkedHashMap<AkteInfo, List<PdfDocumentInfo>> pdfInfoHashtable = null;
     private AppConfig config = null;
+    // Menuitem-Elemente
+    private MenuItem exitItem = null;
+    private MenuItem openNachrichtXml = null;
+    private MenuItem pdfMerge = null;
 
     @Override
     public void start(Stage stage) throws IOException, URISyntaxException {
@@ -201,7 +205,7 @@ public class XEFPdfMerge extends Application {
 
         // PM: 04/02/22 - image Pfad als uri holen - eventuell try/catch statt Methoden-Erweiterung
         imgPfad = getClass().getResource("/images/nachrichtxml.png").toURI().toString();
-        MenuItem openNachrichtXml = new MenuItem("Nachricht.xml öffnen", new ImageView(new Image(imgPfad)));
+        openNachrichtXml = new MenuItem("Nachricht.xml öffnen", new ImageView(new Image(imgPfad)));
 
         /**
         * Xml-Nachricht einlesen und in treeView darstellen
@@ -231,6 +235,9 @@ public class XEFPdfMerge extends Application {
 
                 File selectedFile = fileChooser.showOpenDialog(stage);
                 if (selectedFile != null) {
+
+                    // Menuitem Gesamt-Pdf erstellen aktivieren
+                    pdfMerge.setDisable(false);
 
                     // Klassenvariable wird ohne this angesprochen
                     xmlPfad = selectedFile.toString();
@@ -404,7 +411,7 @@ public class XEFPdfMerge extends Application {
         // Trennlinie für das Menü
         SeparatorMenuItem sep1 = new SeparatorMenuItem();
         imgPfad = getClass().getResource("/images/exit.png").toURI().toString();
-        MenuItem exitItem =  new MenuItem("Beenden", new ImageView(new Image(imgPfad)));
+        exitItem =  new MenuItem("Beenden", new ImageView(new Image(imgPfad)));
 
         exitItem.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -418,7 +425,10 @@ public class XEFPdfMerge extends Application {
 
         Menu menuAction = new Menu("Aktionen");
         imgPfad = getClass().getResource("/images/pdfmerge.png").toURI().toString();
-        MenuItem pdfMerge = new MenuItem("GesamtPDF erstellen",  new ImageView(new Image(imgPfad)));
+        pdfMerge = new MenuItem("GesamtPDF erstellen",  new ImageView(new Image(imgPfad)));
+
+        // Menuitem deaktivieren
+        pdfMerge.setDisable(true);
 
         // Ausführen der Merge-Aktion
         pdfMerge.setOnAction(new EventHandler<ActionEvent>() {
