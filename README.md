@@ -27,13 +27,17 @@ Die offizielle Downloadadresse der JavaFx-Dateien ist:
 
 https://openjfx.io/ 
 
-Andere Links sollten nicht genutzt werden (es sei denn, es explizit klar was sich dahinter "verbirgt").
+Andere Links sollten nicht genutzt werden (es sei denn, es ist explizit klar, was sich dahinter "verbirgt").
 
 **Hinweis:** Hinter *JavaFX* steht die Firma *Gluon*, so dass man bei der Suche nach dem Stichwort JavaFx ab und zu direkt auf der Firmenwebseite (https://gluonhq.com/) landen kann.
 
-Wichtig ist allgemein, dass sich die Programmdatei Java, z.B. in der Konsole, ausführen lässt. Damit können generell Java-Programme ausgeführt werden und die Umgebungsvariable *JAVA_HOME* enthält den richtigen Verzeichnispfad.
+Wichtig ist allgemein, dass sich die Programmdatei java, z.B. in der Konsole, ausführen lässt. Damit können generell Java-Programme ausgeführt werden und die Umgebungsvariable *JAVA_HOME* enthält den richtigen Verzeichnispfad. Per
 
-Wenn nicht, muss die Umgebungsvariable _JAVA_HOME_ angelegt und auf den Pfad des JDK gesetzt werden, z.B. bei Windows *C:\Program Files\RedHat\java-11-openjdk-11.0.9-3*
+`java -version`
+
+lässt sich bekanntlich feststellen, ob es eine Version > 1.8 ist.
+
+Sollte *java* nicht aufrufbar sein, obwohl ein Java SDK installiert wurde, muss die Umgebungsvariable _JAVA_HOME_ eventuell noch angelegt und auf den Pfad des JDK gesetzt werden, z.B. bei Windows *C:\Program Files\RedHat\java-11-openjdk-11.0.9-3*
 
 Aufgrund der erwähnten Abhängigkeit des Programms zu JavaFx, muss der Verzeichnispfad der JavaFx-Lib-Dateien beim Aufruf von *java* angegeben werden. Sollten diese Dateien Teil eines Gesamtpakets sein, kommt es darauf an, dass das richtige Unterverzeichnis angegeben wird.
 
