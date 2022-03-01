@@ -55,13 +55,13 @@ Sie ist Teil dieses Projekts und ist die einzige Datei, die benötigt wird:
 
 https://github.com/pemo11/xpdfmerge/blob/main/deploy/pdfmergev1.jar
 
-**Wichtig:** Das Java (11) SDK und die JavaFX-Dateien müssen separat installiert werden (am besten natürlich vor dem ersten Programmstart;).
+**Wichtig:** Das Java (11) SDK und die JavaFX-Dateien müssen bei der Ausführung unter Windows separat installiert werden (am besten natürlich vor dem ersten Programmstart;).Für MacOS ist alles was zur Ausführung erforderlich ist Teil der dmg-Datei, für Linux enthält die deb-Datei aktuell nur die JavaFx-Dateien.
 
 Das kleine (und optionale) PowerShell-Skript ist ebenfalls Teil dieses Projektportals (und wird am einfachsten in der Raw-Ansicht kopiert und in eine lokale Textdatei eingefügt, die als Ps1-Datei lokal gespeichert wird).
 
-Bei den JavaFX-Dateien kommt es (natürlich) darauf an, das sie zum OS passen müssen (Windows, MacOS und Linux).
+Bei den JavaFX-Dateien kommt es (natürlich) darauf an, dass sie zum OS passen müssen (Windows, MacOS und Linux).
 
-Die folgende Anleitung gilt allgemein - für Linux gibt es alternativ eine Deb-Datei (mehr dazu am Ende, für MacOS steht auf Anfrage eine Dmg-Datei zur Verfügung).
+Die folgende Anleitung gilt allgemein (für MacOS und Linus sollte man die Package-Dateien aus dem Ftp-Verzeichnis verwenden).
 
 Die einzelnen Schritte, um XpdfMerge ausführen zu können:
 
