@@ -1,10 +1,19 @@
 # xpdfmerge
- /usr/lib/jvm/javafx-sdk-17.0.2/lib
-*xpdfmerge* ist eine kleine Java-Anwendung, die alle über Verzeichnispfade in einer Xml-Datei im XJustiz-Format enthaltenen Pdf-Datei zu einer einzigen Pdf-Datei zusammengefasst.
+
+*xpdfmerge* ist eine kleine Java-Anwendung, die alle in einer XJustiz-Nachricht über Dateinamen angegebenen Pdf-Dateien zu einer Pdf-Datei zusammenfasst und diese im documents-Verzeichnis ablegt.
 
 Der Autor der Anwendung ist Mitglied des EurekaFach-Entwicklerteams.
 
 Die Anwendung kann unter Windows, MacOS und Linux ausgeführt werden.
+
+Die Anwendung wird auf zwei unterschiedlichen Wegen zur Verfügung gestellt:
+
+1. Als Quelltext über dieses Projektportal.
+2. Als lauffähige Packages für MacOS und Linux über das Ftp-Verzeichnis.
+
+Hinweise zur Ausführung unter MacOS und Linux folgen am Ende dieser Übersicht.
+
+Für die Ausführung unter Windows stehen aktuell nur die Quelltextdateien im Rahmen eines Maven-Projekts zur Verfügung. Die Jar-Datei im deploy-Verzeichnis ist nicht auf dem aktuellen Stand.
 
 Voraussetzung für die Ausführung der Anwendung ist, dass das JDK (ab Version 11) installiert ist, z.B. über das Open JDK von RedHat:
 
@@ -12,7 +21,7 @@ https://developers.redhat.com/products/openjdk/download
 
 Theoretisch ist das Liberica SDK eine gute Alternative (https://bell-sw.com/pages/downloads/), da hier (bei Full SDK) JavaFx dabei ist - das habe ich aber noch nicht getestet. Auf der anderen Seite ist es eventuell flexibler, die JavaFx-Dateien beim Start der Jar-Datei über den *--module-path**-Parameter auswählen zu können. Aktuell geht die Start-Datei davon aus, dass alle JavaFx-Dateien in einem eigenen Verzeichnis vorliegen (das bei der Linux-Version Teil der deb-Datei ist, die über das EurekaFach-Ftp-Verzeichnis zur Verfügung gestellt wird).
 
-Da (bekanntlich) JavaFx ab JDK 9 nicht mehr dabei ist, müssen die Progrmambibliotheken separat heruntergeladen und in einem eigenen Verzeichnis abgelegt werden. Dieser Verzeichnispfad muss über den Parameter **--module-path** bei der Ausführung der Jar-Datei angegeben werden (mehr dazu später).
+Da (bekanntlich) JavaFx ab JDK 9 nicht mehr dabei ist, müssen die Programmbibliotheken separat heruntergeladen und in einem eigenen Verzeichnis abgelegt werden. Dieser Verzeichnispfad muss über den Parameter **--module-path** bei der Ausführung der Jar-Datei angegeben werden (mehr dazu später).
 
 Die offizielle Downloadadresse der JavaFx-Dateien ist:
 
@@ -77,17 +86,25 @@ xJustizPfad=C:\\EurekaFach\\BEAkten
 Installation unter Linux
 ========================
 
-Die obige "Installationsanleitung" funktioniert natürlich auch unter Linux. Damit die Anwendung etwas komfortabler per Doppelklick gestartet werden kann, gibt es eine Alternative in Gestalt einer Deb-Datei und einer desktop-Datei, die das Skript *start.sh* ausführt, das wiederum java wie gezeigt startet.
+Die obige "Installationsanleitung" funktioniert natürlich auch unter Linux. Damit die Anwendung etwas komfortabler per Doppelklick gestartet werden kann, gibt es eine Alternative in Gestalt einer deb-Datei, die sich im Ftp-Verzeichnis befindet.
 
-*Wichtig*: Die JavaFx-Dateien sind Teil des deb-Pakets, JavaFx muss also in diesem Fall nicht separat installiert werden, sondern nur das Java 11-SDK.
+*Wichtig*: Aktuell enthält die deb-Datei nur die JavaFx-Dateien - das Java 11 SDK muss vorher instaliert werden. JavaFx muss daher *nicht* installiert werden.
 
-Aktuell müssen drei Schritte ausgeführt werden, um eine Datei zu erhalten, die "doppelgeklickt" werden kann:
+Die deb-Datei enthält desktop-Datei, die das Skript *start.sh* ausführt, das wiederum java wie gezeigt startet.
 
-**Schritt 1:** Download der Deb-Datei aus dem deploy-Verzeichnis im Projektportal
+Aktuell müssen drei Schritte ausgeführt werden, um eine Datei zu erhalten, die auf einem Linux-Desktop (Debian) "doppelgeklickt" werden kann:
+
+**Schritt 1:** Download der deb-Datei aus dem Ftp-Verzeichnis.
 
 **Schritt 2:** Für die Installation einer Deb-Datei habe ich unter Ubuntu mit **GDebi** gute Erfahrungen gemacht (es muss per *sudo apt-get gdebi* installiert werden). Ansonsten geht es auch mit der eingebauten Anwendung.
 
-**Schritt 3:** Alle Dateien werden in das Verzeichnis */usr/local/bin* kopiert (das wird ggf. noch geändert).
+**Wichtig**: Aktuell gibt es mit der deb-Datei leider ein Problem, das dazu führt, das die Installation nicht ausgeführt wird (es hängt mit dem Umstand zusammen, dass aus einem mir nicht bekannten Grund Dateien, die Teil des Package sind nicht überschrieben werden können).
+
+Eine provisorische Lösung besteht darin, die deb-Datei direkt zu installieren:
+
+`sudo dpkg -i --force-overwrite EFXPdfMerge.deb`
+
+**Schritt 3:** Alle Dateien werden durch die Installation in das Verzeichnis */usr/local/bin* kopiert (das wird ggf. noch geändert).
 
 Optional kann die Datei *pdfmergev1.desktop* in das desktop-Verzeichnis kopiert werden, so dass sie einfacher erreichbar ist.
 
@@ -99,6 +116,8 @@ wird die desktop-Datei im Verzeichnis /usr/share/applications abgelegt und kann 
 
 Danach sollte das Anwendungfenster starten.
 
+Bei Fragen und Problemen bitte eine Mail an pm@eureka-fach.de
+
 #Versionsgeschichte:
 
 * 0.16 - erste Version mit Minimalfunktionsumfang
@@ -106,4 +125,6 @@ Danach sollte das Anwendungfenster starten.
 * 0.22 - keine neuen Funktionen, aber Aktualisierung auf Log4J 2.17.1 (aus aktuellem Anlass)
 * 0.24 - Abfrage auf app.config nach dem Start und "Umstellen" auf Log4J 2.17.1
 * 0.32 - Mehr Details in der Baumansicht und korrekte Bookmarks für die Gesamt-PdfDatei
-* 0.33 - Aktuelle Version mit korrekter Anzeige der Log4j-Versionsnummer nach dem Start in der Log-Datei
+* 0.33 - Korrekte Anzeige der Log4j-Versionsnummer nach dem Start in der Log-Datei
+* 0.35 - u.a. Anwendungsicon und numerierte Dokument-Einträge in der Baumansicht
+* 0.36 - Ein PdfMerge ist nur möglich, wenn eine Xml-Datei geladen wurde
