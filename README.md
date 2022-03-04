@@ -1,6 +1,6 @@
 # xpdfmerge
 
-(letzte Aktualisierung: 01/03/2022)
+(letzte Aktualisierung: 04/03/2022)
 
 *xpdfmerge* ist eine kleine Java-Anwendung, die alle in einer XJustiz-Nachricht über Dateinamen angegebenen Pdf-Dateien zu einer Pdf-Datei zusammenfasst und diese im documents-Verzeichnis ablegt.
 
@@ -11,11 +11,11 @@ Die Anwendung kann unter Windows, MacOS und Linux ausgeführt werden.
 Die Anwendung wird auf zwei unterschiedlichen Wegen zur Verfügung gestellt:
 
 1. Als Quelltext über dieses Projektportal.
-2. Als lauffähige Packages für MacOS und Linux über das Ftp-Verzeichnis (der Zugang muss angefordert werden).
+2. Als lauffähige Packages für MacOS und Linux über das Ftp-Verzeichnis (der Zugang muss über die unten angegebene E-Mail-Adresse angefordert werden).
 
 Hinweise zur Ausführung unter MacOS und Linux folgen am Ende dieser Übersicht.
 
-Für die Ausführung unter Windows stehen aktuell nur die Quelltextdateien im Rahmen eines Maven-Projekts zur Verfügung. Die Jar-Datei im deploy-Verzeichnis ist nicht auf dem aktuellen Stand.
+Für die Ausführung unter Windows stehen aktuell *nur* die Quelltextdateien im Rahmen eines Maven-Projekts zur Verfügung, das in Eclipse, IntelliJ, Visual Code usw. erstellt werden muss. Es gibt daher keinen Installer (die jar-Datei im deploy-Verzeichnis ist nicht automatisch auf dem aktuellen Stand).
 
 Voraussetzung für die Ausführung der Anwendung ist, dass das JDK (ab Version 11) installiert ist, z.B. über das Open JDK von RedHat:
 
@@ -61,15 +61,15 @@ https://github.com/pemo11/xpdfmerge/blob/main/deploy/pdfmergev1.jar
 
 Das kleine (und optionale) PowerShell-Skript ist ebenfalls Teil dieses Projektportals (und wird am einfachsten in der Raw-Ansicht kopiert und in eine lokale Textdatei eingefügt, die als Ps1-Datei lokal gespeichert wird).
 
-Bei den JavaFX-Dateien kommt es (natürlich) darauf an, dass sie zum OS passen müssen (Windows, MacOS und Linux).
+Bei den JavaFx-Dateien kommt es (natürlich) darauf an, dass sie zum OS passen müssen (Windows, MacOS und Linux).
 
-Die folgende Anleitung gilt allgemein (für MacOS und Linus sollte man die Package-Dateien aus dem Ftp-Verzeichnis verwenden).
+Die folgende Anleitung gilt allgemein (für MacOS und Linux sollte man die Package-Dateien aus dem Ftp-Verzeichnis verwenden).
 
 Die einzelnen Schritte, um XpdfMerge ausführen zu können:
 
 **Schritt 1**: Die Jar-Datei pdfmergev1.jar wird in ein leeres Verzeichnis kopiert.
 
-**Schritt 2**: Es wird eine Umgebungsvariable **PATH_TO_FX** angelegt, die als Wert den Verzeichnispfad des lib-Unterverzeichnis in dem Verzeichnis mit den JavaFX-Dateien erhält (darum kümmert sich das kleine PowerShell-Skript).
+**Schritt 2**: Es wird eine Umgebungsvariable **PATH_TO_FX** angelegt, die als Wert den Verzeichnispfad des lib-Unterverzeichnis in dem Verzeichnis mit den JavaFx-Dateien erhält (darum kümmert sich das kleine PowerShell-Skript).
 
 **Schritt 3**: Start der Jar-Datei über den Java Launcher
 
@@ -96,17 +96,17 @@ Die obige "Installationsanleitung" funktioniert natürlich auch unter Linux. Dam
 
 *Wichtig*: Aktuell enthält die deb-Datei nur die JavaFx-Dateien - das Java 11 SDK muss vorher instaliert werden. JavaFx muss daher *nicht* installiert werden.
 
-Die deb-Datei enthält desktop-Datei, die das Skript *start.sh* ausführt, das wiederum java wie gezeigt startet.
+Die deb-Datei enthält eine desktop-Datei, die das Skript *start.sh* ausführt, das wiederum den Java-Launcher *java* wie gezeigt startet.
 
 Aktuell müssen drei Schritte ausgeführt werden, um eine Datei zu erhalten, die auf einem Linux-Desktop (Debian) "doppelgeklickt" werden kann:
 
 **Schritt 1:** Download der deb-Datei aus dem Ftp-Verzeichnis.
 
-**Schritt 2:** Für die Installation einer Deb-Datei habe ich unter Ubuntu mit **GDebi** gute Erfahrungen gemacht (es muss per *sudo apt-get gdebi* installiert werden). Ansonsten geht es auch mit der eingebauten Anwendung.
+**Schritt 2:** Für die Installation einer Deb-Datei habe ich mit **GDebi** gute Erfahrungen gemacht (es muss eventuell per *sudo apt-get gdebi* installiert werden). Ansonsten geht es auch mit dem eingebauten Package Installer.
 
 **Wichtig**: Aktuell gibt es mit der deb-Datei leider ein Problem, das dazu führt, das die Installation nicht ausgeführt wird (es hängt mit dem Umstand zusammen, dass aus einem mir nicht bekannten Grund Dateien, die Teil des Package sind nicht überschrieben werden können).
 
-Eine provisorische Lösung besteht darin, die deb-Datei direkt zu installieren:
+Eine provisorische Lösung besteht darin, die deb-Datei direkt im Terminal-Fenster zu installieren:
 
 `sudo dpkg -i --force-overwrite EFXPdfMerge.deb`
 
@@ -116,13 +116,13 @@ Optional kann die Datei *pdfmergev1.desktop* in das desktop-Verzeichnis kopiert 
 
 Über
 
-sudo desktop-file-install pfdmergev1.desktop
+`sudo desktop-file-install pfdmergev1.desktop`
 
-wird die desktop-Datei im Verzeichnis /usr/share/applications abgelegt und kann dort per Doppeklick gestartet werden.
+wird die desktop-Datei im Verzeichnis `/usr/share/applications` abgelegt und kann dort per Doppeklick gestartet werden.
 
 Danach sollte das Anwendungfenster starten.
 
-Bei Fragen und Problemen bitte eine Mail an pm@eureka-fach.de
+Bei Fragen und Problemen bitte (formlos) eine Mail an pdfmerger@eureka-fach.de
 
 #Versionsgeschichte:
 
@@ -134,3 +134,4 @@ Bei Fragen und Problemen bitte eine Mail an pm@eureka-fach.de
 * 0.33 - Korrekte Anzeige der Log4j-Versionsnummer nach dem Start in der Log-Datei
 * 0.35 - u.a. Anzeige von Validierungsfehlern, Anwendungsicon und nummerierte Dokument-Einträge in der Baumansicht
 * 0.36 - Ein PdfMerge ist nur möglich, wenn eine Xml-Datei geladen wurde
+* 0.37 - Detailierte Log-Einträge zur Schemavalidierung
