@@ -87,7 +87,7 @@ Ihr Inhalt ist sehr einfach:
 
 xJustizPfad=C:\\EurekaFach\\BEAkten
 
-Über die Datei Log4j2.xml kann der Logger konfiguriert werden (noch nicht getestet, da es anscheinend auch ohne die Xml_Datei funktioniert).
+Über die Datei Log4j2.xml kann der Logger konfiguriert werden (u.a. den Pfad der Log-Datei).
 
 Installation unter Linux
 ========================
