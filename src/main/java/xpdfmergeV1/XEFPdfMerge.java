@@ -278,11 +278,15 @@ public class XEFPdfMerge extends Application {
                         // TODO: Sollte über Config-Datei abgefragt werden, so dass die Anpassung an aktuelle XJustiz-Versionen einfacher wird
                         // Eintrag schemaPfad ist bereits vorhanden
                         String xsdPfad = "schemas/xjustiz_0005_nachrichten_3_0.xsd";
+                        // TODO: Bessere Lösung finden
+                        String curDir = new File("").getAbsolutePath();
+                        xsdPfad = Paths.get(curDir, xsdPfad).toString();
+                        String xsdSchemaVersion = "3.3.1";
                         if (new File(xsdPfad).exists()) {
-                            infoMessage = String.format("XJustiz-Nachricht wird gegen Schemadatei %s validiert.", xsdPfad);
+                            infoMessage = String.format("XJustiz-Nachricht wird gegen %s Version %s validiert.", xsdPfad, xsdSchemaVersion);
                             logger.info(infoMessage);
                         } else {
-                            infoMessage = String.format("Schemadatei %s ist nicht vorhanden.", xsdPfad);
+                            infoMessage = String.format("Schemadatei %s ist nicht vorhanden - keine Schema-Validierung.", xsdPfad);
                             logger.warn(infoMessage);
                         }
                         List<String> validateErrors = xmlHelper.validateXMLSchema(xsdPfad, xmlPfad);
@@ -291,7 +295,8 @@ public class XEFPdfMerge extends Application {
                             infoMessage = "XSD-Schemavalidierung ohne Fehler";
                             logger.info(infoMessage);
                         } else {
-                            infoMessage = String.format("XSD-Schemavalidierung mit %d Fehlern", validateErrors.size());
+                            String schemaInfo = "XJustiz-Nachricht v" + xsdSchemaVersion;
+                            infoMessage = String.format("Schemavalidierung gegen %s mit %d Fehlern", schemaInfo, validateErrors.size());
                             logger.warn(infoMessage);
                             for(String validateError: validateErrors) {
                                 logger.warn(validateError);
@@ -313,7 +318,7 @@ public class XEFPdfMerge extends Application {
                             Alert alert = new Alert(Alert.AlertType.WARNING, "", ButtonType.OK);
                             alert.setTitle("XML-Validierung mit Fehlern");
                             alert.setHeaderText("");
-                            String contentText = "Beim Laden von " + xmlPfad + " traten Validierungsfehler auf.";
+                            String contentText = String.format("Beim Laden von " + xmlPfad + " traten Validierungsfehler auf (XJustiz-Schemaversion %s).", xsdSchemaVersion);
                             contentText += "\n\n";
                             contentText += "(weitere Details in der Log-Datei)";
                             alert.setContentText(contentText);
