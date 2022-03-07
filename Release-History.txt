@@ -17,3 +17,9 @@ bis 09/11/21 - Version 0.15 umfasst die Kernfunktionalität
 04/02/22     - Auslagern der Config-Datei als efxapp.config und Log-Datei in das Userprofile-Verzeichnis/Bitmaps werden als Ressourcen eingelesen
 
 06/02/22     - Version 0.25
+
+kein Datum   - Version 0.32 - Mehr Details in der Baumansicht und korrekte Bookmarks für die Gesamt-PdfDatei
+kein Datum   - Version 0.33 - Korrekte Anzeige der Log4j-Versionsnummer nach dem Start in der Log-Datei
+kein Datum   - Version 0.35 - u.a. Anzeige von Validierungsfehlern, Anwendungsicon und nummerierte Dokument-Einträge in der Baumansicht
+kein Datum   - Version 0.36 - Ein PdfMerge ist nur möglich, wenn eine Xml-Datei geladen wurde
+04/03/22     - Version 0.37 - Detailierte Log-Einträge zur Schemavalidierung

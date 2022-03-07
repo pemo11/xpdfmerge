@@ -20,14 +20,14 @@ public class AppConfig {
         private String configPath;
 
         AppConfig() throws IOException {
-            String userPath = "";
+            String userHome = "";
             configFile = new java.util.Properties();
             configPath  = "";
             try {
                 // efxapp.config soll sich im Benutzerprofilverzeichnis (Home-Verzeichnis) befinden
                 // TODO: Besser unter /var/xpdfmerge?
-                userPath = System.getProperty("user.home");
-                configPath = userPath + "/" + "efxapp.config";
+                userHome = System.getProperty("user.home");
+                configPath = Paths.get(userHome, "efxapp.config").toString();
                 // TODO: Abfrage, ob Datei existiert
                 File file = new File(configPath);
                 if (file.exists()) {
@@ -39,7 +39,7 @@ public class AppConfig {
                     FileOutputStream stream = new FileOutputStream(configPath);
                     Charset charset = Charset.forName("UTF8");
                     try (BufferedWriter bufWriter = Files.newBufferedWriter(file.toPath(), charset)) {
-                        bufWriter.write("xJustizPfad=" + userPath);
+                        bufWriter.write("xJustizPfad=" + userHome);
                         infoMessage = String.format("AppConfig() - %s war nicht vorhanden und wurde angelegt.", configPath);
                     } catch (IOException ex) {
                         infoMessage = String.format("AppConfig() - Fehler beim Anlegen von %s !!!", configPath);

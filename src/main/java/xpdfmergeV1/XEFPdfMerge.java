@@ -1,7 +1,7 @@
 /*
   XJustiz-Pdf-Merge für Windows, MacOs und Linux
-  Autor: Peter Monadjemi - pm@eureka-fach.de
-  Letzte Änderung: 14/02/22
+  Autor: Peter Monadjemi - pdfmerger@eureka-fach.de
+  Letzte Änderung: 07/03/22
 */
 
 package xpdfmergeV1;
@@ -35,9 +35,8 @@ import java.time.Instant;
 import java.util.*;
 
 public class XEFPdfMerge extends Application {
-    private String xJustizPfad;
     private String osName = "Unbekannt";
-    private String appVersion = "0.36";
+    private String appVersion = "0.38";
     // Nur provisorisch - falls die Version-Abfrage null liefert
     private String log4VersionDefault = "2.17.1";
     // Kein Scope Modifier, daher Sichtbarkeit innerhalb des Package
@@ -46,6 +45,7 @@ public class XEFPdfMerge extends Application {
     private String xmlPfad = "";
     private String basePfad = "";
     private String infoMessage = "";
+    private String xJustizPfad = "";
     private String pdfOutfile = "GesamtePDF.pdf";
     private String imgPfad = "";
     private int dokumentNr = 0;
@@ -61,6 +61,8 @@ public class XEFPdfMerge extends Application {
 
     @Override
     public void start(Stage stage) throws IOException, URISyntaxException {
+        // TODO: Unter Linux sollte die Log-Datei unter ~/.local/share/applications werden
+        // Geht eventuell per PropertyConfigurator.configure(...)
         logger = LogManager.getLogger(XEFPdfMerge.class);
 
         // Die Versionsnummer von Log4J loggen
@@ -69,8 +71,6 @@ public class XEFPdfMerge extends Application {
         log4JVersion = log4JVersion == null ? log4VersionDefault : log4JVersion;
         // geht nicht, da versionInfo private ist?
         // String log4JVersion = logger.getClass().getPackage().versionInfo.implVersion;
-        infoMessage = String.format("*** Using Log4J version %s ***", log4JVersion);
-        logger.info(infoMessage);
 
         // Application Icon festlegen
         imgPfad = getClass().getResource("/images/EFXLogo.png").toURI().toString();
@@ -80,24 +80,29 @@ public class XEFPdfMerge extends Application {
         stage.getIcons().add(imgLogo);
 
         // User directory holen
-        String userDir = System.getProperty("user.home");
+        String userHome = System.getProperty("user.home");
 
         // OS-Name holen
         osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
 
-        infoMessage = String.format("XEFPdfMerge->start: osName=%s", osName);
+        infoMessage = String.format("XEFPdfMerge->start: version=%s osName=%s", appVersion, osName);
+        logger.info(infoMessage);
+
+        infoMessage = String.format("*** Using Log4J version %s ***", log4JVersion);
         logger.info(infoMessage);
 
         // Ausgabeverzeichnis OS-spezifisch festlegen
         // Ist u.U. nicht erforderlich, da user.home bereits OS-spezifisch ist
         if (osName.contains("win")) {
-            pdfOutfile = userDir + "/documents/" + pdfOutfile;
+            pdfOutfile = Paths.get(userHome, "documents", pdfOutfile).toString();
         } else if (osName.contains("mac")) {
-            pdfOutfile = userDir + "/documents/" + pdfOutfile;
+            pdfOutfile = Paths.get(userHome, "documents", pdfOutfile).toString();
         } else {
-            // Bei Linux Documents statt documents?
-            pdfOutfile = userDir + "/Documents/" + pdfOutfile;
+            // Problem bei Linux-Desktop: Documents statt documents und documents kann auch Dokumente heißen
+            pdfOutfile = Paths.get(userHome,  pdfOutfile).toString();
         }
+        infoMessage = String.format("Home-Directory=%s,pdfOutfile=%s", userHome, pdfOutfile);
+        logger.info(infoMessage);
 
         // xJustiz-Pfad aus Config-Datei einlesen
 
@@ -111,7 +116,7 @@ public class XEFPdfMerge extends Application {
 
         // Wenn leer, dann Default setzen
         if (xJustizPfad == null || xJustizPfad.isEmpty()) {
-            xJustizPfad = userDir + "/documents";
+            xJustizPfad = Paths.get(userHome, "documents").toString();
         }
 
         infoMessage = String.format("XEFPdfMerge->start: xJustizPfad=%s", xJustizPfad);
@@ -270,13 +275,24 @@ public class XEFPdfMerge extends Application {
                     try {
                         XmlHelper xmlHelper = new XmlHelper(logger, xmlPfad);
                         // Schema-Validierung
+                        // TODO: Sollte über Config-Datei abgefragt werden, so dass die Anpassung an aktuelle XJustiz-Versionen einfacher wird
+                        // Eintrag schemaPfad ist bereits vorhanden
                         String xsdPfad = "schemas/xjustiz_0005_nachrichten_3_0.xsd";
+                        if (new File(xsdPfad).exists()) {
+                            infoMessage = String.format("XJustiz-Nachricht wird gegen Schemadatei %s validiert.", xsdPfad);
+                            logger.info(infoMessage);
+                        } else {
+                            infoMessage = String.format("Schemadatei %s ist nicht vorhanden.", xsdPfad);
+                            logger.warn(infoMessage);
+                        }
                         List<String> validateErrors = xmlHelper.validateXMLSchema(xsdPfad, xmlPfad);
                         // Gab es Validierungsfehler, alle loggen, die Ausführung geht weiter
                         if (validateErrors.size() == 0) {
                             infoMessage = "XSD-Schemavalidierung ohne Fehler";
                             logger.info(infoMessage);
                         } else {
+                            infoMessage = String.format("XSD-Schemavalidierung mit %d Fehlern", validateErrors.size());
+                            logger.warn(infoMessage);
                             for(String validateError: validateErrors) {
                                 logger.warn(validateError);
                                 errorFlag = true;
