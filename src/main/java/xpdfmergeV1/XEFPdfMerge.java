@@ -36,7 +36,7 @@ import java.util.*;
 
 public class XEFPdfMerge extends Application {
     private String osName = "Unbekannt";
-    private String appVersion = "0.38";
+    private String appVersion = "0.39";
     // Nur provisorisch - falls die Version-Abfrage null liefert
     private String log4VersionDefault = "2.17.1";
     // Kein Scope Modifier, daher Sichtbarkeit innerhalb des Package
@@ -47,6 +47,7 @@ public class XEFPdfMerge extends Application {
     private String infoMessage = "";
     private String xJustizPfad = "";
     private String pdfOutfile = "GesamtePDF.pdf";
+    private String userHome = "";
     private String imgPfad = "";
     private int dokumentNr = 0;
     // Betrifft die XML-Validierung
@@ -80,7 +81,7 @@ public class XEFPdfMerge extends Application {
         stage.getIcons().add(imgLogo);
 
         // User directory holen
-        String userHome = System.getProperty("user.home");
+        userHome = System.getProperty("user.home");
 
         // OS-Name holen
         osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
@@ -257,9 +258,10 @@ public class XEFPdfMerge extends Application {
                         config.setProperty("LastPathSelected", basePfad);
                     }
 
-                    String anzeigeName = "";;
+                    String anzeigeName = "";
+                    ;
                     String dateiName = "";
-                    String zeitpunktErstellung  = "";
+                    String zeitpunktErstellung = "";
 
                     // dokumentNr für die Dokumenteliste in der TreeView zurücksetzen
                     dokumentNr = 0;
@@ -272,37 +274,66 @@ public class XEFPdfMerge extends Application {
                     // Pdf-Dateien der Akte stehen
                     pdfInfoHashtable = new LinkedHashMap<>();
 
+                    boolean errorFlag = false;
                     try {
+                        // Xml-Datei laden (ohne Validierung)
                         XmlHelper xmlHelper = new XmlHelper(logger, xmlPfad);
-                        // Schema-Validierung
-                        // TODO: Sollte über Config-Datei abgefragt werden, so dass die Anpassung an aktuelle XJustiz-Versionen einfacher wird
-                        // Eintrag schemaPfad ist bereits vorhanden
-                        String xsdPfad = "schemas/xjustiz_0005_nachrichten_3_0.xsd";
-                        // TODO: Bessere Lösung finden
-                        String curDir = new File("").getAbsolutePath();
-                        xsdPfad = Paths.get(curDir, xsdPfad).toString();
-                        String xsdSchemaVersion = "3.3.1";
-                        if (new File(xsdPfad).exists()) {
-                            infoMessage = String.format("XJustiz-Nachricht wird gegen %s Version %s validiert.", xsdPfad, xsdSchemaVersion);
-                            logger.info(infoMessage);
-                        } else {
-                            infoMessage = String.format("Schemadatei %s ist nicht vorhanden - keine Schema-Validierung.", xsdPfad);
-                            logger.warn(infoMessage);
-                        }
-                        List<String> validateErrors = xmlHelper.validateXMLSchema(xsdPfad, xmlPfad);
-                        // Gab es Validierungsfehler, alle loggen, die Ausführung geht weiter
-                        if (validateErrors.size() == 0) {
-                            infoMessage = "XSD-Schemavalidierung ohne Fehler";
-                            logger.info(infoMessage);
-                        } else {
-                            String schemaInfo = "XJustiz-Nachricht v" + xsdSchemaVersion;
-                            infoMessage = String.format("Schemavalidierung gegen %s mit %d Fehlern", schemaInfo, validateErrors.size());
-                            logger.warn(infoMessage);
-                            for(String validateError: validateErrors) {
-                                logger.warn(validateError);
-                                errorFlag = true;
+                        // Eine Schema-Validierung wird nur durchgeführt, wenn die Config-Datei den Eintrag schemaValidierung = ein enthält
+                        // Der Eintrag schemaPfad gibt das Verzeichnis mit den schema-Dateien an
+                        // Das erscheint mir als die einfachste Lösung
+                        // String xsdPfad = "/schemas/xjustiz_0005_nachrichten_3_0.xsd";
+                        if (config != null) {
+                            String schemaValidierung = config.getProperty("schemaValidierung");
+                            String schemaVersion = "3.3.1";
+                            String schemaPfad = "";
+                            if (schemaValidierung != null && schemaValidierung.toLowerCase().equals("ein")) {
+                                if (config.getProperty("schemaVersion") != "") {
+                                    schemaVersion = config.getProperty("schemaVersion");
+                                }
+                                schemaPfad = config.getProperty("schemaPfad");
+                                if (schemaPfad != null) {
+                                    // Xsd-Pfad ist aktuell relativ zum home-Directory
+                                    schemaPfad = Paths.get(userHome, schemaPfad).toString();
+                                    if (!new File(schemaPfad).exists()) {
+                                        infoMessage = String.format("Die Schemadatei %s existiert nicht - Schemavalidierung wurde ausgelassen.", schemaPfad);
+                                        logger.warn(infoMessage);
+                                    } else {
+                                        infoMessage = String.format("Die XJustiz-Nachricht wird gegen %s Version %s validiert.", schemaPfad, schemaVersion);
+                                        logger.info(infoMessage);
+                                        List<String> validateErrors = xmlHelper.validateXMLSchema(schemaPfad, xmlPfad);
+                                        // Gab es Validierungsfehler, alle loggen, die Ausführung geht weiter
+                                        if (validateErrors.size() == 0) {
+                                            infoMessage = "XSD-Schemavalidierung ohne Fehler";
+                                            logger.info(infoMessage);
+                                        } else {
+                                            String schemaInfo = "XJustiz-Nachricht v" + schemaVersion;
+                                            infoMessage = String.format("Schemavalidierung gegen %s mit %d Fehlern", schemaInfo, validateErrors.size());
+                                            logger.warn(infoMessage);
+                                            for (String validateError : validateErrors) {
+                                                logger.warn(validateError);
+                                                errorFlag = true;
+                                            }
+                                            // Fehlermeldung ausgeben
+                                            Alert alert = new Alert(Alert.AlertType.WARNING, "", ButtonType.OK);
+                                            alert.setTitle("XML-Validierung mit Fehlern");
+                                            alert.setHeaderText("");
+                                            String contentText = String.format("Beim Laden von %s traten Validierungsfehler auf (XJustiz-Schemaversion %s).", xmlPfad, schemaVersion);
+                                            contentText += "\n\n";
+                                            contentText += "(weitere Details in der Log-Datei)";
+                                            alert.setContentText(contentText);
+                                            // Höhe explizit setzen
+                                            alert.setHeight(200);
+                                            alert.showAndWait();
+                                        }
+                                    }
+                                } else {
+                                    infoMessage = "Config-Datei enthält keinen schemaPfad-Eintrag - Schemavalidierung wurde ausgelassen.";
+                                    logger.info(infoMessage);
+                                }
                             }
                         }
+
+                        // Gab es Validierungsfehler?
                         if (!errorFlag) {
                             // Erfolgsmeldung ausgeben
                             Alert alert = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.OK);
@@ -310,31 +341,18 @@ public class XEFPdfMerge extends Application {
                             alert.setHeaderText("");
                             alert.setContentText(xmlPfad + " wurde ausgewertet.");
                             alert.showAndWait();
-
-                            // Pfad in "Statusbar" anzeigen
-                            lbl3.setText(xmlPfad + " wurde geladen.");
-                        } else {
-                            // Fehlermeldung ausgeben
-                            Alert alert = new Alert(Alert.AlertType.WARNING, "", ButtonType.OK);
-                            alert.setTitle("XML-Validierung mit Fehlern");
-                            alert.setHeaderText("");
-                            String contentText = String.format("Beim Laden von " + xmlPfad + " traten Validierungsfehler auf (XJustiz-Schemaversion %s).", xsdSchemaVersion);
-                            contentText += "\n\n";
-                            contentText += "(weitere Details in der Log-Datei)";
-                            alert.setContentText(contentText);
-                            // Höhe explizit setzen
-                            alert.setHeight(200);
-                            alert.showAndWait();
                         }
+                        // Pfad in "Statusbar" anzeigen
+                        lbl3.setText(xmlPfad + " wurde geladen.");
 
                         PdfHelper pdfHelper = new PdfHelper(logger);
                         List<Akte> akten = xmlHelper.getAkten();
                         TreeItem triRoot = new TreeItem("Akten");
                         // Ins TreeView übertragen
-                        for(Akte akte: akten) {
+                        for (Akte akte : akten) {
                             String aktenId = akte.getId();
                             anzeigeName = akte.getAnzeigeName();
-                            zeitpunktErstellung  = akte.getZeitpunktErstellungVersand();
+                            zeitpunktErstellung = akte.getZeitpunktErstellungVersand();
                             TreeItem triAkte = new TreeItem("Akte=" + anzeigeName);
                             triAkte.getChildren().add(new TreeItem("Id=" + aktenId));
                             triAkte.getChildren().add(new TreeItem("Aktentyp=" + akte.getAktenTyp()));
@@ -343,7 +361,7 @@ public class XEFPdfMerge extends Application {
                             List<Teilakte> teilakten = xmlHelper.getTeilakten(aktenId);
                             // Gibt es Teilakten?
                             if (teilakten.size() > 0) {
-                                for(Teilakte teilakte: teilakten) {
+                                for (Teilakte teilakte : teilakten) {
                                     String teilakteId = teilakte.getId();
                                     anzeigeName = teilakte.getAnzeigeName();
                                     // Akteinfo-Objekt für Teilakte anlegen
@@ -355,7 +373,7 @@ public class XEFPdfMerge extends Application {
                                     triTeilakte.getChildren().add(new TreeItem("Nummer im übg. Container=" + teilakte.getNummerImUebergeordnetenContainer()));
                                     // Alle Dokumente durchgehen
                                     List<Dokument> dokumente = xmlHelper.getDokumente(teilakteId, Aktentyp.Teilakte);
-                                    for(Dokument dokument: dokumente) {
+                                    for (Dokument dokument : dokumente) {
                                         dokumentNr++;
                                         dateiName = dokument.getDateiname();
                                         TreeItem triDokument = new TreeItem(String.format("Dokument (%d) %s", dokumentNr, dateiName));
@@ -385,7 +403,7 @@ public class XEFPdfMerge extends Application {
 
                                 // Alle Dokumente der Akte durchgehen
                                 List<Dokument> dokumente = xmlHelper.getDokumente(aktenId, Aktentyp.Akte);
-                                for(Dokument dokument: dokumente) {
+                                for (Dokument dokument : dokumente) {
                                     dokumentNr++;
                                     dateiName = dokument.getDateiname();
                                     anzeigeName = dokument.getAnzeigename();
