@@ -1,6 +1,6 @@
 # xpdfmerge
 
-(letzte Aktualisierung: 04/03/2022)
+(letzte Aktualisierung: 08/03/2022)
 
 *xpdfmerge* ist eine kleine Java-Anwendung, die alle in einer XJustiz-Nachricht über Dateinamen angegebenen Pdf-Dateien zu einer Pdf-Datei zusammenfasst und diese im documents-Verzeichnis ablegt.
 
@@ -87,6 +87,8 @@ Ihr Inhalt ist sehr einfach:
 
 xJustizPfad=C:\\EurekaFach\\BEAkten
 
+Außerdem kann in dieser Datei die Schemavalidierung für die XJustiz-Nachricht aktiviert werden (mehr dazu am Ende).
+
 Über die Datei Log4j2.xml kann der Logger konfiguriert werden (u.a. den Pfad der Log-Datei).
 
 Installation unter Linux
@@ -122,7 +124,22 @@ wird die desktop-Datei im Verzeichnis `/usr/share/applications` abgelegt und kan
 
 Danach sollte das Anwendungfenster starten.
 
-Bei Fragen und Problemen bitte (formlos) eine Mail an pdfmerger@eureka-fach.de
+Bei Fragen und Problemen bitte (formlos) eine Mail an **pdfmerger@eureka-fach.de**
+
+Schemavalidierung
+=================
+Über die (optionale) Konfigurationsdatei *efxapp.config* kann eine Schemavalidierung für die XJustiz-Nachricht aktiviert werden. Danach werden Schemafehler angezeigt bzw. in der Logdatei vermerkt, die Nachrichtendatei wird aber immer geladen. Dadurch lässt sich feststellen, ob der Absender valide Nachrichten in Bezug auf die aktuelle XJustiz-Version verschickt.
+
+Die Einträge sind:
+- schemaValidierung=ein
+- schemaVersion=3.3.1
+- schemaPfad=xjustiz-schemas/xjustiz_0005_nachrichten_3_0.xsd
+
+Über *schemaValidierung=ein* wird die Schemavalidierung aktiviert (jeder andere Begriff oder kein Eintrag deaktiviert die Validierung). Dann muss *schemaPfad* auf die Xsd-Datei verweisen, die eine Nachricht validiert (die Schemadateien gibt es auf der XJustiz-Webseite bzw. im usr/bin/local-Verzeichnis im Verzeichnis schemas.
+
+**Wichtig**: Der Schemapfad ist immer relativ zum *home*-Verzeichnis. Hier darf also kein absoluter Pfad stehen.
+
+Die *schemaVersion* hat lediglich Infozwecke, was hier steht spielt daher keine Rolle.
 
 #Versionsgeschichte:
 
@@ -135,3 +152,4 @@ Bei Fragen und Problemen bitte (formlos) eine Mail an pdfmerger@eureka-fach.de
 * 0.35 - u.a. Anzeige von Validierungsfehlern, Anwendungsicon und nummerierte Dokument-Einträge in der Baumansicht
 * 0.36 - Ein PdfMerge ist nur möglich, wenn eine Xml-Datei geladen wurde
 * 0.37 - Detailierte Log-Einträge zur Schemavalidierung
+* 0.39 - Konfiguration der Schemavalidierung über die efxapp.config
