@@ -124,6 +124,8 @@ wird die desktop-Datei im Verzeichnis `/usr/share/applications` abgelegt und kan
 
 Danach sollte das Anwendungfenster starten.
 
+In der aktuellen Version der deb-Datei erledigt das postinst-Skript den letzten Schritt, so der Eintrag automatisch bei den "geteilten Anwendungen" erscheinen sollte. Bei Ubuntu erscheint er aber nicht in der Liste der installierten Anwendungen.
+
 Bei Fragen und Problemen bitte (formlos) eine Mail an **pdfmerger@eureka-fach.de**
 
 Schemavalidierung
@@ -135,7 +137,7 @@ Die Einträge sind:
 - schemaVersion=3.3.1
 - schemaPfad=xjustiz-schemas/xjustiz_0005_nachrichten_3_0.xsd
 
-Über *schemaValidierung=ein* wird die Schemavalidierung aktiviert (jeder andere Begriff oder kein Eintrag deaktiviert die Validierung). Dann muss *schemaPfad* auf die Xsd-Datei verweisen, die eine Nachricht validiert (die Schemadateien gibt es auf der XJustiz-Webseite bzw. im usr/bin/local-Verzeichnis im Verzeichnis schemas.
+Über *schemaValidierung=ein* wird die Schemavalidierung aktiviert (jeder andere Begriff oder kein Eintrag deaktiviert die Validierung). Dann muss *schemaPfad* auf die Xsd-Datei verweisen, die eine Nachricht validiert (die Schemadateien gibt es auf der XJustiz-Webseite bzw. im *usr/bin/local*-Verzeichnis im Verzeichnis *schemas*, das durch die deb-Datei angelegt wird).
 
 **Wichtig**: Der Schemapfad ist immer relativ zum *home*-Verzeichnis. Hier darf also kein absoluter Pfad stehen.
 
