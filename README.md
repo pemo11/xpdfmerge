@@ -4,7 +4,7 @@
 
 *xpdfmerge* ist eine kleine Java-Anwendung, die alle in einer XJustiz-Nachricht über Dateinamen angegebenen Pdf-Dateien zu einer Pdf-Datei zusammenfasst.
 
-Die erzeugte Datei heißt *GesamtePDF.pdf*. Unter windows und MacOS wird sie im *documents*-Verzeichnis, unter Linux unter */home/NUTZER* abgelegt.
+Die erzeugte Datei heißt *GesamtePDF.pdf*. Unter Windows und MacOS wird sie im *documents*-Verzeichnis, unter Linux unter */home/NUTZER* abgelegt.
 
 Der Autor der Anwendung ist Mitglied des EurekaFach-Entwicklerteams.
 
