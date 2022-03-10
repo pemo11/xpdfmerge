@@ -1,8 +1,10 @@
 # xpdfmerge
 
-(letzte Aktualisierung: 09/03/2022)
+(letzte Aktualisierung: 10/03/2022)
 
 *xpdfmerge* ist eine kleine Java-Anwendung, die alle in einer XJustiz-Nachricht über Dateinamen angegebenen Pdf-Dateien zu einer Pdf-Datei zusammenfasst.
+
+Die aktuelle Version ist 0.39.
 
 Die erzeugte Datei heißt *GesamtePDF.pdf*. Unter Windows und MacOS wird sie im *documents*-Verzeichnis, unter Linux unter */home/NUTZER* abgelegt.
 
@@ -13,15 +15,17 @@ Die Anwendung kann unter Windows, MacOS und Linux ausgeführt werden.
 Die Anwendung wird auf zwei unterschiedlichen Wegen zur Verfügung gestellt:
 
 1. Als Quelltext über dieses Projektportal.
-2. Als lauffähige Packages für MacOS und Linux über das Ftp-Verzeichnis (der Zugang muss über die unten angegebene E-Mail-Adresse angefordert werden).
+2. Als lauffähige Packages für MacOS und Linux über das Ftp-Verzeichnis (der Zugang muss über die unten angegebene E-Mail-Adresse angefordert werden - es kann daher im ungünstigen Fall 1-2 Tage dauern).
 
-Hinweise zur Ausführung unter MacOS und Linux folgen am Ende dieser Übersicht.
+Hinweise zur Ausführung unter MacOS und Linux folgen am Ende dieser Übersicht. Besonders für MacOS gibt es noch zwei Kleinigkeiten zu beachten.
 
 Für die Ausführung unter Windows stehen aktuell *nur* die Quelltextdateien im Rahmen eines Maven-Projekts zur Verfügung, das in Eclipse, IntelliJ, Visual Code usw. erstellt werden muss. Es gibt daher keinen Installer (die jar-Datei im deploy-Verzeichnis ist nicht automatisch auf dem aktuellen Stand).
 
-Voraussetzung für die Ausführung der Anwendung ist, dass das JDK (ab Version 11) installiert ist, z.B. über das Open JDK von RedHat:
+Voraussetzung für die Ausführung der Anwendung unter Linux und Windows ist, dass das JDK (ab Version 11) installiert ist, z.B. über das Open JDK von RedHat:
 
 https://developers.redhat.com/products/openjdk/download
+
+Bei MacOS ist das Java SDK Teil der pkg-Datei.
 
 Theoretisch ist das Liberica SDK eine gute Alternative (https://bell-sw.com/pages/downloads/), da hier (bei Full SDK) JavaFx dabei ist - das habe ich aber noch nicht getestet. Auf der anderen Seite ist es eventuell flexibler, die JavaFx-Dateien beim Start der Jar-Datei über den *--module-path*-Parameter auswählen zu können. Aktuell geht die Start-Datei davon aus, dass alle JavaFx-Dateien in einem eigenen Verzeichnis vorliegen (das bei der Linux-Version Teil der deb-Datei ist, die über das EurekaFach-Ftp-Verzeichnis zur Verfügung gestellt wird).
 
@@ -93,6 +97,16 @@ Außerdem kann in dieser Datei die Schemavalidierung für die XJustiz-Nachricht 
 
 Über die Datei Log4j2.xml kann der Logger konfiguriert werden (u.a. den Pfad der Log-Datei).
 
+
+Installation unter MacOS
+========================
+Bei der Installation unter MacOS gilt es zwei Kleinigkeiten zu beachten:
+
+1. Die Zip-Datei muss nach dem Download die Erweiterung .pkg erhalten, also ohne das .zip am Ende (anders scheint der Download über den Browser nicht möglich zu sein).
+2. Die Pkg-Datei darf nicht doppelt geklickt werden, sondern muss über die rechte Maustaste -> Öffnen mit ->Installationsprogramm starten geöffnet werden (der übliche Weg, wenn eine Datei nicht aus dem App Store kommt).
+
+Aktuell ist die Datei mit knapp 160 MB noch etwas groß, da das ganze Java SDK an Bord ist. Außerdem wäre es schön, wenn im Installationsassistenten das EF-Logo erscheinen würde (und nicht das Java-Maskottchen;). Diese "Probleme" werden in naher Zukunft noch gelöst werden.
+
 Installation unter Linux
 ========================
 
@@ -139,11 +153,11 @@ Die Einträge sind:
 - schemaVersion=3.3.1
 - schemaPfad=xjustiz-schemas/xjustiz_0005_nachrichten_3_0.xsd
 
-Über *schemaValidierung=ein* wird die Schemavalidierung aktiviert (jeder andere Begriff oder kein Eintrag deaktiviert die Validierung). Dann muss *schemaPfad* auf die Xsd-Datei verweisen, die eine Nachricht validiert (die Schemadateien gibt es auf der XJustiz-Webseite bzw. im *usr/bin/local*-Verzeichnis im Verzeichnis *schemas*, das durch die deb-Datei angelegt wird).
+Über *schemaValidierung=ein* wird die Schemavalidierung aktiviert (jeder andere Begriff oder kein Eintrag deaktiviert die Validierung). Dann muss *schemaPfad* auf die Xsd-Datei verweisen, die eine Nachricht validiert (die Schemadateien gibt es auf der XJustiz-Webseite bzw. im *usr/bin/local*-Verzeichnis im Verzeichnis *schemas*, das durch die deb-Datei angelegt wird - Unterschied zum offiziellen XJustiz-Download habe ich nur die Dateien zusammengestellt, die für die Nachrichtenvalidierung benötigt werden).
 
 **Wichtig**: Der Schemapfad ist immer relativ zum *home*-Verzeichnis. Hier darf also kein absoluter Pfad stehen.
 
-Die *schemaVersion* hat lediglich Infozwecke, was hier steht spielt daher keine Rolle.
+Der Wert bei *schemaVersion* hat lediglich Infozwecke, was hier steht spielt daher keine Rolle.
 
 #Versionsgeschichte:
 
