@@ -1,10 +1,10 @@
 # xpdfmerge
 
-(letzte Aktualisierung: 10/03/2022)
+(letzte Aktualisierung: 22/09/2022)
 
 *xpdfmerge* ist eine kleine Java-Anwendung, die alle in einer XJustiz-Nachricht über Dateinamen angegebenen Pdf-Dateien zu einer Pdf-Datei zusammenfasst.
 
-Die aktuelle Version ist 0.39.
+Die aktuelle Version ist 0.40.
 
 Die erzeugte Datei heißt *GesamtePDF.pdf*. Unter Windows und MacOS wird sie im *documents*-Verzeichnis, unter Linux unter */home/NUTZER* abgelegt.
 
@@ -27,9 +27,13 @@ https://developers.redhat.com/products/openjdk/download
 
 Bei MacOS ist das Java SDK Teil der pkg-Datei.
 
-Theoretisch ist das Liberica SDK eine gute Alternative (https://bell-sw.com/pages/downloads/), da hier (bei Full SDK) JavaFx dabei ist - das habe ich aber noch nicht getestet. Auf der anderen Seite ist es eventuell flexibler, die JavaFx-Dateien beim Start der Jar-Datei über den *--module-path*-Parameter auswählen zu können. Aktuell geht die Start-Datei davon aus, dass alle JavaFx-Dateien in einem eigenen Verzeichnis vorliegen (das bei der Linux-Version Teil der deb-Datei ist, die über das EurekaFach-Ftp-Verzeichnis zur Verfügung gestellt wird).
+Das Liberica SDK ist eine von mehreren sehr guten Alternativen (https://bell-sw.com/pages/downloads/), da bei **Full SDK** auch JavaFx dabei ist.
 
-Da (bekanntlich) JavaFx ab JDK 9 nicht mehr dabei ist, müssen die Programmbibliotheken separat heruntergeladen und in einem eigenen Verzeichnis abgelegt werden. Dieser Verzeichnispfad muss über den Parameter **--module-path** bei der Ausführung der Jar-Datei angegeben werden (mehr dazu später).
+Eventuell ist es flexibler, die JavaFx-Dateien beim Start der Jar-Datei über den *--module-path*-Parameter auswählen zu können.
+
+Aktuell geht die Start-Datei davon aus, dass alle JavaFx-Dateien in einem eigenen Verzeichnis vorliegen (das bei der Linux-Version Teil der deb-Datei ist, die über das EurekaFach-Ftp-Verzeichnis zur Verfügung gestellt wird).
+
+Da (bekanntlich) JavaFx ab JDK 11 nicht mehr dabei ist, müssen die Programmbibliotheken separat heruntergeladen und in einem eigenen Verzeichnis abgelegt werden. Dieser Verzeichnispfad muss über den Parameter **--module-path** bei der Ausführung der Jar-Datei angegeben werden (mehr dazu später).
 
 Die offizielle Downloadadresse der JavaFx-Dateien ist:
 
@@ -63,7 +67,9 @@ Sie ist Teil dieses Projekts und ist die einzige Datei, die benötigt wird:
 
 https://github.com/pemo11/xpdfmerge/blob/main/deploy/pdfmergev1.jar
 
-**Wichtig:** Das Java (11) SDK und die JavaFX-Dateien müssen bei der Ausführung unter Windows separat installiert werden (am besten natürlich vor dem ersten Programmstart;).Für MacOS ist alles was zur Ausführung erforderlich ist Teil der dmg-Datei, für Linux enthält die deb-Datei aktuell nur die JavaFx-Dateien.
+**Wichtig:** Das Java (11) SDK und die JavaFX-Dateien müssen bei der Ausführung unter Windows separat installiert werden (am besten natürlich vor dem ersten Programmstart;).
+
+Für MacOS ist alles was zur Ausführung erforderlich ist Teil der dmg-Datei, für Linux enthält die deb-Datei aktuell nur die JavaFx-Dateien.
 
 Das kleine (und optionale) PowerShell-Skript ist ebenfalls Teil dieses Projektportals (und wird am einfachsten in der Raw-Ansicht kopiert und in eine lokale Textdatei eingefügt, die als Ps1-Datei lokal gespeichert wird).
 
