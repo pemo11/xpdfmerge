@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -34,9 +35,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
+// Wird nur über das Öffnen einer Pdf-Datei benötigt
+import java.awt.Desktop;
+
 public class XEFPdfMerge extends Application {
     private String osName = "Unbekannt";
-    private String appVersion = "0.39";
+    private String appVersion = "0.40";
     // Nur provisorisch - falls die Version-Abfrage null liefert
     private String log4VersionDefault = "2.17.1";
     // Kein Scope Modifier, daher Sichtbarkeit innerhalb des Package
@@ -174,6 +178,51 @@ public class XEFPdfMerge extends Application {
         // TreeView anlegen
         TreeView trvAkten = new TreeView();
 
+        // Eventhandler für DoubleClick anlegen
+        trvAkten.setOnMouseClicked(new EventHandler<MouseEvent>()
+        {
+            @Override
+            public void handle(MouseEvent mouseEvent)
+            {
+                if (mouseEvent.getClickCount() == 2) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, infoMessage, ButtonType.FINISH);
+                    alert.setTitle("DoubleClick-Event");
+                    // TreeItem<Dokument> selectedItem = (TreeItem<Dokument>) trvAkten.getSelectionModel().getSelectedItem();
+                    TreeItem<String> selectedItem = (TreeItem<String>)trvAkten.getSelectionModel().getSelectedItem();
+                    if (selectedItem != null) {
+                        // alert.setHeaderText(selectedItem.getValue().getDateiname());
+                        String treeItemText = selectedItem.getValue();
+                        String pdfDateiname = "";
+                        if (treeItemText.endsWith(".pdf"))
+                        {
+                            if (treeItemText.startsWith("Dokument"))
+                            {
+                                // nur provisorisch, besser Regex
+                                pdfDateiname = treeItemText.split("[)]")[1].trim();
+
+                            }
+                            else {
+                                pdfDateiname = treeItemText.split("=")[1];
+                            }
+                            String pdfPfad = basePfad +"/" + pdfDateiname;
+                            File file = new File(pdfPfad);
+                            if (file.exists()) {
+                                Desktop desktop = Desktop.getDesktop();
+                                try {
+                                    desktop.open(file);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            // alert.setHeaderText(pdfPfad);
+                            // alert.showAndWait();
+                        }
+                    }
+                }
+            }
+
+            });
+
         // ???
         trvAkten.setPadding(new Insets(10, 20, 10, 20));
 
@@ -284,6 +333,9 @@ public class XEFPdfMerge extends Application {
                         // String xsdPfad = "/schemas/xjustiz_0005_nachrichten_3_0.xsd";
                         if (config != null) {
                             String schemaValidierung = config.getProperty("schemaValidierung");
+                            // 18/09/22 - Validierung gegen die neuste XJustiz-Version testen
+                            // ??? Die neuste Version ist aber 3.3.1 - die Versionsnummernabfrage ist daher eigentlich falsch?
+                            // bzw. allgemein mit einem Dokument nach dem neuen Standard testen
                             String schemaVersion = "3.3.1";
                             String schemaPfad = "";
                             if (schemaValidierung != null && schemaValidierung.toLowerCase().equals("ein")) {
