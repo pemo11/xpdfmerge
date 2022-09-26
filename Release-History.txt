@@ -23,3 +23,5 @@ kein Datum   - Version 0.33 - Korrekte Anzeige der Log4j-Versionsnummer nach dem
 kein Datum   - Version 0.35 - u.a. Anzeige von Validierungsfehlern, Anwendungsicon und nummerierte Dokument-Einträge in der Baumansicht
 kein Datum   - Version 0.36 - Ein PdfMerge ist nur möglich, wenn eine Xml-Datei geladen wurde
 04/03/22     - Version 0.37 - Detailierte Log-Einträge zur Schemavalidierung
+
+23/09/22     - Version 0.40 - Keine funktionale Änderungen
