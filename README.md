@@ -177,3 +177,4 @@ Der Wert bei *schemaVersion* hat lediglich Infozwecke, was hier steht spielt dah
 * 0.36 - Ein PdfMerge ist nur möglich, wenn eine Xml-Datei geladen wurde
 * 0.37 - Detailierte Log-Einträge zur Schemavalidierung
 * 0.39 - Konfiguration der Schemavalidierung über die efxapp.config
+* 0.40 - Ein Doppelklick auf eine Pdf-Datei öffnet sie in einem externen Betrachterprogramm
