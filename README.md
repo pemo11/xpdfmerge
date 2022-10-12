@@ -1,8 +1,8 @@
 # xpdfmerge
 
-(letzte Aktualisierung: 22/09/2022)
+(letzte Aktualisierung: 12/10/2022)
 
-*xpdfmerge* ist eine kleine Java-Anwendung, die alle in einer XJustiz-Nachricht über Dateinamen angegebenen Pdf-Dateien zu einer Pdf-Datei zusammenfasst.
+*xpdfmerge* ist eine kleine Java-Anwendung mit einer JavaFx-GUI, die alle in einer XJustiz-Nachricht über Dateinamen angegebenen Pdf-Dateien zu einer einzigen Pdf-Datei zusammenfasst.
 
 Die aktuelle Version ist 0.40.
 
@@ -177,3 +177,4 @@ Der Wert bei *schemaVersion* hat lediglich Infozwecke, was hier steht spielt dah
 * 0.36 - Ein PdfMerge ist nur möglich, wenn eine Xml-Datei geladen wurde
 * 0.37 - Detailierte Log-Einträge zur Schemavalidierung
 * 0.39 - Konfiguration der Schemavalidierung über die efxapp.config
+* 0.40 - Ein Doppelklick auf eine Pdf-Datei öffnet sie in einem externen Betrachterprogramm
