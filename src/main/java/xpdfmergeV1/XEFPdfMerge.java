@@ -34,6 +34,8 @@ import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 // Wird nur über das Öffnen einer Pdf-Datei benötigt
 import java.awt.Desktop;
@@ -63,10 +65,11 @@ public class XEFPdfMerge extends Application {
     private MenuItem exitItem = null;
     private MenuItem openNachrichtXml = null;
     private MenuItem pdfMerge = null;
+    private MenuItem lruList = null;
 
     @Override
     public void start(Stage stage) throws IOException, URISyntaxException {
-        // TODO: Unter Linux sollte die Log-Datei unter ~/.local/share/applications werden
+        // TODO: Unter Linux sollte die Log-Datei unter ~/.local/share/applications abgelegt werden
         // Geht eventuell per PropertyConfigurator.configure(...)
         logger = LogManager.getLogger(XEFPdfMerge.class);
 
@@ -178,50 +181,63 @@ public class XEFPdfMerge extends Application {
         // TreeView anlegen
         TreeView trvAkten = new TreeView();
 
-        // Eventhandler für DoubleClick anlegen
-        trvAkten.setOnMouseClicked(new EventHandler<MouseEvent>()
-        {
+        // Eventhandler für DoubleClick auf ein TreeItem anlegen
+        trvAkten.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
-            public void handle(MouseEvent mouseEvent)
-            {
+            public void handle(MouseEvent mouseEvent) {
                 if (mouseEvent.getClickCount() == 2) {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION, infoMessage, ButtonType.FINISH);
-                    alert.setTitle("DoubleClick-Event");
+                    // Alert alert = new Alert(Alert.AlertType.INFORMATION, infoMessage, ButtonType.FINISH);
+                    // alert.setTitle("DoubleClick-Event");
                     // TreeItem<Dokument> selectedItem = (TreeItem<Dokument>) trvAkten.getSelectionModel().getSelectedItem();
                     TreeItem<String> selectedItem = (TreeItem<String>)trvAkten.getSelectionModel().getSelectedItem();
                     if (selectedItem != null) {
                         // alert.setHeaderText(selectedItem.getValue().getDateiname());
-                        String treeItemText = selectedItem.getValue();
-                        String pdfDateiname = "";
-                        if (treeItemText.endsWith(".pdf"))
-                        {
-                            if (treeItemText.startsWith("Dokument"))
-                            {
-                                // nur provisorisch, besser Regex
-                                pdfDateiname = treeItemText.split("[)]")[1].trim();
+                        try {
+                            String treeItemText = selectedItem.getValue();
+                            String pdfDateiname = "";
+                            String filePattern = "Dokument\\s+\\((\\d+)\\)\\s+(.+\\.pdf)";
+                            Pattern pattern = Pattern.compile(filePattern);
 
-                            }
-                            else {
-                                pdfDateiname = treeItemText.split("=")[1];
-                            }
-                            String pdfPfad = basePfad +"/" + pdfDateiname;
-                            File file = new File(pdfPfad);
-                            if (file.exists()) {
-                                Desktop desktop = Desktop.getDesktop();
-                                try {
-                                    desktop.open(file);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
+                            Matcher m = pattern.matcher(treeItemText);
+                            if (m.find()) {
+                                pdfDateiname = m.group(2);
+                            } else {
+                                filePattern = "Datei=(.*\\.pdf)";
+                                pattern = Pattern.compile(filePattern);
+                                m = pattern.matcher(treeItemText);
+                                if (m.find()) {
+                                    pdfDateiname = m.group(1);
                                 }
                             }
-                            // alert.setHeaderText(pdfPfad);
-                            // alert.showAndWait();
+                            if (pdfDateiname != "") {
+                                // alert.setHeaderText(pdfDateiname);
+                                // alert.showAndWait();
+                                String pdfPfad = basePfad +"/" + pdfDateiname;
+                                File file = new File(pdfPfad);
+                                if (file.exists()) {
+                                    // support for Desktop?
+                                    if (Desktop.isDesktopSupported()) {
+                                        Desktop desktop = Desktop.getDesktop();
+                                        try {
+                                            desktop.open(file);
+                                        } catch (IOException ex) {
+                                            infoMessage = "Fehler im Eventhandler setOnMouseClicked (" + ex.getMessage() + ")";
+                                            logger.info(infoMessage);
+                                        }
+                                    } else {
+                                        infoMessage = "Keine Desktop-Unterstützung - kein Doppelklicker möglich!";
+                                        logger.info(infoMessage);
+                                    }
+                                }
+                            }
+                        } catch (Exception ex) {
+                            infoMessage = "Fehler im Event-Handler setOnMouseClicked (" + ex.getMessage() + ")";
+                            logger.info(infoMessage);
                         }
                     }
                 }
             }
-
-            });
+        });
 
         // ???
         trvAkten.setPadding(new Insets(10, 20, 10, 20));
@@ -499,6 +515,17 @@ public class XEFPdfMerge extends Application {
             }
         });
 
+        imgPfad = getClass().getResource("/images/paper.png").toURI().toString();
+        lruList = new MenuItem("Zuletzt geöffnet", new ImageView(new Image(imgPfad)));
+
+        lruList.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent actionEvent) {
+
+            }
+        });
+
         // Trennlinie für das Menü
         SeparatorMenuItem sep1 = new SeparatorMenuItem();
         imgPfad = getClass().getResource("/images/exit.png").toURI().toString();
@@ -512,7 +539,7 @@ public class XEFPdfMerge extends Application {
             }
         });
 
-        menuFile.getItems().addAll(openNachrichtXml, sep1, exitItem);
+        menuFile.getItems().addAll(openNachrichtXml, lruList, sep1, exitItem);
 
         Menu menuAction = new Menu("Aktionen");
         imgPfad = getClass().getResource("/images/pdfmerge.png").toURI().toString();
