@@ -1,8 +1,8 @@
 # xpdfmerge
 
-(letzte Aktualisierung: 22/09/2022)
+(letzte Aktualisierung: 12/10/2022)
 
-*xpdfmerge* ist eine kleine Java-Anwendung, die alle in einer XJustiz-Nachricht über Dateinamen angegebenen Pdf-Dateien zu einer Pdf-Datei zusammenfasst.
+*xpdfmerge* ist eine kleine Java-Anwendung mit einer JavaFx-GUI, die alle in einer XJustiz-Nachricht über Dateinamen angegebenen Pdf-Dateien zu einer einzigen Pdf-Datei zusammenfasst.
 
 Die aktuelle Version ist 0.40.
 
