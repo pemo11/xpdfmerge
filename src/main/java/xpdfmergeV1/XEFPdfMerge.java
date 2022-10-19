@@ -1,7 +1,7 @@
 /*
   XJustiz-Pdf-Merge für Windows, MacOs und Linux
-  Autor: Peter Monadjemi - pdfmerger@eureka-fach.de
-  Letzte Änderung: 07/03/22
+  Autor: Peter Monadjemi - pdfmerge@eureka-fach.de
+  Letzte Änderung: 13/10/22
 */
 
 package xpdfmergeV1;
@@ -19,6 +19,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,7 +43,7 @@ import java.awt.Desktop;
 
 public class XEFPdfMerge extends Application {
     private String osName = "Unbekannt";
-    private String appVersion = "0.40";
+    private String appVersion = "0.42";
     // Nur provisorisch - falls die Version-Abfrage null liefert
     private String log4VersionDefault = "2.17.1";
     // Kein Scope Modifier, daher Sichtbarkeit innerhalb des Package
@@ -50,6 +51,7 @@ public class XEFPdfMerge extends Application {
     private XmlHelper xmlHelper = null;
     private String xmlPfad = "";
     private String basePfad = "";
+    private String pdfPfad = "";
     private String infoMessage = "";
     private String xJustizPfad = "";
     private String pdfOutfile = "GesamtePDF.pdf";
@@ -60,12 +62,16 @@ public class XEFPdfMerge extends Application {
     private boolean errorFlag = false;
     // Wichtig: LinkedHashMap statt (veralteter) Hashtable, da die Reihenfolge erhalten bleibt
     private LinkedHashMap<AkteInfo, List<PdfDocumentInfo>> pdfInfoHashtable = null;
+    // LRU-Liste
+    private List<String> lruList = null;
+    private int lruCounter = 0;
+    private MenuItem[] lruItems = null;
     private AppConfig config = null;
     // Menuitem-Elemente
     private MenuItem exitItem = null;
-    private MenuItem openNachrichtXml = null;
-    private MenuItem pdfMerge = null;
-    private MenuItem lruList = null;
+    private MenuItem openNachrichtXmlItem = null;
+    private MenuItem pdfMergeItem = null;
+    private MenuItem lruListItem = null;
 
     @Override
     public void start(Stage stage) throws IOException, URISyntaxException {
@@ -98,6 +104,10 @@ public class XEFPdfMerge extends Application {
 
         infoMessage = String.format("*** Using Log4J version %s ***", log4JVersion);
         logger.info(infoMessage);
+
+        // Variablen initalisieren
+        // lruList = new LRUList(4);
+        lruList = new ArrayList<>(4);
 
         // Ausgabeverzeichnis OS-spezifisch festlegen
         // Ist u.U. nicht erforderlich, da user.home bereits OS-spezifisch ist
@@ -212,7 +222,10 @@ public class XEFPdfMerge extends Application {
                             if (pdfDateiname != "") {
                                 // alert.setHeaderText(pdfDateiname);
                                 // alert.showAndWait();
-                                String pdfPfad = basePfad +"/" + pdfDateiname;
+                                infoMessage = "Doppelklick mit Datei=" + pdfDateiname;
+                                logger.info(infoMessage);
+
+                                pdfPfad = basePfad +"/" + pdfDateiname;
                                 File file = new File(pdfPfad);
                                 if (file.exists()) {
                                     // support for Desktop?
@@ -276,18 +289,18 @@ public class XEFPdfMerge extends Application {
 
         // PM: 04/02/22 - image Pfad als uri holen - eventuell try/catch statt Methoden-Erweiterung
         imgPfad = getClass().getResource("/images/nachrichtxml.png").toURI().toString();
-        openNachrichtXml = new MenuItem("Nachricht.xml öffnen", new ImageView(new Image(imgPfad)));
+        openNachrichtXmlItem = new MenuItem("Nachricht.xml öffnen", new ImageView(new Image(imgPfad)));
 
         /**
         * Xml-Nachricht einlesen und in treeView darstellen
          */
-        openNachrichtXml.setOnAction(new EventHandler<ActionEvent>() {
+        openNachrichtXmlItem.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent actionEvent) {
                 AkteInfo akteInfo = null;
                 FileChooser fileChooser = new FileChooser();
-                // Gibt es einen gespeicherten Pfad
+                // Gibt es einen gespeicherten Pfad?
                 if (config != null && config.getProperty("LastPathSelected") != null) {
                     String lastPath = config.getProperty("LastPathSelected");
                     File lastpathFile = new File(lastPath);
@@ -308,7 +321,7 @@ public class XEFPdfMerge extends Application {
                 if (selectedFile != null) {
 
                     // Menuitem Gesamt-Pdf erstellen aktivieren
-                    pdfMerge.setDisable(false);
+                    pdfMergeItem.setDisable(false);
 
                     // Klassenvariable wird ohne this angesprochen
                     xmlPfad = selectedFile.toString();
@@ -322,7 +335,18 @@ public class XEFPdfMerge extends Application {
                     if (config != null) {
                         config.setProperty("LastPathSelected", basePfad);
                     }
-
+                    
+                    // Pfad zur LRU-Liste hinzufügen, wenn er noch nicht enthalten ist
+                    // PM: Benennung der Variablen nicht optimal
+                    pdfPfad = basePfad + "/" + xmlPfad;
+                    if (!lruList.contains(pdfPfad)) {
+                        lruItems[lruCounter].setText(pdfPfad);
+                        lruCounter = lruCounter < 4 ? ++lruCounter : 0;
+                        lruList.add(pdfPfad);
+                        infoMessage = String.format("%s added to LRU list", pdfPfad);
+                        logger.info(infoMessage);
+                    }
+                    
                     String anzeigeName = "";
                     ;
                     String dateiName = "";
@@ -446,7 +470,7 @@ public class XEFPdfMerge extends Application {
                                         dateiName = dokument.getDateiname();
                                         TreeItem triDokument = new TreeItem(String.format("Dokument (%d) %s", dokumentNr, dateiName));
                                         triDokument.getChildren().add(new TreeItem("Id=" + dokument.getId()));
-                                        String pdfPfad = basePfad + "/" + dateiName;
+                                        pdfPfad = basePfad + "/" + dateiName;
                                         Integer pageCount = pdfHelper.getPdfPageCount(pdfPfad);
                                         triDokument.getChildren().add(new TreeItem("Posteingangsdatum=" + dokument.getDatumPosteingang()));
                                         triDokument.getChildren().add(new TreeItem("Veraktungsdatum=" + dokument.getDatumVeraktung()));
@@ -475,7 +499,7 @@ public class XEFPdfMerge extends Application {
                                     dokumentNr++;
                                     dateiName = dokument.getDateiname();
                                     anzeigeName = dokument.getAnzeigename();
-                                    String pdfPfad = basePfad + "/" + dateiName;
+                                    pdfPfad = basePfad + "/" + dateiName;
                                     Integer pageCount = pdfHelper.getPdfPageCount(pdfPfad);
                                     TreeItem triDokument = new TreeItem(String.format("Dokument (%d) %s", dokumentNr, dateiName));
                                     triDokument.getChildren().add(new TreeItem("Id=" + dokument.getId()));
@@ -515,14 +539,45 @@ public class XEFPdfMerge extends Application {
             }
         });
 
-        imgPfad = getClass().getResource("/images/paper.png").toURI().toString();
-        lruList = new MenuItem("Zuletzt geöffnet", new ImageView(new Image(imgPfad)));
+        // lruListItem = new MenuItem("Zuletzt geöffnet", new ImageView(new Image(imgPfad)));
+        // menuLru.getItems().add(lruListItem);
 
-        lruList.setOnAction(new EventHandler<ActionEvent>() {
+        imgPfad = getClass().getResource("/images/documentlist.png").toURI().toString();
+        Menu menuLru = new Menu("Zuletzt verwendet", new ImageView(new Image(imgPfad)));
+
+        imgPfad = getClass().getResource("/images/document.png").toURI().toString();
+        MenuItem lru1 = new MenuItem("Eintrag 1", new ImageView(new Image(imgPfad)));
+        MenuItem lru2 = new MenuItem("Eintrag 2", new ImageView(new Image(imgPfad)));
+        MenuItem lru3 = new MenuItem("Eintrag 3", new ImageView(new Image(imgPfad)));
+        MenuItem lru4 = new MenuItem("Eintrag 4", new ImageView(new Image(imgPfad)));
+        
+        lruItems = new MenuItem[]{lru1, lru2, lru3, lru4};
+        menuLru.getItems().addAll(lruItems);
+
+        menuLru.getItems().forEach((item) -> {
+            item.setOnAction(e -> {
+                infoMessage = item.getText();
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, infoMessage, ButtonType.FINISH);
+                alert.setTitle("Test");
+                alert.setHeaderText(infoMessage);
+                alert.showAndWait();
+            });
+        });
+
+        menuLru.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent actionEvent) {
-
+                // Alert alert = new Alert(Alert.AlertType.INFORMATION, infoMessage, ButtonType.FINISH);
+                // alert.setTitle("Noch nicht implementiert!");
+                // alert.setHeaderText("Anzahl LRU-Einträge: " + lruList.size());
+                // alert.showAndWait();
+                for (int i=0; i < lruList.size(); i++) {
+                    // MenuItem für LRU-Item anlegen
+                    // MenuItem lruItemNew = new MenuItem(lruItem.toString());
+                    // menuLru.getItems().add(lruItemNew);
+                    lruItems[i].setText(lruList.get(i));
+                }
             }
         });
 
@@ -539,17 +594,17 @@ public class XEFPdfMerge extends Application {
             }
         });
 
-        menuFile.getItems().addAll(openNachrichtXml, lruList, sep1, exitItem);
+        menuFile.getItems().addAll(openNachrichtXmlItem, menuLru, sep1, exitItem);
 
         Menu menuAction = new Menu("Aktionen");
         imgPfad = getClass().getResource("/images/pdfmerge.png").toURI().toString();
-        pdfMerge = new MenuItem("GesamtPDF erstellen",  new ImageView(new Image(imgPfad)));
+        pdfMergeItem = new MenuItem("GesamtPDF erstellen",  new ImageView(new Image(imgPfad)));
 
         // Menuitem deaktivieren
-        pdfMerge.setDisable(true);
+        pdfMergeItem.setDisable(true);
 
         // Ausführen der Merge-Aktion
-        pdfMerge.setOnAction(new EventHandler<ActionEvent>() {
+        pdfMergeItem.setOnAction(new EventHandler<ActionEvent>() {
             private Instant startZeit = Instant.now();
 
             @Override
@@ -670,7 +725,7 @@ public class XEFPdfMerge extends Application {
             }
         });
 
-        menuAction.getItems().add(pdfMerge);
+        menuAction.getItems().add(pdfMergeItem);
 
         Menu menuInfo = new Menu("Info");
 
