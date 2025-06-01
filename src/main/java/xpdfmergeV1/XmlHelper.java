@@ -210,13 +210,14 @@ public class XmlHelper {
             // Namespaceresolver verwenden
             xPathId.setNamespaceContext(new NamespaceResolver(xDoc));
             // XPath-Ausdruck, der das erste akte-Element zum id-Element holt
-            String xPathExpr = "//ns0:akte/ns0:identifikation/ns0:id[contains(.,'" + Id + "')]/ancestor::ns0:akte[1]";
+            // Verwende local-name() anstelle expliziter Namespace-Präfixe
+            String xPathExpr = "//*[local-name()='akte']/*[local-name()='identifikation']/*[local-name()='id'][contains(.,'" + Id + "')]/ancestor::*[local-name()='akte'][1]";
             try {
                 NodeList nlAkte = (NodeList)xPathId.evaluate(xPathExpr, xDoc, XPathConstants.NODESET);
                 Node nAkte = nlAkte.item(0);
                 elAkte = (Element)nAkte;
             } catch(XPathExpressionException ex) {
-                infoMessage = String.format("getAkteById: XPath-Fehler (%s)", ex.getMessage());
+                infoMessage = String.format("getAkteById: XPath-Fehler (%s) für %s", ex.getMessage(), xPathExpr);
                 logger.error(infoMessage, ex);
             }
         } catch(Exception ex) {
@@ -235,20 +236,21 @@ public class XmlHelper {
     public Element getTeilakteById(String Id) {
         Element elTeilakte = null;
         try {
-                // Das Akte-Element mit der Id per XPath lokalisieren
+            // Das Akte-Element mit der Id per XPath lokalisieren
             XPath xPathId = XPathFactory.newInstance().newXPath();
             // Namespaceresolver verwenden
             xPathId.setNamespaceContext(new NamespaceResolver(xDoc));
             // XPath-Ausdruck, der das erste teilakte-Element zum id-Element holt
-            String xPathExpr = "//ns0:teilakte/ns0:identifikation/ns0:id[contains(.,'" + Id + "')]/ancestor::ns0:teilakte[1]";
+            // Verwende local-name() anstelle expliziter Namespace-Präfixe
+            String xPathExpr = "//*[local-name()='teilakte']/*[local-name()='identifikation']/*[local-name()='id'][contains(.,'" + Id + "')]/ancestor::*[local-name()='teilakte'][1]";
             try {
                 NodeList nlTeilakte = (NodeList)xPathId.evaluate(xPathExpr, xDoc, XPathConstants.NODESET);
                 Node nAkte = nlTeilakte.item(0);
-                if (nAkte.getNodeType() == Node.ELEMENT_NODE) {
+                if (nAkte != null && nAkte.getNodeType() == Node.ELEMENT_NODE) {
                     elTeilakte = (Element)nAkte;
                 }
             } catch(XPathExpressionException ex) {
-                infoMessage = String.format("getTeilakteById: XPath-Fehler (%s)", ex.getMessage());
+                infoMessage = String.format("getTeilakteById: XPath-Fehler (%s) für %s", ex.getMessage(), xPathExpr);
                 logger.error(infoMessage, ex);
             }
         } catch(Exception ex) {
@@ -355,25 +357,103 @@ public class XmlHelper {
             } else {
                 akte = getTeilakteById(id);
             }
+            
+            // Check if akte element was found
+            if (akte == null) {
+                infoMessage = String.format("getDokumente: %s with ID %s not found", tagName, id);
+                logger.warn(infoMessage);
+                return dokumenteListe;
+            }
+            
             // Jetzt alle Dokumente holen
             NodeList dokumente = akte.getElementsByTagNameNS(nsName, "dokument");
             for(int i=0; i<dokumente.getLength();i++) {
                 if (dokumente.item(i).getNodeType() == Node.ELEMENT_NODE) {
                     Element elDokument = (Element)dokumente.item(i);
-                    String idDokument = elDokument.getElementsByTagNameNS(nsName, "id").item(0).getTextContent();
-                    String nummerUebergeordneterContainer = elDokument.getElementsByTagNameNS(nsName, "nummerImUebergeordnetenContainer").item(0).getTextContent();
-                    String datumPosteingang = elDokument.getElementsByTagNameNS(nsName, "posteingangsdatum").item(0).getTextContent();
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
-                    Date tmpDate = dateFormat.parse(datumPosteingang);
-                    dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-                    datumPosteingang = dateFormat.format(tmpDate);
-                    String datumVeraktung = elDokument.getElementsByTagNameNS(nsName, "veraktungsdatum").item(0).getTextContent();
-                    dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                    tmpDate = dateFormat.parse(datumVeraktung);
-                    dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-                    datumVeraktung = dateFormat.format(tmpDate);
-                    String anzeigeName = elDokument.getElementsByTagNameNS(nsName, "anzeigename").item(0).getTextContent();
-                    String dateiname = elDokument.getElementsByTagNameNS(nsName, "dateiname").item(0).getTextContent();
+                    
+                    // Add null checks for all element accesses
+                    Node idNode = elDokument.getElementsByTagNameNS(nsName, "id").item(0);
+                    if (idNode == null) {
+                        infoMessage = "getDokumente: id element is missing for a document, skipping";
+                        logger.warn(infoMessage);
+                        continue;
+                    }
+                    String idDokument = idNode.getTextContent();
+                    
+                    Node nummerNode = elDokument.getElementsByTagNameNS(nsName, "nummerImUebergeordnetenContainer").item(0);
+                    if (nummerNode == null) {
+                        infoMessage = String.format("getDokumente: nummerImUebergeordnetenContainer is missing for document %s, using default value 0", idDokument);
+                        logger.warn(infoMessage);
+                        // Set default value if element is missing
+                        Dokument dokument = new Dokument(idDokument);
+                        dokument.setNummerUebergeordneterContainer(0);
+                        dokument.setAnzeigename("Unknown");
+                        dokument.setDateiname("Unknown");
+                        dokument.setDatumPosteingang("01-01-2025");
+                        dokument.setDatumVeraktung("01-01-2025");
+                        dokumenteListe.add(dokument);
+                        continue;
+                    }
+                    String nummerUebergeordneterContainer = nummerNode.getTextContent();
+                    
+                    // Check for posteingangsdatum
+                    Node postEingangNode = elDokument.getElementsByTagNameNS(nsName, "posteingangsdatum").item(0);
+                    String datumPosteingang = "01-01-2025"; // Default value
+                    if (postEingangNode != null) {
+                        try {
+                            String rawDate = postEingangNode.getTextContent();
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+                            Date tmpDate = dateFormat.parse(rawDate);
+                            dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                            datumPosteingang = dateFormat.format(tmpDate);
+                        } catch (Exception ex) {
+                            infoMessage = String.format("getDokumente: Error parsing posteingangsdatum for document %s: %s", idDokument, ex.getMessage());
+                            logger.warn(infoMessage);
+                        }
+                    } else {
+                        infoMessage = String.format("getDokumente: posteingangsdatum is missing for document %s, using default value", idDokument);
+                        logger.warn(infoMessage);
+                    }
+                    
+                    // Check for veraktungsdatum
+                    Node veraktungNode = elDokument.getElementsByTagNameNS(nsName, "veraktungsdatum").item(0);
+                    String datumVeraktung = "01-01-2025"; // Default value
+                    if (veraktungNode != null) {
+                        try {
+                            String rawDate = veraktungNode.getTextContent();
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                            Date tmpDate = dateFormat.parse(rawDate);
+                            dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                            datumVeraktung = dateFormat.format(tmpDate);
+                        } catch (Exception ex) {
+                            infoMessage = String.format("getDokumente: Error parsing veraktungsdatum for document %s: %s", idDokument, ex.getMessage());
+                            logger.warn(infoMessage);
+                        }
+                    } else {
+                        infoMessage = String.format("getDokumente: veraktungsdatum is missing for document %s, using default value", idDokument);
+                        logger.warn(infoMessage);
+                    }
+                    
+                    // Check for anzeigename
+                    Node anzeigeNameNode = elDokument.getElementsByTagNameNS(nsName, "anzeigename").item(0);
+                    String anzeigeName = "Unknown"; // Default value
+                    if (anzeigeNameNode != null) {
+                        anzeigeName = anzeigeNameNode.getTextContent();
+                    } else {
+                        infoMessage = String.format("getDokumente: anzeigename is missing for document %s, using default value", idDokument);
+                        logger.warn(infoMessage);
+                    }
+                    
+                    // Check for dateiname
+                    Node dateinameNode = elDokument.getElementsByTagNameNS(nsName, "dateiname").item(0);
+                    String dateiname = "Unknown.pdf"; // Default value
+                    if (dateinameNode != null) {
+                        dateiname = dateinameNode.getTextContent();
+                    } else {
+                        infoMessage = String.format("getDokumente: dateiname is missing for document %s, using default value", idDokument);
+                        logger.warn(infoMessage);
+                    }
+                    
                     Dokument dokument = new Dokument(idDokument);
                     dokument.setNummerUebergeordneterContainer(Integer.parseInt(nummerUebergeordneterContainer));
                     dokument.setAnzeigename(anzeigeName);
@@ -383,11 +463,130 @@ public class XmlHelper {
                     dokumenteListe.add(dokument);
                     infoMessage = String.format("getDokumente: Dokument %s wurde hinzugefügt.", idDokument);
                     logger.info(infoMessage);
-
                 }
             }
         } catch(Exception ex) {
             infoMessage = String.format("getDokumente: Allgemeiner Fehler (%s)", ex.getMessage());
+            logger.error(infoMessage, ex);
+        }
+        return dokumenteListe;
+    }
+
+    /**
+     * Verwendet XPath mit local-name() um Dokumente zu finden, unabhängig vom Namespace-Präfix
+     * @param id ID der Akte oder Teilakte
+     * @param typ Typ (Akte oder Teilakte)
+     * @return Liste aller gefundenen Dokumente
+     */
+    public List<Dokument> getDokumenteWithXPath(String id, Aktentyp typ) {
+        List<Dokument> dokumenteListe = new ArrayList<Dokument>();
+        try {
+            XPath xpath = XPathFactory.newInstance().newXPath();
+            xpath.setNamespaceContext(new NamespaceResolver(xDoc));
+            
+            // XPath-Ausdruck, der alle Dokumente für eine Akte oder Teilakte mit der angegebenen ID findet
+            String xPathExpr;
+            if (typ == Aktentyp.Akte) {
+                xPathExpr = "//*[local-name()='akte']/*[local-name()='identifikation']/*[local-name()='id'][text()='" + id + "']/ancestor::*[local-name()='akte'][1]//*[local-name()='dokument']";
+            } else {
+                xPathExpr = "//*[local-name()='teilakte']/*[local-name()='identifikation']/*[local-name()='id'][text()='" + id + "']/ancestor::*[local-name()='teilakte'][1]//*[local-name()='dokument']";
+            }
+            
+            NodeList dokumente;
+            try {
+                dokumente = (NodeList) xpath.evaluate(xPathExpr, xDoc, XPathConstants.NODESET);
+                infoMessage = String.format("getDokumenteWithXPath: Gefunden %d Dokumente für %s mit ID %s", 
+                                         dokumente.getLength(), 
+                                         (typ == Aktentyp.Akte ? "Akte" : "Teilakte"), 
+                                         id);
+                logger.info(infoMessage);
+                
+                // Verarbeite jedes gefundene Dokument
+                for (int i = 0; i < dokumente.getLength(); i++) {
+                    Element elDokument = (Element) dokumente.item(i);
+                    
+                    // ID des Dokuments auslesen
+                    String idExpr = ".//*[local-name()='id']";
+                    Node idNode = (Node) xpath.evaluate(idExpr, elDokument, XPathConstants.NODE);
+                    String idDokument = (idNode != null) ? idNode.getTextContent() : "unknown-" + i;
+                    
+                    // Container-Nummer auslesen
+                    String nummerExpr = ".//*[local-name()='nummerImUebergeordnetenContainer']";
+                    Node nummerNode = (Node) xpath.evaluate(nummerExpr, elDokument, XPathConstants.NODE);
+                    int nummerUebergeordneterContainer = (nummerNode != null) ? 
+                                                    Integer.parseInt(nummerNode.getTextContent()) : 0;
+                    
+                    // Posteingangsdatum auslesen und formatieren
+                    String datumPosteingang = "01-01-2025"; // Standardwert
+                    String postEingangExpr = ".//*[local-name()='posteingangsdatum']";
+                    Node postEingangNode = (Node) xpath.evaluate(postEingangExpr, elDokument, XPathConstants.NODE);
+                    if (postEingangNode != null) {
+                        try {
+                            String rawDate = postEingangNode.getTextContent();
+                            if (rawDate.contains("T")) {
+                                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+                                Date tmpDate = dateFormat.parse(rawDate);
+                                dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                                datumPosteingang = dateFormat.format(tmpDate);
+                            } else {
+                                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                                Date tmpDate = dateFormat.parse(rawDate);
+                                dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                                datumPosteingang = dateFormat.format(tmpDate);
+                            }
+                        } catch (Exception ex) {
+                            infoMessage = String.format("getDokumenteWithXPath: Fehler beim Parsen des Posteingangsdatums für Dokument %s: %s", 
+                                                     idDokument, ex.getMessage());
+                            logger.warn(infoMessage);
+                        }
+                    }
+                    
+                    // Veraktungsdatum auslesen und formatieren
+                    String datumVeraktung = "01-01-2025"; // Standardwert
+                    String veraktungExpr = ".//*[local-name()='veraktungsdatum']";
+                    Node veraktungNode = (Node) xpath.evaluate(veraktungExpr, elDokument, XPathConstants.NODE);
+                    if (veraktungNode != null) {
+                        try {
+                            String rawDate = veraktungNode.getTextContent();
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                            Date tmpDate = dateFormat.parse(rawDate);
+                            dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                            datumVeraktung = dateFormat.format(tmpDate);
+                        } catch (Exception ex) {
+                            infoMessage = String.format("getDokumenteWithXPath: Fehler beim Parsen des Veraktungsdatums für Dokument %s: %s", 
+                                                     idDokument, ex.getMessage());
+                            logger.warn(infoMessage);
+                        }
+                    }
+                    
+                    // Anzeigename auslesen
+                    String anzeigeNameExpr = ".//*[local-name()='anzeigename']";
+                    Node anzeigeNameNode = (Node) xpath.evaluate(anzeigeNameExpr, elDokument, XPathConstants.NODE);
+                    String anzeigeName = (anzeigeNameNode != null) ? anzeigeNameNode.getTextContent() : "Unknown";
+                    
+                    // Dateiname auslesen
+                    String dateinameExpr = ".//*[local-name()='dateiname']";
+                    Node dateinameNode = (Node) xpath.evaluate(dateinameExpr, elDokument, XPathConstants.NODE);
+                    String dateiname = (dateinameNode != null) ? dateinameNode.getTextContent() : "Unknown.pdf";
+                    
+                    // Dokument-Objekt erstellen und zur Liste hinzufügen
+                    Dokument dokument = new Dokument(idDokument);
+                    dokument.setNummerUebergeordneterContainer(nummerUebergeordneterContainer);
+                    dokument.setAnzeigename(anzeigeName);
+                    dokument.setDateiname(dateiname);
+                    dokument.setDatumPosteingang(datumPosteingang);
+                    dokument.setDatumVeraktung(datumVeraktung);
+                    dokumenteListe.add(dokument);
+                    
+                    infoMessage = String.format("getDokumenteWithXPath: Dokument %s wurde hinzugefügt.", idDokument);
+                    logger.info(infoMessage);
+                }
+            } catch (XPathExpressionException ex) {
+                infoMessage = String.format("getDokumenteWithXPath: XPath-Fehler (%s) für %s", ex.getMessage(), xPathExpr);
+                logger.error(infoMessage, ex);
+            }
+        } catch(Exception ex) {
+            infoMessage = String.format("getDokumenteWithXPath: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);
         }
         return dokumenteListe;

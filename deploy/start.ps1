@@ -11,7 +11,11 @@
 # new-item -path env: -name PATH_TO_FX -value D:\Java11\JavaFx\Lib -Force
 # new-item -path env: -name PATH_TO_FX -value G:\2021\xpdfmerge\out\artifacts\pdfmergev1_jar\JavaFx\Lib -Force
 # new-item -path env: -name PATH_TO_FX -value $PSScriptRoot\JavaFx\Lib -Force
-$FxPfad = "/Library/Java/javafx-sdk-11.0.2/lib"
+$FxPfad = Join-Path $PSScriptRoot "JavaFx\Lib"
+if (-not (Test-Path $FxPfad)) {
+    Write-Host "JavaFx Pfad nicht gefunden: $FxPfad"
+    exit 1
+}
 new-item -path env: -name PATH_TO_FX -value $FxPfad -Force
 
 # Jar-Datei ausführen

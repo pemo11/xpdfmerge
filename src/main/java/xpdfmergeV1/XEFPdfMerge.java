@@ -1,7 +1,7 @@
 /*
   XJustiz-Pdf-Merge für Windows, MacOs und Linux
   Autor: Peter Monadjemi - pdfmerge@eureka-fach.de
-  Letzte Änderung: 13/10/22
+  Letzte Änderung: 28/05/25
 */
 
 package xpdfmergeV1;
@@ -43,7 +43,7 @@ import java.awt.Desktop;
 
 public class XEFPdfMerge extends Application {
     private String osName = "Unbekannt";
-    private String appVersion = "0.42";
+    private String appVersion = "0.44";
     // Nur provisorisch - falls die Version-Abfrage null liefert
     private String log4VersionDefault = "2.17.1";
     // Kein Scope Modifier, daher Sichtbarkeit innerhalb des Package
@@ -87,11 +87,28 @@ public class XEFPdfMerge extends Application {
         // String log4JVersion = logger.getClass().getPackage().versionInfo.implVersion;
 
         // Application Icon festlegen
-        imgPfad = getClass().getResource("/images/EFXLogo.png").toURI().toString();
-
-        // stage.getIcons().add(new Image("file:EFXLogo.png"));
-        Image imgLogo = new Image(imgPfad);
-        stage.getIcons().add(imgLogo);
+        try {
+            java.net.URL logoUrl = getClass().getResource("/images/EFXLogo.png");
+            if (logoUrl != null) {
+                imgPfad = logoUrl.toURI().toString();
+                Image imgLogo = new Image(imgPfad);
+                stage.getIcons().add(imgLogo);
+            } else {
+                logger.warn("Logo image resource /images/EFXLogo.png not found in classpath");
+                // Try alternate locations
+                File logoFile = new File("images/EFXLogo_512x512.png");
+                if (logoFile.exists()) {
+                    imgPfad = logoFile.toURI().toString();
+                    Image imgLogo = new Image(imgPfad);
+                    stage.getIcons().add(imgLogo);
+                    logger.info("Loaded logo from alternate location: " + imgPfad);
+                } else {
+                    logger.error("Could not find any logo image file");
+                }
+            }
+        } catch (Exception ex) {
+            logger.error("Error loading application icon: " + ex.getMessage(), ex);
+        }
 
         // User directory holen
         userHome = System.getProperty("user.home");
@@ -288,8 +305,19 @@ public class XEFPdfMerge extends Application {
         Menu menuFile = new Menu("eAkte");
 
         // PM: 04/02/22 - image Pfad als uri holen - eventuell try/catch statt Methoden-Erweiterung
-        imgPfad = getClass().getResource("/images/nachrichtxml.png").toURI().toString();
-        openNachrichtXmlItem = new MenuItem("Nachricht.xml öffnen", new ImageView(new Image(imgPfad)));
+        try {
+            java.net.URL imageUrl = getClass().getResource("/images/nachrichtxml.png");
+            if (imageUrl != null) {
+                imgPfad = imageUrl.toURI().toString();
+                openNachrichtXmlItem = new MenuItem("Nachricht.xml öffnen", new ImageView(new Image(imgPfad)));
+            } else {
+                logger.warn("nachrichtxml.png resource not found in classpath");
+                openNachrichtXmlItem = new MenuItem("Nachricht.xml öffnen");
+            }
+        } catch (Exception ex) {
+            logger.error("Error loading nachrichtxml.png: " + ex.getMessage(), ex);
+            openNachrichtXmlItem = new MenuItem("Nachricht.xml öffnen");
+        }
 
         /**
         * Xml-Nachricht einlesen und in treeView darstellen
@@ -322,6 +350,17 @@ public class XEFPdfMerge extends Application {
 
                     // Menuitem Gesamt-Pdf erstellen aktivieren
                     pdfMergeItem.setDisable(false);
+                    
+                    // Ensure the icon is preserved
+                    if (pdfMergeItem.getGraphic() == null) {
+                        try {
+                            String iconPath = getClass().getResource("/images/pdfmerge.png").toURI().toString();
+                            pdfMergeItem.setGraphic(new ImageView(new Image(iconPath)));
+                        } catch (Exception ex) {
+                            infoMessage = String.format("Icon für GesamtPDF erstellen konnte nicht geladen werden: %s", ex.getMessage());
+                            logger.warn(infoMessage);
+                        }
+                    }
 
                     // Klassenvariable wird ohne this angesprochen
                     xmlPfad = selectedFile.toString();
@@ -427,11 +466,15 @@ public class XEFPdfMerge extends Application {
 
                         // Gab es Validierungsfehler?
                         if (!errorFlag) {
+                            // PDF-Dateinamen holen, um Anzahl der Dokumente anzuzeigen
+                            List<String> pdfFiles = xmlHelper.getPdfNamen2();
+                            int pdfCount = pdfFiles.size();
+                            
                             // Erfolgsmeldung ausgeben
                             Alert alert = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.OK);
                             alert.setTitle("Hinweis");
                             alert.setHeaderText("");
-                            alert.setContentText(xmlPfad + " wurde ausgewertet.");
+                            alert.setContentText(xmlPfad + " wurde ausgewertet.\nEnthaltene PDF-Dokumente: " + pdfCount);
                             alert.showAndWait();
                         }
                         // Pfad in "Statusbar" anzeigen
@@ -464,7 +507,7 @@ public class XEFPdfMerge extends Application {
                                     triTeilakte.getChildren().add(new TreeItem("Id=" + teilakteId));
                                     triTeilakte.getChildren().add(new TreeItem("Nummer im übg. Container=" + teilakte.getNummerImUebergeordnetenContainer()));
                                     // Alle Dokumente durchgehen
-                                    List<Dokument> dokumente = xmlHelper.getDokumente(teilakteId, Aktentyp.Teilakte);
+                                    List<Dokument> dokumente = xmlHelper.getDokumenteWithXPath(teilakteId, Aktentyp.Teilakte);
                                     for (Dokument dokument : dokumente) {
                                         dokumentNr++;
                                         dateiName = dokument.getDateiname();
@@ -494,7 +537,7 @@ public class XEFPdfMerge extends Application {
                                 pdfInfoHashtable.put(akteInfo, new ArrayList<>());
 
                                 // Alle Dokumente der Akte durchgehen
-                                List<Dokument> dokumente = xmlHelper.getDokumente(aktenId, Aktentyp.Akte);
+                                List<Dokument> dokumente = xmlHelper.getDokumenteWithXPath(aktenId, Aktentyp.Akte);
                                 for (Dokument dokument : dokumente) {
                                     dokumentNr++;
                                     dateiName = dokument.getDateiname();
@@ -542,17 +585,47 @@ public class XEFPdfMerge extends Application {
         // lruListItem = new MenuItem("Zuletzt geöffnet", new ImageView(new Image(imgPfad)));
         // menuLru.getItems().add(lruListItem);
 
-        imgPfad = getClass().getResource("/images/documentlist.png").toURI().toString();
-        Menu menuLru = new Menu("Zuletzt verwendet", new ImageView(new Image(imgPfad)));
-
-        imgPfad = getClass().getResource("/images/document.png").toURI().toString();
-        MenuItem lru1 = new MenuItem("Eintrag 1", new ImageView(new Image(imgPfad)));
-        MenuItem lru2 = new MenuItem("Eintrag 2", new ImageView(new Image(imgPfad)));
-        MenuItem lru3 = new MenuItem("Eintrag 3", new ImageView(new Image(imgPfad)));
-        MenuItem lru4 = new MenuItem("Eintrag 4", new ImageView(new Image(imgPfad)));
+        Menu menuLru = new Menu("Zuletzt verwendet");
         
-        lruItems = new MenuItem[]{lru1, lru2, lru3, lru4};
-        menuLru.getItems().addAll(lruItems);
+        // Menu icons with error handling
+        try {
+            java.net.URL docListUrl = getClass().getResource("/images/documentlist.png");
+            if (docListUrl != null) {
+                imgPfad = docListUrl.toURI().toString();
+                menuLru.setGraphic(new ImageView(new Image(imgPfad)));
+            } else {
+                logger.warn("documentlist.png resource not found in classpath");
+            }
+            
+            java.net.URL docUrl = getClass().getResource("/images/document.png");
+            if (docUrl != null) {
+                imgPfad = docUrl.toURI().toString();
+                MenuItem lru1 = new MenuItem("Eintrag 1", new ImageView(new Image(imgPfad)));
+                MenuItem lru2 = new MenuItem("Eintrag 2", new ImageView(new Image(imgPfad)));
+                MenuItem lru3 = new MenuItem("Eintrag 3", new ImageView(new Image(imgPfad)));
+                MenuItem lru4 = new MenuItem("Eintrag 4", new ImageView(new Image(imgPfad)));
+                
+                lruItems = new MenuItem[]{lru1, lru2, lru3, lru4};
+            } else {
+                logger.warn("document.png resource not found in classpath");
+                MenuItem lru1 = new MenuItem("Eintrag 1");
+                MenuItem lru2 = new MenuItem("Eintrag 2");
+                MenuItem lru3 = new MenuItem("Eintrag 3");
+                MenuItem lru4 = new MenuItem("Eintrag 4");
+                
+                lruItems = new MenuItem[]{lru1, lru2, lru3, lru4};
+            }
+            menuLru.getItems().addAll(lruItems);
+        } catch (Exception ex) {
+            logger.error("Error loading document icons: " + ex.getMessage(), ex);
+            MenuItem lru1 = new MenuItem("Eintrag 1");
+            MenuItem lru2 = new MenuItem("Eintrag 2");
+            MenuItem lru3 = new MenuItem("Eintrag 3");
+            MenuItem lru4 = new MenuItem("Eintrag 4");
+            
+            lruItems = new MenuItem[]{lru1, lru2, lru3, lru4};
+            menuLru.getItems().addAll(lruItems);
+        }
 
         menuLru.getItems().forEach((item) -> {
             item.setOnAction(e -> {
@@ -639,13 +712,21 @@ public class XEFPdfMerge extends Application {
                 List<String> pdfListe = xmlHelper.getPdfNamen2();
                 for (String pdfPfad : pdfListe) {
                     String tmpPath = basePfad + "/" + pdfPfad;
-                    try {
-                        inputList.add(new FileInputStream(tmpPath));
-                        infoMessage = String.format("mergePdf: %s hinzugefügt", tmpPath);
-                        logger.info(infoMessage);
-                    } catch (FileNotFoundException ex) {
-                        infoMessage = String.format("Fehler in mergePdf: %s gibt es nicht", tmpPath);
-                        logger.error(infoMessage, ex);
+                    File pdfFile = new File(tmpPath);
+                    if (pdfFile.exists() && pdfFile.isFile()) {
+                        try {
+                            inputList.add(new FileInputStream(tmpPath));
+                            infoMessage = String.format("mergePdf: %s hinzugefügt", tmpPath);
+                            logger.info(infoMessage);
+                        } catch (FileNotFoundException ex) {
+                            // Sollte nie eintreten, da wir vorher prüfen, ob die Datei existiert
+                            infoMessage = String.format("mergePdf: %s kann nicht gelesen werden", tmpPath);
+                            logger.warn(infoMessage);
+                        }
+                    } else {
+                        // Datei nicht gefunden - nur warnen, aber keine Exception
+                        infoMessage = String.format("mergePdf: %s existiert nicht und wird ausgelassen", tmpPath);
+                        logger.warn(infoMessage);
                     }
                 }
 
@@ -703,7 +784,18 @@ public class XEFPdfMerge extends Application {
                 }
 
                 // Booksmarks in die erstellte Pdf-Datei eintragen
-                pdfHelper.setBookmarks(pdfOutfile, pdfInfoHashtable);
+                if (!pdfHelper.setBookmarks(pdfOutfile, pdfInfoHashtable)) {
+                    infoMessage = String.format("mergePdf-ActionHandler: Fehler beim Setzen der Bookmarks in %s", pdfOutfile);
+                    logger.error(infoMessage);
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, infoMessage, ButtonType.FINISH);
+                    alert.setTitle("Fehler beim Setzen der Bookmarks in %s\", pdfOutfile");
+                    alert.setHeaderText("mergePdf-ActionHandler");
+                    alert.showAndWait();
+                        return;
+                } else {
+                    infoMessage = String.format("mergePdf-ActionHandler: Bookmarks in %s gesetzt", pdfOutfile);
+                    logger.info(infoMessage);
+                }
 
                 // Progressbar soll wieder anhalten
                 // progressBar.setProgress(0);

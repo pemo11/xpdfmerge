@@ -268,31 +268,62 @@ public class PdfHelper {
      * Setzen der Lesemarken in der Gesamt-Pdfdatei
      * @param pdfOutfile
      * @param pdfInfoHashtable
+     * @return true wenn erfolgreich, false im Fehlerfall
      */
-    public void setBookmarks(String pdfOutfile, LinkedHashMap<AkteInfo, List<PdfDocumentInfo>> pdfInfoHashtable) {
+    public boolean setBookmarks(String pdfOutfile, LinkedHashMap<AkteInfo, List<PdfDocumentInfo>> pdfInfoHashtable) {
         infoMessage = String.format("setBookmarks: Aufruf ");
         this.logger.info(infoMessage);
+
+        // Check if the file exists before proceeding
+        File pdfFile = new File(pdfOutfile);
+        if (!pdfFile.exists() || !pdfFile.isFile()) {
+            infoMessage = String.format("setBookmarks: Die Datei %s existiert nicht oder ist keine Datei.", pdfOutfile);
+            logger.error(infoMessage);
+            return false; // Exit the method if the file doesn't exist
+        }
+
+        // Check if the file is 0 bytes in size
+        if (pdfFile.length() == 0) {
+            infoMessage = String.format("setBookmarks: Die Datei %s ist 0 Bytes groß und kann keine Bookmarks enthalten.", pdfOutfile);
+            logger.error(infoMessage);
+            return false; // Exit the method if the file is empty
+        }
+
+        // Check if hashtable is empty or null
+        if (pdfInfoHashtable == null || pdfInfoHashtable.isEmpty()) {
+            infoMessage = "setBookmarks: Keine Bookmark-Informationen vorhanden (pdfInfoHashtable ist leer oder null)";
+            logger.error(infoMessage);
+            return false; // Exit the method if there's no data to process
+        }
 
         String pdfOutfileBak = "";
         Path destPath = null;
         Path sourcePath = null;
+        PDDocument pdfDoc = null;
 
         // TODO: Alle Bookmarks in einer Datei setzen - am besten am Anfang eine Kopie anlegen, in die alle Bookmarks geschrieben werden
         // und die am Ende auf die Originaldatei kopiert wird
         try {
-            // Pdf-Datei kopieren
-            File file1 = new File(pdfOutfile);
-            // Erweiterung ersetzen
-            // pdfOutfileBak = pdfOutfile.replace("pdf", "pdfbak");
-            // Datei kopieren
-            // ? Path oder String für Files.copy?
-            // sourcePath = Paths.get(pdfOutfile);
-            // destPath = Paths.get(pdfOutfileBak);
-            // Files.copy(sourcePath, destPath, REPLACE_EXISTING);
-
             // PDF-Dokument öffnen
-            File pdfFile = new File(pdfOutfile);
-            PDDocument pdfDoc = Loader.loadPDF(pdfFile);
+            try {
+                pdfDoc = Loader.loadPDF(pdfFile);
+            } catch (Exception ex) {
+                infoMessage = String.format("setBookmarks: Datei %s kann nicht geladen werden (%s)", pdfOutfile, ex.getMessage());
+                logger.error(infoMessage, ex);
+                // Exit if we can't load the PDF
+                return false; // Exit if the PDF cannot be loaded
+            }
+            
+            if (pdfDoc.getNumberOfPages() <= 0) {
+                infoMessage = "setBookmarks: Das PDF-Dokument enthält keine Seiten";
+                logger.error(infoMessage);
+                try {
+                    pdfDoc.close();
+                } catch (Exception closeEx) {
+                    logger.error("setBookmarks: Fehler beim Schließen des leeren PDFs", closeEx);
+                }
+                return false;
+            }
 
             // Bookmark für alle Seiten
             PDDocumentOutline rootOutline = new PDDocumentOutline();
@@ -313,104 +344,175 @@ public class PdfHelper {
             // Integer pageCounter = 0;
             int currentPageNumber = 0;
             int aktePageNumber = 0;
-
-            // forEach ist nicht geeignet, da keine lokale Variable in dem Lambda verwendet werden kann?
-            // pdfInfoHashtable.forEach((String fileName, PdfInfo pdfInfo) -> {
-            Set<AkteInfo> akteInfoSet = pdfInfoHashtable.keySet();
+            int totalPageCount = pdfDoc.getNumberOfPages();
 
             // Alle Akten durchgehen
-            // Das az (aktenzeichen.freitext) spielt aktuell keine Rolle, wird aber aus dem Xml ausgelesen
-            for(AkteInfo akte  : akteInfoSet) {
+            Set<AkteInfo> akteInfoSet = pdfInfoHashtable.keySet();
+            for(AkteInfo akte : akteInfoSet) {
+                if (akte == null) {
+                    infoMessage = "setBookmarks: Null-AkteInfo gefunden, überspringe";
+                    logger.error(infoMessage);
+                    continue;
+                }
+                
                 // Die Seitenzahl der Akte ist die aktuelle Seitennummer in Bezug auf die Gesamt-Pdf
                 aktePageNumber = currentPageNumber;
-                // Bookmark für Akte setzen
-                PDPageDestination pageDestinationAkte = new PDPageFitWidthDestination();
-                // Seite in Bezug auf das Gesamtdokument holen
-                PDPage page = pdfDoc.getPage(currentPageNumber);
-                pageDestinationAkte.setPage(page);
-
-                PDOutlineItem bookmarkAkte = new PDOutlineItem();
-                bookmarkAkte.setDestination(pageDestinationAkte);
-                bookmarkAkte.setTitle(akte.getAnzeigeName());
-
-                // Jetzt die Bookmarks für das Dokument setzen
-                List<PdfDocumentInfo> infoListe = pdfInfoHashtable.get(akte);
-                // Alle Dokumente durchgehen
-                for(var pdfInfo : infoListe) {
-                    // Bookmark für das Dokument anlegen
-                    PDOutlineItem bookmarkDokument = new PDOutlineItem();
-                    PDPageDestination pageDestinationDokument = new PDPageFitWidthDestination();
-                    // Erste Seite des aktuellen Dokuments holen
-                    page = pdfDoc.getPage(currentPageNumber);
-                    // Seitenzahl für das aktuelle Dokument abrufen
-                    int pageCount = pdfInfo.getPageCount();
-                    // Bookmark für das Dokument setzen
-                    try {
-                        pageDestinationDokument.setPage(page);
-                        bookmarkDokument.setTitle(pdfInfo.getDisplayName());
-                        bookmarkDokument.setDestination(pageDestinationDokument);
-
-                        // Detail-Bookmarks für das Dokument setzen
-                        Hashtable<String, String> htBookmarks = pdfInfo.getBookmarks();
-                        Enumeration enKeys = htBookmarks.keys();
-                        while(enKeys.hasMoreElements()) {
-                            String bmName = enKeys.nextElement().toString();
-                            String bmText = htBookmarks.get(bmName);
-                            PDOutlineItem bm = new PDOutlineItem();
-                            bm.setDestination(pageDestinationDokument);
-                            bm.setTitle(bmName + "=" + bmText);
-                            bookmarkDokument.addLast(bm);
-                        }
-                        // dokument-Bookmark an die Akte-Bookmark anhängen
-                        bookmarkAkte.addLast(bookmarkDokument);
-                        infoMessage = String.format("setBookmarks: Bookmark für Dokument auf Seite %d gesetzt.", currentPageNumber);
-                        logger.info(infoMessage);
-                    } catch (Exception ex) {
-                        infoMessage = String.format("setBookmarks: Fehler beim Setzen einer Bookmark auf Seite %d", currentPageNumber);
-                        logger.error(infoMessage, ex);
-                    }
-                    // Seitenzähler auf die nächste Startseite eines Teildokuments
-                    currentPageNumber += pageCount;
+                
+                // Sicherheitscheck - Ist die Seitennummer valide?
+                if (aktePageNumber >= totalPageCount) {
+                    infoMessage = String.format("setBookmarks: Seitennummer %d außerhalb des gültigen Bereichs (max: %d)", 
+                        aktePageNumber, totalPageCount - 1);
+                    logger.error(infoMessage);
+                    continue;
                 }
-                // Bookmark für Akte setzen
-                pagesOutline.addLast(bookmarkAkte);
-                infoMessage = String.format("setBookmarks: Bookmark für Akte auf Seite %d gesetzt.", aktePageNumber);
-                logger.info(infoMessage);
-            };
+                
+                try {
+                    // Bookmark für Akte setzen
+                    PDPageDestination pageDestinationAkte = new PDPageFitWidthDestination();
+                    // Seite in Bezug auf das Gesamtdokument holen
+                    PDPage page = pdfDoc.getPage(aktePageNumber);
+                    pageDestinationAkte.setPage(page);
 
-            // Dokument wieder speichern - das Originaldokument zuvor löschen
-            try {
-                Files.delete(pdfFile.toPath());
-            } catch (NoSuchFileException ex) {
-                System.err.format("setBookmarks: %s gibt es leider nicht.", pdfOutfile);
-            } catch (IOException ex) {
-                System.err.format("setBookmarks: Allgemeiner Fehler beim Löschen von %s", pdfOutfile);
+                    PDOutlineItem bookmarkAkte = new PDOutlineItem();
+                    bookmarkAkte.setDestination(pageDestinationAkte);
+                    bookmarkAkte.setTitle(akte.getAnzeigeName());
+
+                    // Jetzt die Bookmarks für das Dokument setzen
+                    List<PdfDocumentInfo> infoListe = pdfInfoHashtable.get(akte);
+                    if (infoListe != null && !infoListe.isEmpty()) {
+                        // Alle Dokumente durchgehen
+                        for(var pdfInfo : infoListe) {
+                            if (pdfInfo == null) {
+                                infoMessage = "setBookmarks: Null-PdfDocumentInfo gefunden, überspringe";
+                                logger.error(infoMessage);
+                                continue;
+                            }
+                            
+                            // Seitenzahl für das aktuelle Dokument abrufen
+                            int pageCount = pdfInfo.getPageCount() != null ? pdfInfo.getPageCount() : 0;
+                            
+                            // Sicherheitscheck - Ist die Seitennummer valide?
+                            if (currentPageNumber >= totalPageCount) {
+                                infoMessage = String.format("setBookmarks: Dokument-Seitennummer %d außerhalb des gültigen Bereichs (max: %d)", 
+                                    currentPageNumber, totalPageCount - 1);
+                                logger.error(infoMessage);
+                                continue;
+                            }
+                            
+                            try {
+                                // Bookmark für das Dokument anlegen
+                                PDOutlineItem bookmarkDokument = new PDOutlineItem();
+                                PDPageDestination pageDestinationDokument = new PDPageFitWidthDestination();
+                                // Erste Seite des aktuellen Dokuments holen
+                                page = pdfDoc.getPage(currentPageNumber);
+                                pageDestinationDokument.setPage(page);
+                                bookmarkDokument.setTitle(pdfInfo.getDisplayName());
+                                bookmarkDokument.setDestination(pageDestinationDokument);
+
+                                // Detail-Bookmarks für das Dokument setzen
+                                Hashtable<String, String> htBookmarks = pdfInfo.getBookmarks();
+                                if (htBookmarks != null) {
+                                    Enumeration enKeys = htBookmarks.keys();
+                                    while(enKeys.hasMoreElements()) {
+                                        String bmName = enKeys.nextElement().toString();
+                                        String bmText = htBookmarks.get(bmName);
+                                        PDOutlineItem bm = new PDOutlineItem();
+                                        bm.setDestination(pageDestinationDokument);
+                                        bm.setTitle(bmName + "=" + bmText);
+                                        bookmarkDokument.addLast(bm);
+                                    }
+                                }
+                                
+                                // dokument-Bookmark an die Akte-Bookmark anhängen
+                                bookmarkAkte.addLast(bookmarkDokument);
+                                infoMessage = String.format("setBookmarks: Bookmark für Dokument auf Seite %d gesetzt.", currentPageNumber);
+                                logger.info(infoMessage);
+                                
+                                // Seitenzähler auf die nächste Startseite eines Teildokuments
+                                currentPageNumber += pageCount;
+                            } catch (Exception ex) {
+                                infoMessage = String.format("setBookmarks: Fehler beim Setzen einer Bookmark auf Seite %d (%s)", 
+                                    currentPageNumber, ex.getMessage());
+                                logger.error(infoMessage, ex);
+                                // Trotzdem weitermachen mit dem nächsten Dokument
+                                currentPageNumber += pageCount > 0 ? pageCount : 1;
+                            }
+                        }
+                    }
+                    
+                    // Bookmark für Akte setzen
+                    pagesOutline.addLast(bookmarkAkte);
+                    infoMessage = String.format("setBookmarks: Bookmark für Akte auf Seite %d gesetzt.", aktePageNumber);
+                    logger.info(infoMessage);
+                } catch (Exception ex) {
+                    infoMessage = String.format("setBookmarks: Fehler beim Setzen der Bookmarks für Akte %s (%s)", 
+                        akte.getAnzeigeName(), ex.getMessage());
+                    logger.error(infoMessage, ex);
+                }
             }
 
+            // Dokument wieder speichern - das Originaldokument aber zuvor sichern statt löschen
+            boolean saveSuccessful = false;
+            
+            // Create a temp file for saving
+            File tempFile = null;
             try {
-                pdfDoc.save(pdfOutfile);
-                infoMessage = String.format("setBookmarks: %s wurde mit Bookmarks gespeichert.", pdfOutfile);
-                logger.info(infoMessage);
-
+                tempFile = File.createTempFile("pdfbookmark_", ".pdf");
+                // Save to temp file first to avoid losing the original if saving fails
+                pdfDoc.save(tempFile);
+                saveSuccessful = true;
             } catch (IOException ex) {
-                infoMessage = String.format("setBookmarks: Allgemeiner Fehler beim Speichern von %s", pdfOutfile);
-                logger.error(infoMessage);
+                infoMessage = String.format("setBookmarks: Fehler beim Speichern in temporäre Datei (%s)", ex.getMessage());
+                logger.error(infoMessage, ex);
+                return false;
             }
-
-
-            // Originaldatei löschen
-            // Files.delete(sourcePath);
-            // infoMessage = String.format("*** %s wurde gelöscht. ***", sourcePath);
-            // logger.info(infoMessage);
-
-            // Bak-Datei in Originaldatei umbenennen
-            // Files.move(destPath, sourcePath);
-            // infoMessage = String.format("*** %s wurde in %s umbenannt. ***", destPath, sourcePath);
-            // logger.info(infoMessage);
-
+            
+            // Only if saving to temp was successful, replace the original
+            if (saveSuccessful && tempFile != null && tempFile.exists()) {
+                try {
+                    // Create backup of original file (optional)
+                    File backupFile = new File(pdfOutfile + ".bak");
+                    try {
+                        Files.copy(pdfFile.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    } catch (IOException ex) {
+                        // Not critical, just log and continue
+                        logger.warn("setBookmarks: Backup-Datei konnte nicht erstellt werden: " + ex.getMessage());
+                    }
+                    
+                    // Replace original with the new file
+                    Files.copy(tempFile.toPath(), pdfFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    infoMessage = String.format("setBookmarks: %s wurde mit Bookmarks gespeichert.", pdfOutfile);
+                    logger.info(infoMessage);
+                    
+                    // Clean up temp file
+                    try {
+                        Files.delete(tempFile.toPath());
+                    } catch (IOException ex) {
+                        // Not critical, just log
+                        logger.warn("setBookmarks: Temporäre Datei konnte nicht gelöscht werden: " + ex.getMessage());
+                    }
+                    return true;
+                } catch (IOException ex) {
+                    infoMessage = String.format("setBookmarks: Fehler beim Ersetzen der Originaldatei %s (%s)", 
+                        pdfOutfile, ex.getMessage());
+                    logger.error(infoMessage, ex);
+                    return false;
+                }
+            }
+            return false;
         } catch (Exception ex) {
             infoMessage = String.format("setBookmarks: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);
+            return false;
+        } finally {
+            // Make sure we always close the document
+            if (pdfDoc != null) {
+                try {
+                    pdfDoc.close();
+                } catch (IOException ex) {
+                    logger.error("setBookmarks: Fehler beim Schließen des PDFs", ex);
+                }
+            }
         }
     };
 
@@ -447,9 +549,18 @@ public class PdfHelper {
         infoMessage = String.format("getPdfPageCount: Aufruf");
         int pageCount = 0;
         this.logger.info(infoMessage);
+        
+        File pdfFile = new File(pdfPfad);
+        if (!pdfFile.exists() || !pdfFile.isFile()) {
+            infoMessage = String.format("getPdfPageCount: Die Datei %s existiert nicht oder ist keine Datei.", pdfPfad);
+            logger.warn(infoMessage);
+            return pageCount; // Return 0 if file doesn't exist
+        }
+        
         try {
-            PDDocument pdfDoc = Loader.loadPDF(new File(pdfPfad));
+            PDDocument pdfDoc = Loader.loadPDF(pdfFile);
             pageCount = pdfDoc.getNumberOfPages();
+            pdfDoc.close(); // Close the document to free resources
         } catch (Exception ex) {
             infoMessage = String.format("getPdfPageCount: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);

@@ -14,27 +14,29 @@ import org.w3c.dom.Document;
 
 public class NamespaceResolver implements NamespaceContext
 {
-    private Document sourceDocument;
+    private final Document sourceDocument;
+    private final String fixedPrefix = "ns";  // Wir verwenden immer "ns" im XPath
 
     public NamespaceResolver(Document document) {
         this.sourceDocument = document;
     }
 
+    @Override
     public String getNamespaceURI(String prefix) {
-        if (prefix.equals(XMLConstants.DEFAULT_NS_PREFIX)) {
-            return sourceDocument.lookupNamespaceURI(null);
-        } else {
-            return sourceDocument.lookupNamespaceURI(prefix);
+        if (fixedPrefix.equals(prefix)) {
+            // Liefert den Namespace-URI des Root-Elements, z. B. "http://www.xjustiz.de"
+            return sourceDocument.getDocumentElement().getNamespaceURI();
         }
+        return XMLConstants.NULL_NS_URI;
     }
 
+    @Override
     public String getPrefix(String namespaceURI) {
-        return sourceDocument.lookupPrefix(namespaceURI);
+        return fixedPrefix;
     }
 
-    @SuppressWarnings("rawtypes")
-    public Iterator getPrefixes(String namespaceURI) {
+    @Override
+    public Iterator<String> getPrefixes(String namespaceURI) {
         return null;
     }
-
 }

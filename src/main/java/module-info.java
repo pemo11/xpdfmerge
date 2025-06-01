@@ -1,4 +1,4 @@
-module pdfmergev1 {
+module pdfmergegui1 {
     requires javafx.controls;
     requires javafx.fxml;
 
