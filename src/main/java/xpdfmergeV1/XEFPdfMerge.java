@@ -43,7 +43,7 @@ import java.awt.Desktop;
 
 public class XEFPdfMerge extends Application {
     private String osName = "Unbekannt";
-    private String appVersion = "0.45";
+    private static final String appVersion = "0.46";
     // Nur provisorisch - falls die Version-Abfrage null liefert
     private String log4VersionDefault = "2.17.1";
     // Kein Scope Modifier, daher Sichtbarkeit innerhalb des Package
@@ -700,7 +700,7 @@ public class XEFPdfMerge extends Application {
                 lbl3.requestFocus();
                 // Bringt leider nichts - Text wird erst am Ende angezeigt
                 // TODO: Auslagern des Merge in einen Task oder einfacher per Platform.runLater()
-                // https://riptutorial.com/javafx/example/7291/updating-the-ui-using-platform-runlater
+                // https://riptutorial.com/javafx/example/7291/updating-the-ui-using-platform-runLater
 
                 // Pfade aller Pdf-Dateien aus der Xml-Datei ziehen
                 try {
@@ -727,18 +727,25 @@ public class XEFPdfMerge extends Application {
                     String tmpPath = basePfad + "/" + pdfPfad;
                     File pdfFile = new File(tmpPath);
                     if (pdfFile.exists() && pdfFile.isFile()) {
-                        try {
-                            inputList.add(new FileInputStream(tmpPath));
-                            infoMessage = String.format("mergePdf: %s hinzugefügt", tmpPath);
-                            logger.info(infoMessage);
-                        } catch (FileNotFoundException ex) {
-                            // Sollte nie eintreten, da wir vorher prüfen, ob die Datei existiert
-                            infoMessage = String.format("mergePdf: %s kann nicht gelesen werden", tmpPath);
-                            logger.warn(infoMessage);
+                        // Vorab-Validierung mit PDFBox
+                        try (InputStream is = new FileInputStream(pdfFile)) {
+                            try {
+                                org.apache.pdfbox.pdmodel.PDDocument testDoc = org.apache.pdfbox.Loader.loadPDF(is);
+                                testDoc.close();
+                                // Wenn kein Fehler: Stream für Merge öffnen
+                                inputList.add(new FileInputStream(pdfFile));
+                            } catch (Exception pdfEx) {
+                                infoMessage = String.format("mergePdf-ActionHandler: Datei %s ist keine gültige PDF oder beschädigt und wird übersprungen. (%s)", tmpPath, pdfEx.getMessage());
+                                logger.warn(infoMessage, pdfEx);
+                                continue;
+                            }
+                        } catch (Exception ex) {
+                            infoMessage = String.format("mergePdf-ActionHandler: Datei %s konnte nicht geöffnet werden und wird übersprungen. (%s)", tmpPath, ex.getMessage());
+                            logger.warn(infoMessage, ex);
+                            continue;
                         }
                     } else {
-                        // Datei nicht gefunden - nur warnen, aber keine Exception
-                        infoMessage = String.format("mergePdf: %s existiert nicht und wird ausgelassen", tmpPath);
+                        infoMessage = String.format("mergePdf-ActionHandler: Datei %s existiert nicht und wird übersprungen.", tmpPath);
                         logger.warn(infoMessage);
                     }
                 }
