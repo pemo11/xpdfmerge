@@ -801,7 +801,7 @@ public class XEFPdfMerge extends Application {
                     infoMessage = String.format("mergePdf-ActionHandler: Fehler beim Setzen der Bookmarks in %s", pdfOutfile);
                     logger.error(infoMessage);
                     Alert alert = new Alert(Alert.AlertType.INFORMATION, infoMessage, ButtonType.FINISH);
-                    alert.setTitle("Fehler beim Setzen der Bookmarks in %s\", pdfOutfile");
+                    alert.setTitle("Fehler beim Setzen der Bookmarks.");
                     alert.setHeaderText("mergePdf-ActionHandler");
                     alert.showAndWait();
                         return;
