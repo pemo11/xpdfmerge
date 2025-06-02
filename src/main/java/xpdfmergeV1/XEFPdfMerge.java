@@ -43,7 +43,7 @@ import java.awt.Desktop;
 
 public class XEFPdfMerge extends Application {
     private String osName = "Unbekannt";
-    private String appVersion = "0.44";
+    private String appVersion = "0.45";
     // Nur provisorisch - falls die Version-Abfrage null liefert
     private String log4VersionDefault = "2.17.1";
     // Kein Scope Modifier, daher Sichtbarkeit innerhalb des Package
@@ -66,6 +66,7 @@ public class XEFPdfMerge extends Application {
     private List<String> lruList = null;
     private int lruCounter = 0;
     private MenuItem[] lruItems = null;
+    private final int MAX_LRU_ENTRIES = 4;
     private AppConfig config = null;
     // Menuitem-Elemente
     private MenuItem exitItem = null;
@@ -124,7 +125,7 @@ public class XEFPdfMerge extends Application {
 
         // Variablen initalisieren
         // lruList = new LRUList(4);
-        lruList = new ArrayList<>(4);
+        lruList = new ArrayList<>(MAX_LRU_ENTRIES);
 
         // Ausgabeverzeichnis OS-spezifisch festlegen
         // Ist u.U. nicht erforderlich, da user.home bereits OS-spezifisch ist
@@ -378,13 +379,25 @@ public class XEFPdfMerge extends Application {
                     // Pfad zur LRU-Liste hinzufügen, wenn er noch nicht enthalten ist
                     // PM: Benennung der Variablen nicht optimal
                     pdfPfad = basePfad + "/" + xmlPfad;
-                    if (!lruList.contains(pdfPfad)) {
-                        lruItems[lruCounter].setText(pdfPfad);
-                        lruCounter = lruCounter < 4 ? ++lruCounter : 0;
-                        lruList.add(pdfPfad);
-                        infoMessage = String.format("%s added to LRU list", pdfPfad);
+                    if (!lruList.contains(xmlPfad)) {
+                        // Wenn die Liste bereits MAX_LRU_ENTRIES Einträge hat, ältesten Eintrag entfernen
+                        if (lruList.size() >= MAX_LRU_ENTRIES) {
+                            lruList.remove(0); // Ältesten Eintrag entfernen (am Anfang der Liste)
+                        }
+                        // Neuen Eintrag am Ende hinzufügen
+                        lruList.add(xmlPfad);
+                        infoMessage = String.format("%s zur LRU-Liste hinzugefügt", xmlPfad);
+                        logger.info(infoMessage);
+                    } else {
+                        // Wenn der Eintrag bereits existiert, an das Ende der Liste verschieben (am häufigsten verwendet)
+                        lruList.remove(xmlPfad);
+                        lruList.add(xmlPfad);
+                        infoMessage = String.format("%s in der LRU-Liste aktualisiert", xmlPfad);
                         logger.info(infoMessage);
                     }
+                    
+                    // Menüeinträge aktualisieren
+                    updateLruMenuItems();
                     
                     String anzeigeName = "";
                     ;
@@ -856,6 +869,29 @@ public class XEFPdfMerge extends Application {
         stage.setTitle(String.format("EF-XJustiz-Viewer %s", appVersion));
         stage.setScene(scene);
         stage.show();
+    }
+
+    /**
+     * Aktualisiert die Menüeinträge für "Zuletzt verwendet" basierend auf der lruList
+     */
+    private void updateLruMenuItems() {
+        // Alle Menüeinträge zuerst ausblenden
+        for (MenuItem item : lruItems) {
+            item.setVisible(false);
+        }
+        
+        // Dann die vorhandenen Einträge anzeigen
+        for (int i = 0; i < lruList.size() && i < MAX_LRU_ENTRIES; i++) {
+            String path = lruList.get(i);
+            // Nur den Dateinamen als Text anzeigen (benutzerfreundlicher)
+            File file = new File(path);
+            String displayName = file.getName();
+            
+            lruItems[i].setText(displayName);
+            // Vollständigen Pfad als UserData speichern für die Öffnen-Aktion
+            lruItems[i].setUserData(path);
+            lruItems[i].setVisible(true);
+        }
     }
 
     public static void main(String[] args) {
