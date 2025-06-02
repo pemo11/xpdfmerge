@@ -14,6 +14,8 @@
     <properties>
         <junit.version>5.7.1</junit.version>
         <javafx.version>17.0.15</javafx.version>
+        <app.version>0.45</app.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
@@ -222,4 +224,136 @@
             </plugin>
         </plugins>
     </build>
+    
+    <!-- Maven profiles for different deployment scenarios -->
+    <profiles>
+        <!-- Profile for creating executable JAR with dependencies -->
+        <profile>
+            <id>jar-with-dependencies</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>3.2.4</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <transformers>
+                                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                            <mainClass>xpdfmergeV1.XEFPdfMerge</mainClass>
+                                        </transformer>
+                                    </transformers>
+                                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                                    <filters>
+                                        <filter>
+                                            <artifact>*:*</artifact>
+                                            <excludes>
+                                                <exclude>META-INF/*.SF</exclude>
+                                                <exclude>META-INF/*.DSA</exclude>
+                                                <exclude>META-INF/*.RSA</exclude>
+                                            </excludes>
+                                        </filter>
+                                    </filters>
+                                    <finalName>pdfmergev1-${app.version}</finalName>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Copy to deploy directory -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <copy file="${project.build.directory}/pdfmergev1-${app.version}.jar" 
+                                              tofile="${project.basedir}/deploy/pdfmergev1.jar" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
+        <!-- Profile for creating native macOS app -->
+        <profile>
+            <id>macos-dmg</id>
+            <build>
+                <plugins>
+                    <!-- Create input directory for jpackage -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>create-jpackage-input</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <mkdir dir="${project.build.directory}/jpackage-input"/>
+                                        <copy file="${project.build.directory}/${project.artifactId}-${project.version}-with-dependencies.jar" 
+                                              todir="${project.build.directory}/jpackage-input"/>
+                                        <copy todir="${project.build.directory}/jpackage-input">
+                                            <fileset dir="${project.basedir}/JavaFx/lib">
+                                                <include name="*.jar"/>
+                                            </fileset>
+                                        </copy>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Run jpackage -->
+                    <plugin>
+                        <groupId>org.panteleyev</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <version>1.6.0</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>package</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <name>XEFPdfMerge</name>
+                            <appVersion>${app.version}</appVersion>
+                            <vendor>ef.pdfmerge</vendor>
+                            <destination>${project.build.directory}/dist</destination>
+                            <mainClass>xpdfmergeV1.XEFPdfMerge</mainClass>
+                            <mainJar>${project.artifactId}-${project.version}-with-dependencies.jar</mainJar>
+                            <input>${project.build.directory}/jpackage-input</input>
+                            <javaOptions>
+                                <option>--module-path .</option>
+                                <option>--add-modules=javafx.controls,javafx.fxml</option>
+                                <option>-Dfile.encoding=UTF-8</option>
+                            </javaOptions>
+                            <icon>${project.basedir}/xpdfmerge.icns</icon>
+                            <type>DMG</type>
+                            <macPackageIdentifier>de.eureka-fach.pdfmerge</macPackageIdentifier>
+                            <macPackageName>XEFPdfMerge</macPackageName>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

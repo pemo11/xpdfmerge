@@ -25,3 +25,5 @@ kein Datum   - Version 0.36 - Ein PdfMerge ist nur möglich, wenn eine Xml-Datei
 04/03/22     - Version 0.37 - Detailierte Log-Einträge zur Schemavalidierung
 
 23/09/22     - Version 0.40 - Keine funktionale Änderungen
+
+01/06/25     - Version 0.45 - Namespace-Prefix muss nicht ns0 sein, Liste der zuletzt verwendeten Xml-Dateien
