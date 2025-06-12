@@ -519,7 +519,7 @@ public class PdfHelper {
     /*
     ** Gibt die Seitenzahlen aller Pdf-Dateien als Hashtable zurück
      */
-    public Hashtable<String, Integer> getPdfPageCount(List<String> pdfDateien) throws IOException {
+    public Hashtable<String, Integer> getTotalPdfPageCount(List<String> pdfDateien) throws IOException {
         infoMessage = String.format("getPdfPageCount: Aufruf");
         this.logger.info(infoMessage);
 
@@ -533,28 +533,32 @@ public class PdfHelper {
                     Integer pageCount = pdfDoc.getNumberOfPages();
                     tmpTable.put(fileName, pageCount);
                 } catch(Exception ex) {
-                    infoMessage = String.format("getPdfPageCount - Seitenzahl für %s kann nicht abgefragt werden (%s)",
-                      pdfDatei, ex.getMessage());
+                    infoMessage = String.format("getTotalPdfPageCount - Seitenzahl für %s kann nicht abgefragt werden (%s)",
+                     pdfDatei, ex.getMessage());
                     logger.error(infoMessage, ex);
                 }
             }
         } catch (Exception ex) {
-            infoMessage = String.format("getPdfPageCount: Allgemeiner Fehler (%s)", ex.getMessage());
+            infoMessage = String.format("getTotalPdfPageCount: Allgemeiner Fehler (%s)", ex.getMessage());
             logger.error(infoMessage, ex);
         }
         return tmpTable;
     }
 
+    /*
+     * Gibt die Seitenzahl einer einzelnen PDF-Datei zurück oder -1, wenn die Datei nicht existiert oder keine gültige PDF-Datei ist
+     */
     public Integer getPdfPageCount(String pdfPfad) throws IOException {
         infoMessage = String.format("getPdfPageCount: Aufruf");
         int pageCount = 0;
         this.logger.info(infoMessage);
         
         File pdfFile = new File(pdfPfad);
-        if (!pdfFile.exists() || !pdfFile.isFile()) {
-            infoMessage = String.format("getPdfPageCount: Die Datei %s existiert nicht oder ist keine Datei.", pdfPfad);
+        if (!pdfFile.exists() || !pdfFile.isFile() || !isPdfFileValid(pdfFile)) {
+            infoMessage = String.format("getPdfPageCount: Die Datei %s existiert nicht oder ist keine Pdf-Datei.", pdfPfad);
             logger.warn(infoMessage);
-            return pageCount; // Return 0 if file doesn't exist
+            // Return -1 if file doesn't exist
+            return -1; 
         }
         
         try {
@@ -568,4 +572,29 @@ public class PdfHelper {
         return pageCount;
     }
 
+    /**
+     * Prüft ob eine PDF-Datei gültig und nicht beschädigt ist
+     * @param pdfPath Pfad zur PDF-Datei
+     * @return true wenn die PDF-Datei gültig ist, false wenn beschädigt
+     */
+    public boolean isPdfFileValid(File pdfPath) {
+        try (PDDocument testDoc = Loader.loadPDF(pdfPath)) {
+            // Versuche die PDF zu laden und grundlegende Eigenschaften zu lesen
+            int pageCount = testDoc.getNumberOfPages();
+            
+            // Optional: Prüfe auch ob mindestens eine Seite vorhanden ist
+            if (pageCount > 0) {
+                // Versuche die erste Seite zu laden (testet interne Struktur)
+                testDoc.getPage(0);
+                return true;
+            } else {
+                logger.warn("isPdfFileValid: PDF-Datei hat keine Seiten: {}", pdfPath.getAbsolutePath());
+                return false;
+            }
+            
+        } catch (Exception e) {
+            logger.warn("isPdfFileValid: PDF-Datei konnte nicht geladen werden: {} - {}", pdfPath.getAbsolutePath(), e.getMessage());
+            return false;
+        }
+    }
 }

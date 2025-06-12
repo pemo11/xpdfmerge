@@ -1,7 +1,7 @@
 /*
   XJustiz-Pdf-Merge für Windows, MacOs und Linux
   Autor: Peter Monadjemi - pdfmerge@eureka-fach.de
-  Letzte Änderung: 28/05/25
+  Letzte Änderung: 11/06/25
 */
 
 package xpdfmergeV1;
@@ -19,11 +19,12 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
+// import javafx.stage.WindowEvent;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -43,9 +44,7 @@ import java.awt.Desktop;
 
 public class XEFPdfMerge extends Application {
     private String osName = "Unbekannt";
-    private static final String appVersion = "0.46";
-    // Nur provisorisch - falls die Version-Abfrage null liefert
-    private String log4VersionDefault = "2.17.1";
+    private static final String appVersion = "0.46a";
     // Kein Scope Modifier, daher Sichtbarkeit innerhalb des Package
     static  Logger logger = null; // LogManager.getLogger(XEFPdfMerge.class);
     private XmlHelper xmlHelper = null;
@@ -54,17 +53,17 @@ public class XEFPdfMerge extends Application {
     private String pdfPfad = "";
     private String infoMessage = "";
     private String xJustizPfad = "";
-    private String pdfOutfile = "GesamtePDF.pdf";
+    private String pdfOutfile = "XJustiz_GesamtDokument.pdf";
     private String userHome = "";
     private String imgPfad = "";
     private int dokumentNr = 0;
     // Betrifft die XML-Validierung
-    private boolean errorFlag = false;
+    // private boolean errorFlag = false;
     // Wichtig: LinkedHashMap statt (veralteter) Hashtable, da die Reihenfolge erhalten bleibt
     private LinkedHashMap<AkteInfo, List<PdfDocumentInfo>> pdfInfoHashtable = null;
     // LRU-Liste
     private List<String> lruList = null;
-    private int lruCounter = 0;
+    // private int lruCounter = 0;
     private MenuItem[] lruItems = null;
     private final int MAX_LRU_ENTRIES = 4;
     private AppConfig config = null;
@@ -72,7 +71,7 @@ public class XEFPdfMerge extends Application {
     private MenuItem exitItem = null;
     private MenuItem openNachrichtXmlItem = null;
     private MenuItem pdfMergeItem = null;
-    private MenuItem lruListItem = null;
+    // private MenuItem lruListItem = null;
 
     @Override
     public void start(Stage stage) throws IOException, URISyntaxException {
@@ -83,7 +82,7 @@ public class XEFPdfMerge extends Application {
         // Die Versionsnummer von Log4J loggen
         String log4JVersion = logger.getClass().getPackage().getSpecificationVersion();
         // Nur prosivorisch, da unter Linux null resultiert?
-        log4JVersion = log4JVersion == null ? log4VersionDefault : log4JVersion;
+        // log4JVersion = log4JVersion == null ? "4.7.1" : log4JVersion;
         // geht nicht, da versionInfo private ist?
         // String log4JVersion = logger.getClass().getPackage().versionInfo.implVersion;
 
@@ -407,7 +406,7 @@ public class XEFPdfMerge extends Application {
                     // dokumentNr für die Dokumenteliste in der TreeView zurücksetzen
                     dokumentNr = 0;
                     // Fehlerflag zurücksetzen
-                    errorFlag = false;
+                    // errorFlag = false;
 
                     // Anlegen der Bookmarks in der Ausgabe-Pdf
                     // Pro Dokument soll eine Bookmark angelegt werden - allerdings hierarchisch Akte -> Dokument1 -> Dokument2 usw.
@@ -480,7 +479,7 @@ public class XEFPdfMerge extends Application {
                         // Gab es Validierungsfehler?
                         if (!errorFlag) {
                             // PDF-Dateinamen holen, um Anzahl der Dokumente anzuzeigen
-                            List<String> pdfFiles = xmlHelper.getPdfNamen2();
+                            List<String> pdfFiles = xmlHelper.getPdfNamen(xmlPfad);
                             int pdfCount = pdfFiles.size();
                             
                             // Erfolgsmeldung ausgeben
@@ -524,23 +523,25 @@ public class XEFPdfMerge extends Application {
                                     for (Dokument dokument : dokumente) {
                                         dokumentNr++;
                                         dateiName = dokument.getDateiname();
-                                        TreeItem triDokument = new TreeItem(String.format("Dokument (%d) %s", dokumentNr, dateiName));
-                                        triDokument.getChildren().add(new TreeItem("Id=" + dokument.getId()));
                                         pdfPfad = basePfad + "/" + dateiName;
                                         Integer pageCount = pdfHelper.getPdfPageCount(pdfPfad);
-                                        triDokument.getChildren().add(new TreeItem("Posteingangsdatum=" + dokument.getDatumPosteingang()));
-                                        triDokument.getChildren().add(new TreeItem("Veraktungsdatum=" + dokument.getDatumVeraktung()));
-                                        triDokument.getChildren().add(new TreeItem("Anzahl Seiten=" + pageCount));
-                                        triTeilakte.getChildren().add(triDokument);
-                                        // Eintrag in pdfInfoHashtable, damit das Setzen von Bookmarks später möglich ist
-                                        PdfDocumentInfo documentInfo = new PdfDocumentInfo();
-                                        documentInfo.setFileName(pdfPfad);
-                                        documentInfo.setDisplayName(dokument.getAnzeigename());
-                                        documentInfo.setPageCount(pageCount);
-                                        documentInfo.getBookmarks().put("Posteingangsdatum", dokument.getDatumPosteingang());
-                                        documentInfo.getBookmarks().put("Veraktungsdatum", dokument.getDatumVeraktung());
-                                        // Dokument an Dokumenteliste der Akte anhängen
-                                        pdfInfoHashtable.get(akteInfo).add(documentInfo);
+                                        if (pageCount > 0) {
+                                            TreeItem triDokument = new TreeItem(String.format("Dokument (%d) %s", dokumentNr, dateiName));
+                                            triDokument.getChildren().add(new TreeItem("Id=" + dokument.getId()));
+                                            triDokument.getChildren().add(new TreeItem("Posteingangsdatum=" + dokument.getDatumPosteingang()));
+                                            triDokument.getChildren().add(new TreeItem("Veraktungsdatum=" + dokument.getDatumVeraktung()));
+                                            triDokument.getChildren().add(new TreeItem("Anzahl Seiten=" + pageCount));
+                                            triTeilakte.getChildren().add(triDokument);
+                                            // Eintrag in pdfInfoHashtable, damit das Setzen von Bookmarks später möglich ist
+                                            PdfDocumentInfo documentInfo = new PdfDocumentInfo();
+                                            documentInfo.setFileName(pdfPfad);
+                                            documentInfo.setDisplayName(dokument.getAnzeigename());
+                                            documentInfo.setPageCount(pageCount);
+                                            documentInfo.getBookmarks().put("Posteingangsdatum", dokument.getDatumPosteingang());
+                                            documentInfo.getBookmarks().put("Veraktungsdatum", dokument.getDatumVeraktung());
+                                            // Dokument an Dokumenteliste der Akte anhängen
+                                            pdfInfoHashtable.get(akteInfo).add(documentInfo);
+                                        }
                                     }
                                     triAkte.getChildren().add(triTeilakte);
                                 }
@@ -557,22 +558,24 @@ public class XEFPdfMerge extends Application {
                                     anzeigeName = dokument.getAnzeigename();
                                     pdfPfad = basePfad + "/" + dateiName;
                                     Integer pageCount = pdfHelper.getPdfPageCount(pdfPfad);
-                                    TreeItem triDokument = new TreeItem(String.format("Dokument (%d) %s", dokumentNr, dateiName));
-                                    triDokument.getChildren().add(new TreeItem("Id=" + dokument.getId()));
-                                    triDokument.getChildren().add(new TreeItem("Datei=" + dokument.getDateiname()));
-                                    triDokument.getChildren().add(new TreeItem("Anzahl Seiten=" + pageCount));
-                                    triDokument.getChildren().add(new TreeItem("Posteingangsdatum=" + dokument.getDatumPosteingang()));
-                                    triDokument.getChildren().add(new TreeItem("Veraktungsdatum=" + dokument.getDatumVeraktung()));
-                                    triAkte.getChildren().add(triDokument);
-                                    // Eintrag in pdfInfoHashtable, damit das Setzen von Bookmarks später möglich ist
-                                    PdfDocumentInfo documentInfo = new PdfDocumentInfo();
-                                    documentInfo.setFileName(pdfPfad);
-                                    documentInfo.setDisplayName(dokument.getAnzeigename());
-                                    documentInfo.setPageCount(pageCount);
-                                    documentInfo.getBookmarks().put("Posteingangsdatum", dokument.getDatumPosteingang());
-                                    documentInfo.getBookmarks().put("Veraktungsdatum", dokument.getDatumVeraktung());
-                                    // Dokument an Dokumenteliste der Akte anhängen
-                                    pdfInfoHashtable.get(akteInfo).add(documentInfo);
+                                    if (pageCount > 0) {
+                                        TreeItem triDokument = new TreeItem(String.format("Dokument (%d) %s", dokumentNr, dateiName));
+                                        triDokument.getChildren().add(new TreeItem("Id=" + dokument.getId()));
+                                        triDokument.getChildren().add(new TreeItem("Datei=" + dokument.getDateiname()));
+                                        triDokument.getChildren().add(new TreeItem("Anzahl Seiten=" + pageCount));
+                                        triDokument.getChildren().add(new TreeItem("Posteingangsdatum=" + dokument.getDatumPosteingang()));
+                                        triDokument.getChildren().add(new TreeItem("Veraktungsdatum=" + dokument.getDatumVeraktung()));
+                                        triAkte.getChildren().add(triDokument);
+                                        // Eintrag in pdfInfoHashtable, damit das Setzen von Bookmarks später möglich ist
+                                        PdfDocumentInfo documentInfo = new PdfDocumentInfo();
+                                        documentInfo.setFileName(pdfPfad);
+                                        documentInfo.setDisplayName(dokument.getAnzeigename());
+                                        documentInfo.setPageCount(pageCount);
+                                        documentInfo.getBookmarks().put("Posteingangsdatum", dokument.getDatumPosteingang());
+                                        documentInfo.getBookmarks().put("Veraktungsdatum", dokument.getDatumVeraktung());
+                                        // Dokument an Dokumenteliste der Akte anhängen
+                                        pdfInfoHashtable.get(akteInfo).add(documentInfo);
+                                    }
                                 }
                             }
 
@@ -695,6 +698,37 @@ public class XEFPdfMerge extends Application {
 
             @Override
             public void handle(ActionEvent actionEvent) {
+                infoMessage = "setOnAction: Pdf-Merge wird gestartet.";
+                logger.info(infoMessage);
+                lbl3.setText(infoMessage);
+                lbl3.requestFocus();
+                List<String> pdfListe = null;
+                PdfMerger pdfMerger = null;
+                try {
+                    xmlHelper = new XmlHelper(logger, xmlPfad);
+                    pdfListe = xmlHelper.getPdfNamen(xmlPfad);
+                    pdfMerger = new PdfMerger(logger);
+                } catch(IOException ex) {
+                    infoMessage = String.format("mergePdf-ActionHandler: IO-Fehler (%s)", ex.getMessage());
+                    logger.error(infoMessage, ex);
+                } catch (ParserConfigurationException ex) {
+                    infoMessage = String.format("mergePdf-ActionHandler: Parser-Fehler (%s)", ex.getMessage());
+                    logger.error(infoMessage, ex);
+                } catch (SAXException ex) {
+                    infoMessage = String.format("mergePdf-ActionHandler: SAX-Fehler (%s)", ex.getMessage());
+                    logger.error(infoMessage, ex);
+                }
+                try {
+                    // Basispfad zuweisen
+                    String basePath = Paths.get(xmlPfad).getParent().toString();
+					pdfMerger.mergePDFsWithBookmarks(pdfListe, basePath, pdfOutfile);
+				} catch (IOException ex) {
+					// TODO Auto-generated catch block
+					ex.printStackTrace();
+				}
+            /* 
+            @Override
+            public void handle(ActionEvent actionEvent) {
 
                 lbl3.setText("Pdf-Merge wird gestartet.");
                 lbl3.requestFocus();
@@ -730,7 +764,8 @@ public class XEFPdfMerge extends Application {
                         // Vorab-Validierung mit PDFBox
                         try (InputStream is = new FileInputStream(pdfFile)) {
                             try {
-                                org.apache.pdfbox.pdmodel.PDDocument testDoc = org.apache.pdfbox.Loader.loadPDF(is);
+                                // org.apache.pdfbox.loader.Loader.loadPDF() ist deprecated, Loader.loadPDF() verwenden
+                                PDDocument testDoc = Loader.loadPDF(is);
                                 testDoc.close();
                                 // Wenn kein Fehler: Stream für Merge öffnen
                                 inputList.add(new FileInputStream(pdfFile));
@@ -778,7 +813,8 @@ public class XEFPdfMerge extends Application {
                         logger.error(infoMessage, ex);
                     }
                 }
-                 */
+                
+                
 
                 InputStream pdfStream = null;
                 try {
@@ -788,6 +824,21 @@ public class XEFPdfMerge extends Application {
                     logger.error(infoMessage, ex);
                 }
 
+                // pdfOutfile vorher löschen, falls vorhanden
+                if (pdfOutfile != null) {
+                    File pdfFile = new File(pdfOutfile);
+                    if (pdfFile.exists()) {
+                        if (!pdfFile.delete()) {
+                            infoMessage = String.format("mergePdf-ActionHandler: Ausgabedatei %s konnte nicht gelöscht werden.", pdfOutfile);
+                            logger.error(infoMessage);
+                            Alert alert = new Alert(Alert.AlertType.ERROR, infoMessage, ButtonType.FINISH);
+                            alert.setTitle("Fehler beim Löschen der Ausgabedatei.");
+                            alert.setHeaderText("mergePdf-ActionHandler");
+                            alert.showAndWait();
+                            return;
+                        }
+                    }
+                }
                 File pdfFile = new File(pdfOutfile);
                 try {
                     Files.copy(pdfStream, pdfFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -817,10 +868,13 @@ public class XEFPdfMerge extends Application {
                     logger.info(infoMessage);
                 }
 
+                */
+
                 // Progressbar soll wieder anhalten
                 // progressBar.setProgress(0);
                 // progressBar.setVisible(false);
                 // vbox.getChildren().remove(progressBar);
+
 
                 Instant endeZeit = Instant.now();
                 String dauer = Duration.between(startZeit, endeZeit).toString();
@@ -846,14 +900,14 @@ public class XEFPdfMerge extends Application {
 
         aboutItem.setOnAction(new EventHandler<ActionEvent>() {
 
-             @Override
-             public void handle(ActionEvent actionEvent) {
-                 Alert infoAlert = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.OK);
-                 infoAlert.setTitle("Über das Programm");
-                 infoAlert.setHeaderText(String.format("Portabler XJustiz-Viewer %s", appVersion));
-                 infoAlert.setContentText("Alle Rechte vorbehalten usw.");
-                 infoAlert.showAndWait();
-             }
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                Alert infoAlert = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.OK);
+                infoAlert.setTitle("Über das Programm");
+                infoAlert.setHeaderText(String.format("Portabler XJustiz-Viewer %s", appVersion));
+                infoAlert.setContentText("Alle Rechte vorbehalten usw.");
+                infoAlert.showAndWait();
+            }
         });
 
         menuInfo.getItems().add(aboutItem);

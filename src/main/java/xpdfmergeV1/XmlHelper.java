@@ -10,6 +10,9 @@ import java.util.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
@@ -31,6 +34,8 @@ import org.xml.sax.SAXParseException;
 
 // import org.apache.commons.logging.Log;
 import org.apache.logging.log4j.Logger;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
 
 /*
  * Stellt allgemeine Xml-Funktionen für eine bestimmte Xml-Datei
@@ -52,6 +57,7 @@ public class XmlHelper {
      * @throws ParserConfigurationException
      * @throws SAXException
      */
+    @SuppressWarnings("exports")
     public XmlHelper(Logger logger, String xmlPfad) throws IOException, ParserConfigurationException, SAXException {
         this.logger = logger;
         this.xmlPfad = xmlPfad;
@@ -109,7 +115,7 @@ public class XmlHelper {
      * Holt die Dateinamen aller Pdf-Dateien
      * @return List<String> - die Liste aller Pdf-Dateinamen
      */
-    public List<String> getPdfNamen() {
+    public List<String> getPdfNamen_Alt1() {
         List<Element> tmpListe = getElements("datei", nsName);
         List<String> pdfListe = new ArrayList<String>();
         try {
@@ -134,7 +140,7 @@ public class XmlHelper {
      *  Alternative zu getPdfNamen
      * @return - Liste aller Pdf-Dateinamen als List<String>
      */
-    public List<String> getPdfNamen2() {
+    public List<String> getPdfNamen_Alt2() {
         List<Element> elListe = getElements("datei", nsName);
         List<String> pdfListe = new ArrayList<String>();
         try {
@@ -159,6 +165,67 @@ public class XmlHelper {
         return pdfListe;
     }
 
+    /**
+     * Extrahiert alle PDF-Dateinamen aus einer XJustiz-XML-Datei
+     * @param xmlFilePath Pfad zur XJustiz-XML-Datei
+     * @return Liste aller PDF-Dateinamen
+     */
+    public List<String> getPdfNamen(String xmlFilePath) {
+        List<String> pdfFiles = new ArrayList<>();
+        
+        try {
+            // XML-Datei parsen
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            // Wichtig für XJustiz-XML mit Namespaces
+            factory.setNamespaceAware(true); 
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(Paths.get(xmlFilePath).toFile());
+            
+            // Verzeichnis der XML-Datei ermitteln (PDFs liegen meist im gleichen Verzeichnis)
+            Path xmlPath = Paths.get(xmlFilePath);
+            Path xmlDirectory = xmlPath.getParent();
+            
+            // XPath für die Suche nach dateiname-Elementen
+            XPathFactory xPathFactory = XPathFactory.newInstance();
+            XPath xpath = xPathFactory.newXPath();
+            
+            // Suche alle dateiname-Elemente (unabhängig vom Namespace)
+            String expression = "//*[local-name()='dateiname']";
+            NodeList dateinameNodes = (NodeList) xpath.evaluate(expression, document, XPathConstants.NODESET);
+            
+            // Durchlaufe alle gefundenen dateiname-Elemente
+            for (int i = 0; i < dateinameNodes.getLength(); i++) {
+                String filename = dateinameNodes.item(i).getTextContent().trim();
+                
+                // Nur PDF-Dateien hinzufügen
+                if (filename.toLowerCase().endsWith(".pdf")) {
+                    // Vollständigen Pfad zur PDF-Datei erstellen
+                    Path pdfPath = xmlDirectory.resolve(filename);
+                    if (Files.exists(pdfPath)) {
+                         // Prüfen ob die PDF-Datei gültig/nicht beschädigt ist
+                        PdfHelper pdfHelper = new PdfHelper(logger);
+                        if (pdfHelper.isPdfFileValid(pdfPath.toFile())) {
+                            pdfFiles.add(filename);
+                        } else {
+                            logger.warn("getPdfNamen: PDF-Datei ist beschädigt oder ungültig: {}", filename);
+                        }
+                    } else {
+                        logger.warn("getPdfNamen: PDF-Datei in XML referenziert, aber nicht gefunden: {}", filename);
+                    }
+                }
+            }
+            
+        } catch (Exception ex) {
+            infoMessage = String.format("getPdfNamen: Allgemeiner Fehler beim Verarbeiten der XML-Datei (%s)", ex.getMessage());
+            logger.error(infoMessage, ex);
+            ex.printStackTrace();
+        }
+        
+        return pdfFiles;
+    }
+
+   
+    
     /**
      * Hole alle akte-Element
      * @return - Liste aller Akten als List<Akte>
@@ -496,9 +563,9 @@ public class XmlHelper {
             try {
                 dokumente = (NodeList) xpath.evaluate(xPathExpr, xDoc, XPathConstants.NODESET);
                 infoMessage = String.format("getDokumenteWithXPath: Gefunden %d Dokumente für %s mit ID %s", 
-                                         dokumente.getLength(), 
-                                         (typ == Aktentyp.Akte ? "Akte" : "Teilakte"), 
-                                         id);
+                                        dokumente.getLength(), 
+                                        (typ == Aktentyp.Akte ? "Akte" : "Teilakte"), 
+                                        id);
                 logger.info(infoMessage);
                 
                 // Verarbeite jedes gefundene Dokument
